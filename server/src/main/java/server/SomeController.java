@@ -9,9 +9,15 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @RequestMapping("/")
 public class SomeController {
 
-    @GetMapping("/")
-    @ResponseBody
-    public String index() {
-        return "Hello world!";
-    }
+  /**
+   * the default test endpoint.
+   *
+   * @return returns a string greeting the user
+   */
+  @GetMapping("/")
+  @ResponseBody
+  public String index() {
+    return "Hello world!";
+  }
+
 }
