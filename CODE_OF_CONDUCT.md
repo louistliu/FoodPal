@@ -24,7 +24,7 @@ We aim for a grade of 8, achieving all base requirements and at least two extra 
 -   **Code Review /Approvals**: All changes require verification by other team members (creator included):
     -   All members: Core changes, Code of Conduct, Gitlab settings.
     -   At least 5 members: Breaking changes.
-    -   At least 4 memers: Full feature implementation
+    -   At least 4 members: Full feature implementation
     -   At least 3 members: code refactoring, 
     -   At least 2 members: meeting docs (chair/minute-taker edits, merged from branch).
 -   **Addressing Poor Quality**: Discuss with creator directly via mattermost or in MR, create Gitlab issue for fixes. Recurring issues escalate to TA  (see [[#Problem resolution]]).
