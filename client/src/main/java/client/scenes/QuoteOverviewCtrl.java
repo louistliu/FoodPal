@@ -13,15 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package client.scenes;
 
+import client.utils.ServerUtils;
+import com.google.inject.Inject;
+import commons.Quote;
 import java.net.URL;
 import java.util.ResourceBundle;
-
-import com.google.inject.Inject;
-
-import client.utils.ServerUtils;
-import commons.Quote;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -30,6 +29,9 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 
+/**
+ * Scene handler form for the overview of all quotes.
+ */
 public class QuoteOverviewCtrl implements Initializable {
 
     private final ServerUtils server;
@@ -46,6 +48,12 @@ public class QuoteOverviewCtrl implements Initializable {
     @FXML
     private TableColumn<Quote, String> colQuote;
 
+    /**
+     * Creates a new class instance and injects dependencies to the constructor and fields.
+     *
+     * @param server server client communication utility
+     * @param mainCtrl main scene controller responsible for stage switching
+     */
     @Inject
     public QuoteOverviewCtrl(ServerUtils server, MainCtrl mainCtrl) {
         this.server = server;
@@ -54,15 +62,23 @@ public class QuoteOverviewCtrl implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        colFirstName.setCellValueFactory(q -> new SimpleStringProperty(q.getValue().person.firstName));
-        colLastName.setCellValueFactory(q -> new SimpleStringProperty(q.getValue().person.lastName));
+        colFirstName.setCellValueFactory(
+              q -> new SimpleStringProperty(q.getValue().person.firstName));
+        colLastName.setCellValueFactory(
+              q -> new SimpleStringProperty(q.getValue().person.lastName));
         colQuote.setCellValueFactory(q -> new SimpleStringProperty(q.getValue().quote));
     }
 
+    /**
+     * Switches the scene to the {@link AddQuoteCtrl} via the main scene controller.
+     */
     public void addQuote() {
         mainCtrl.showAdd();
     }
 
+    /**
+     * Fetches all quotes from the server and refreshes the table with them.
+     */
     public void refresh() {
         var quotes = server.getQuotes();
         data = FXCollections.observableList(quotes);

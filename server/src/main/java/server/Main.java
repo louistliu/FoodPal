@@ -20,11 +20,19 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 
+/**
+ * Class parses used entities and runs a new instance of a Spring Boot server.
+ */
 @SpringBootApplication
 @EntityScan(basePackages = {"commons", "server"})
 public class Main {
 
-  public static void main(String[] args) {
-    SpringApplication.run(Main.class, args);
-  }
+    /**
+     * Starts the Spring Boot server.
+     *
+     * @param args terminal arguments.
+     */
+    public static void main(String[] args) {
+        SpringApplication.run(Main.class, args);
+    }
 }

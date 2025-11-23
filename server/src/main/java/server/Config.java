@@ -20,11 +20,14 @@ import java.util.Random;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * Defines inter-bean dependencies.
+ */
 @Configuration
 public class Config {
 
-  @Bean
-  public Random getRandom() {
-    return new Random();
-  }
+    @Bean
+    public Random getRandom() {
+        return new Random();
+    }
 }

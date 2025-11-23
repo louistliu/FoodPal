@@ -58,6 +58,9 @@
     </module>
     <module name="TreeWalker">
         <module name="OuterTypeFilename"/>
+        <module name="CyclomaticComplexity">
+            <property name="max" value="10"/>
+        </module>
         <module name="MatchXpath">
             <property name="id" value="singleLineCommentStartWithSpace"/>
             <property name="query"
@@ -312,12 +315,12 @@
                      value="GenericWhitespace ''{0}'' is not preceded with whitespace."/>
         </module>
         <module name="Indentation">
-            <property name="basicOffset" value="2"/>
-            <property name="braceAdjustment" value="2"/>
-            <property name="caseIndent" value="2"/>
+            <property name="basicOffset" value="4"/>
+            <property name="braceAdjustment" value="4"/>
+            <property name="caseIndent" value="4"/>
             <property name="throwsIndent" value="4"/>
-            <property name="lineWrappingIndentation" value="4"/>
-            <property name="arrayInitIndent" value="2"/>
+            <property name="lineWrappingIndentation" value="6"/>
+            <property name="arrayInitIndent" value="4"/>
         </module>
 
         <module name="AbbreviationAsWordInName">

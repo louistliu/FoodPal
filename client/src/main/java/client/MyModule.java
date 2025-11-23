@@ -23,12 +23,15 @@ import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.Scopes;
 
+/**
+ * Binds javafx scenes in a relation for dependency injection.
+ */
 public class MyModule implements Module {
 
-  @Override
-  public void configure(Binder binder) {
-    binder.bind(MainCtrl.class).in(Scopes.SINGLETON);
-    binder.bind(AddQuoteCtrl.class).in(Scopes.SINGLETON);
-    binder.bind(QuoteOverviewCtrl.class).in(Scopes.SINGLETON);
-  }
+    @Override
+    public void configure(Binder binder) {
+        binder.bind(MainCtrl.class).in(Scopes.SINGLETON);
+        binder.bind(AddQuoteCtrl.class).in(Scopes.SINGLETON);
+        binder.bind(QuoteOverviewCtrl.class).in(Scopes.SINGLETON);
+    }
 }
