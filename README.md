@@ -12,7 +12,7 @@ to run the server and
 
 to run the client. Please note that the server needs to be running, before you can start the client.
 
-Get the template project running from the command line first to ensure you have the required tools on your sytem.
+Get the template project running from the command line first to ensure you have the required tools on your system.
 
 Once it is working, you can try importing the project into your favorite IDE. Especially the client is a bit more tricky to set up there due to the dependency on a JavaFX SDK.
 To help you get started, you can find additional instructions in the corresponding README of the client project.
