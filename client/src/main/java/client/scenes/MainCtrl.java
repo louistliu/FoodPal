@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package client.scenes;
 
 import javafx.scene.Parent;
@@ -20,6 +21,9 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.util.Pair;
 
+/**
+ * Class handling inter-scene interaction.
+ */
 public class MainCtrl {
 
     private Stage primaryStage;
@@ -30,8 +34,15 @@ public class MainCtrl {
     private AddQuoteCtrl addCtrl;
     private Scene add;
 
+    /**
+     * Creates central control of stages.
+     *
+     * @param primaryStage the base stage
+     * @param overview     stage showing all the quotes
+     * @param add          stage showing the UI for adding a new quote
+     */
     public void initialize(Stage primaryStage, Pair<QuoteOverviewCtrl, Parent> overview,
-            Pair<AddQuoteCtrl, Parent> add) {
+                           Pair<AddQuoteCtrl, Parent> add) {
         this.primaryStage = primaryStage;
         this.overviewCtrl = overview.getKey();
         this.overview = new Scene(overview.getValue());
@@ -43,12 +54,18 @@ public class MainCtrl {
         primaryStage.show();
     }
 
+    /**
+     * refreshes and shows the overview stage, sets window title.
+     */
     public void showOverview() {
         primaryStage.setTitle("Quotes: Overview");
         primaryStage.setScene(overview);
         overviewCtrl.refresh();
     }
 
+    /**
+     * shows add stage, sets window title and enables user input.
+     */
     public void showAdd() {
         primaryStage.setTitle("Quotes: Adding Quote");
         primaryStage.setScene(add);

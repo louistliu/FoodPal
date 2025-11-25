@@ -13,15 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package client;
 
+import com.google.inject.Injector;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-
-import com.google.inject.Injector;
-
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.util.Builder;
@@ -29,17 +28,36 @@ import javafx.util.BuilderFactory;
 import javafx.util.Callback;
 import javafx.util.Pair;
 
+/**
+ * Wrapper for javaFX scene config parsing.
+ */
+@SuppressWarnings("checkstyle:AbbreviationAsWordInName")
 public class MyFXML {
 
     private Injector injector;
 
+    /**
+     *  Creates a new fxml class with an injector.
+     *
+     * @param injector google object injector required by javafx
+     */
     public MyFXML(Injector injector) {
         this.injector = injector;
     }
 
+    /**
+     * Parses a scene fxml configuration from a file as objects.
+     *
+     * @param c config
+     * @param parts path to config as a string array
+     * @param <T> generic javaFX scene controller.
+     * @return returns a key-value pair of scene controller and the ui object hierarchy
+     */
     public <T> Pair<T, Parent> load(Class<T> c, String... parts) {
         try {
-            var loader = new FXMLLoader(getLocation(parts), null, null, new MyFactory(), StandardCharsets.UTF_8);
+            var loader =
+                  new FXMLLoader(getLocation(parts), null, null, new MyFactory(),
+                        StandardCharsets.UTF_8);
             Parent parent = loader.load();
             T ctrl = loader.getController();
             return new Pair<>(ctrl, parent);

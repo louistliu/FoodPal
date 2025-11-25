@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package client.scenes;
 
-import com.google.inject.Inject;
-
 import client.utils.ServerUtils;
+import com.google.inject.Inject;
 import commons.Person;
 import commons.Quote;
 import jakarta.ws.rs.WebApplicationException;
@@ -27,6 +27,9 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Modality;
 
+/**
+ * UI form for adding a new quote.
+ */
 public class AddQuoteCtrl {
 
     private final ServerUtils server;
@@ -41,6 +44,12 @@ public class AddQuoteCtrl {
     @FXML
     private TextField quote;
 
+    /**
+     * Injects quote controller with the necessary elements.
+     *
+     * @param server object for handling server client interaction
+     * @param mainCtrl scene handler
+     */
     @Inject
     public AddQuoteCtrl(ServerUtils server, MainCtrl mainCtrl) {
         this.mainCtrl = mainCtrl;
@@ -48,11 +57,18 @@ public class AddQuoteCtrl {
 
     }
 
+    /**
+     * clears all fields, returns user back to the overview.
+     */
     public void cancel() {
         clearFields();
         mainCtrl.showOverview();
     }
 
+    /**
+     * sends a post request to the server to add a new quote.
+     * if request fails shows an alert to the user, finally returns to overview.
+     */
     public void ok() {
         try {
             server.addQuote(getQuote());
@@ -81,16 +97,22 @@ public class AddQuoteCtrl {
         quote.clear();
     }
 
+    /**
+     * checks if either enter or escape is pressed,
+     * and executes the logic for adding or canceling the addition of a quote.
+     *
+     * @param e key event
+     */
     public void keyPressed(KeyEvent e) {
         switch (e.getCode()) {
-        case ENTER:
-            ok();
-            break;
-        case ESCAPE:
-            cancel();
-            break;
-        default:
-            break;
+            case ENTER:
+                ok();
+                break;
+            case ESCAPE:
+                cancel();
+                break;
+            default:
+                break;
         }
     }
 }
