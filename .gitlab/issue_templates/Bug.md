@@ -1,4 +1,7 @@
-### Bug issue - (insert title)
+## Bug issue
+____
+#### Place of bug
+(Insert line-numbers or files)
 
 #### What was the software supposed to do?
 ~
@@ -6,7 +9,11 @@
 #### What went wrong?
 ~
 
-#### Time frame:
-Done by (insert date/time
+____
+/due (insert date/time)
 
-/label ~"type::bug" ~"Workflow::Development"    
+/assign (insert names)
+
+/weight 3
+
+/label ~"Type::Bug" ~"Workflow::Development"  
