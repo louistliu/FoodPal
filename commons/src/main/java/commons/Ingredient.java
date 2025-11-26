@@ -9,6 +9,7 @@ import jakarta.persistence.Id;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * An ingredient, cannot be used in a recipe, use RecipeIngredient instead.
@@ -19,6 +20,8 @@ public class Ingredient {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
 
+    @SuppressWarnings("NotNullFieldNotInitialized")
+    @NotNull
     private String name;
 
     /**
@@ -33,7 +36,7 @@ public class Ingredient {
      *
      * @param name The name the ingredient should have
      */
-    public Ingredient(String name) {
+    public Ingredient(@NotNull String name) {
         this.name = name;
     }
 
@@ -41,11 +44,11 @@ public class Ingredient {
         return id;
     }
 
-    public String getName() {
+    public @NotNull String getName() {
         return name;
     }
 
-    public void setName(String name) {
+    public void setName(@NotNull String name) {
         this.name = name;
     }
 

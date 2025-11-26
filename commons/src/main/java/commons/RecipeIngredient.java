@@ -10,6 +10,7 @@ import jakarta.persistence.ManyToOne;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * An RecipeIngredient that can be used in a recipe.
@@ -20,9 +21,11 @@ public class RecipeIngredient {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
 
-    @ManyToOne // An ingredient can be used in multiple ingredients
+    @ManyToOne(optional = false) // An ingredient can be used in multiple ingredients
     private Ingredient ingredient;
-    private int amount;
+    private float amount;
+    @SuppressWarnings("NotNullFieldNotInitialized")
+    @NotNull
     private String unit;
 
     /**
@@ -39,7 +42,7 @@ public class RecipeIngredient {
      * @param amount The amount of the ingredient that should be used for the recipe
      * @param unit The unit of the amount (e.g. grams)
      */
-    public RecipeIngredient(Ingredient ingredient, int amount, String unit) {
+    public RecipeIngredient(Ingredient ingredient, int amount, @NotNull String unit) {
         this.ingredient = ingredient;
         this.unit = unit;
         this.amount = amount;
@@ -57,19 +60,19 @@ public class RecipeIngredient {
         this.ingredient = ingredient;
     }
 
-    public String getUnit() {
+    public @NotNull String getUnit() {
         return unit;
     }
 
-    public void setUnit(String unit) {
+    public void setUnit(@NotNull String unit) {
         this.unit = unit;
     }
 
-    public int getAmount() {
+    public float getAmount() {
         return amount;
     }
 
-    public void setAmount(int amount) {
+    public void setAmount(float amount) {
         this.amount = amount;
     }
 
