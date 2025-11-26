@@ -7,10 +7,10 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import jakarta.validation.constraints.NotNull;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * An RecipeIngredient that can be used in a recipe.
@@ -24,7 +24,6 @@ public class RecipeIngredient {
     @ManyToOne(optional = false) // An ingredient can be used in multiple ingredients
     private Ingredient ingredient;
     private float amount;
-    @SuppressWarnings("NotNullFieldNotInitialized")
     @NotNull
     private String unit;
 
