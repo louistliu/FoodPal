@@ -8,18 +8,31 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 
 /**
  * Sets up websockets to use STOMP by target prefixes for socket data broker,
- * and application prefix for request endpoints.
+ * and application prefix for request endpoints. <br>
+ * The broker automatically interchanges these, when handling requests based on default behavior.
  */
 @Configuration
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
+    /**
+     *  Configures broker prefixes {@code /topic} for channels that broadcast new changes,
+     *  {@code /queue} for client specific messages.<br>
+     *  All should be sent and handled at {@code /api} prefixed endpoints.
+     *
+     * @param registry Web Socket server configuration object.
+     */
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
-        registry.enableSimpleBroker("/topic");
+        registry.enableSimpleBroker("/topic", "/queue");
         registry.setApplicationDestinationPrefixes("/app");
     }
 
+    /**
+     *  Sets the initial connection endpoint to be {@code /food-pal}.
+     *
+     * @param registry Web Socket server configuration object.
+     */
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/food-pal").withSockJS();

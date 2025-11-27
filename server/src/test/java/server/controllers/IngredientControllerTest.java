@@ -22,6 +22,7 @@ import org.springframework.messaging.simp.stomp.StompFrameHandler;
 import org.springframework.messaging.simp.stomp.StompHeaders;
 import org.springframework.messaging.simp.stomp.StompSession;
 import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
@@ -67,7 +68,7 @@ class IngredientControllerTest {
     }
 
     @Test
-    void create() {
+    void createIngredientEndpoint() {
         BlockingQueue<Ingredient> blockingQueue = new ArrayBlockingQueue<>(1);
         Ingredient payload = new Ingredient("test");
 
@@ -83,6 +84,8 @@ class IngredientControllerTest {
                       blockingQueue.add((Ingredient) payload);
                   }
               });
+        var headers = new StompHeaders();
+
         session.send("/app/ingredients/create", payload);
         await()
               .atMost(1, TimeUnit.SECONDS)
@@ -90,5 +93,10 @@ class IngredientControllerTest {
                   Ingredient result = blockingQueue.poll();
                   assertEquals(payload.getName(), result != null ? result.getName() : null);
               });
+    }
+
+    @Test
+    void initialReply() {
+        //TODO: Test to be implemented
     }
 }
