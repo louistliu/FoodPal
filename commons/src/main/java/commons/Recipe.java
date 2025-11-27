@@ -1,6 +1,6 @@
 package commons;
 
-import java.util.*;
+import static org.apache.commons.lang3.builder.ToStringStyle.MULTI_LINE_STYLE;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.ElementCollection;
@@ -11,12 +11,16 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderColumn;
 import jakarta.validation.constraints.NotNull;
-
-import static org.apache.commons.lang3.builder.ToStringStyle.MULTI_LINE_STYLE;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
+
+/**
+ * A recipe entity, containing all the necessary details.
+ */
 @Entity
 public class Recipe {
     @Id
@@ -28,11 +32,12 @@ public class Recipe {
     @NotNull
     private String description;
 
-    @OneToMany(cascade = CascadeType.ALL) // One recipe can contain many different RecipeIngredients.
-    private List<RecipeIngredient> ingredients = new ArrayList<RecipeIngredient>();
+    @OneToMany(cascade = CascadeType.ALL)
+    // One recipe can contain many different RecipeIngredients.
+    private List<RecipeIngredient> ingredients = new ArrayList<>();
     @ElementCollection
     @OrderColumn(name = "instruction_sequence") // Persists the List order in the database.
-    private List<String> instructions = new ArrayList<String>();
+    private List<String> instructions = new ArrayList<>();
 
     /**
      * A constructor for Jackson serializing of Recipe.
@@ -44,12 +49,13 @@ public class Recipe {
     /**
      * Creates a new Recipe with all necessary details.
      *
-     * @param name The name of the recipe
-     * @param description The description of the recipe
-     * @param ingredients The list of the ingredients used
+     * @param name         The name of the recipe
+     * @param description  The description of the recipe
+     * @param ingredients  The list of the ingredients used
      * @param instructions The list of the instruction steps
      */
-    public Recipe(@NotNull String name, @NotNull String description, List<RecipeIngredient> ingredients, List<String> instructions) {
+    public Recipe(@NotNull String name, @NotNull String description,
+                  List<RecipeIngredient> ingredients, List<String> instructions) {
         this.name = name;
         this.description = description;
         this.ingredients = ingredients;
@@ -94,6 +100,7 @@ public class Recipe {
 
     /**
      * Adds an ingredient to the recipe.
+     *
      * @param ingredient the ingredient to be added
      */
     public void addIngredient(@NotNull RecipeIngredient ingredient) {
@@ -101,7 +108,8 @@ public class Recipe {
     }
 
     /**
-     * Removes an ingredient from the recipe.
+     * Removes the first occurrence of an ingredient from the recipe.
+     *
      * @param ingredient the ingredient to be removed
      */
     public void removeIngredient(@NotNull RecipeIngredient ingredient) {
@@ -110,6 +118,7 @@ public class Recipe {
 
     /**
      * Add an instruction to the end of the list.
+     *
      * @param instruction The instruction step to be added
      */
     public void addInstruction(@NotNull String instruction) {
@@ -118,15 +127,17 @@ public class Recipe {
 
     /**
      * Insert an instruction at a specific step number.
-     * @param index The step number (counting from 0)
+     *
+     * @param index       The step number (counting from 0)
      * @param instruction The instruction step to be added
      */
-    public void addInstruction(int index, String instruction) {
+    public void addInstruction(int index, @NotNull String instruction) {
         this.instructions.add(index, instruction);
     }
 
     /**
-     * Removes a given instruction.
+     * Removes the first occurrence of a given instruction.
+     *
      * @param instruction The instruction to be removed
      */
     public void removeInstruction(@NotNull String instruction) {
