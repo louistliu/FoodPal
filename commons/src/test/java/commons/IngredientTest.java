@@ -15,7 +15,6 @@ class IngredientTest {
         ingredient1 = new Ingredient("Milk");
         ingredient2 = new Ingredient("Cheese");
 
-
     }
 
     @Test
@@ -45,24 +44,23 @@ class IngredientTest {
     public void equalsNullTest() {
         assertNotEquals(ingredient1, null);
     }
+
     @Test
-    public void equalsHashCodeTest(){
+    public void equalsHashCodeTest() {
         Ingredient ing = new Ingredient("Milk");
         assertEquals(ingredient1.hashCode(), ing.hashCode());
     }
 
     @Test
-    public void notEqualsHashCodeTest(){
+    public void notEqualsHashCodeTest() {
         assertNotEquals(ingredient1.hashCode(), ingredient2.hashCode());
     }
 
     @Test
-    public void toStringTest(){
+    public void toStringTest() {
         var string = ingredient1.toString();
         assertTrue(string.contains("name"));
     }
-
-
 
 
 }
