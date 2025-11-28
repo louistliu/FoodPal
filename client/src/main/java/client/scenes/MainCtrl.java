@@ -16,6 +16,7 @@
 
 package client.scenes;
 
+import client.scenes.MainScreenCtrl;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
@@ -34,6 +35,10 @@ public class MainCtrl {
     private AddQuoteCtrl addCtrl;
     private Scene add;
 
+    // Main Screen Scene fields
+    private MainScreenCtrl mainScrCtrl; // The new controller
+    private Scene mainScreen; // The new scene
+
     /**
      * Creates central control of stages.
      *
@@ -42,7 +47,7 @@ public class MainCtrl {
      * @param add          stage showing the UI for adding a new quote
      */
     public void initialize(Stage primaryStage, Pair<QuoteOverviewCtrl, Parent> overview,
-                           Pair<AddQuoteCtrl, Parent> add) {
+                           Pair<AddQuoteCtrl, Parent> add, Pair<MainScreenCtrl, Parent> mainScreen) {
         this.primaryStage = primaryStage;
         this.overviewCtrl = overview.getKey();
         this.overview = new Scene(overview.getValue());
@@ -50,7 +55,10 @@ public class MainCtrl {
         this.addCtrl = add.getKey();
         this.add = new Scene(add.getValue());
 
-        showOverview();
+        this.mainScrCtrl = mainScreen.getKey();
+        this.mainScreen = new Scene(mainScreen.getValue());
+
+        showMainScreen();
         primaryStage.show();
     }
 
@@ -70,5 +78,13 @@ public class MainCtrl {
         primaryStage.setTitle("Quotes: Adding Quote");
         primaryStage.setScene(add);
         add.setOnKeyPressed(e -> addCtrl.keyPressed(e));
+    }
+
+    /**
+     * shows the main screen and sets window title.
+     */
+    public void showMainScreen() {
+        primaryStage.setTitle("FoodPal: Recipe Organizer");
+        primaryStage.setScene(mainScreen);
     }
 }

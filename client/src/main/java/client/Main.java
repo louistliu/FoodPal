@@ -21,6 +21,7 @@ import static com.google.inject.Guice.createInjector;
 import client.scenes.AddQuoteCtrl;
 import client.scenes.MainCtrl;
 import client.scenes.QuoteOverviewCtrl;
+import client.scenes.MainScreenCtrl;
 import client.utils.ServerUtils;
 import com.google.inject.Injector;
 import java.io.IOException;
@@ -28,21 +29,11 @@ import java.net.URISyntaxException;
 import javafx.application.Application;
 import javafx.stage.Stage;
 
-/**
- * Main javaFX class, starts UI setup and wires up dependencies.
- */
 public class Main extends Application {
 
     private static final Injector INJECTOR = createInjector(new MyModule());
     private static final MyFXML FXML = new MyFXML(INJECTOR);
 
-    /**
-     * runs the program.
-     *
-     * @param args optional command line arguments.
-     * @throws URISyntaxException throws an exception if the uri is invalid
-     * @throws IOException        throws an exception if IO fails
-     */
     public static void main(String[] args) throws URISyntaxException, IOException {
         launch();
     }
@@ -53,16 +44,19 @@ public class Main extends Application {
         var serverUtils = INJECTOR.getInstance(ServerUtils.class);
         if (!serverUtils.isServerAvailable()) {
             var msg =
-                  "Server needs to be started before the client,"
-                        + " but it does not seem to be available. Shutting down.";
+                    "Server needs to be started before the client,"
+                            + " but it does not seem to be available. Shutting down.";
             System.err.println(msg);
             return;
         }
 
         var overview = FXML.load(QuoteOverviewCtrl.class, "client", "scenes", "QuoteOverview.fxml");
         var add = FXML.load(AddQuoteCtrl.class, "client", "scenes", "AddQuote.fxml");
+        var mainScreen = FXML.load(MainScreenCtrl.class, "client", "scenes", "MainScreen.fxml");
 
         var mainCtrl = INJECTOR.getInstance(MainCtrl.class);
-        mainCtrl.initialize(primaryStage, overview, add);
+
+        // Pass the mainScreen Pair to initialize
+        mainCtrl.initialize(primaryStage, overview, add, mainScreen);
     }
 }
