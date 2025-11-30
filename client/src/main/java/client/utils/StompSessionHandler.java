@@ -15,7 +15,7 @@ import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter;
 public class StompSessionHandler extends StompSessionHandlerAdapter {
 
     private StompSession session;
-    private Map<StompHeaders, IResponseHandler> mappings;
+    private final Map<StompHeaders, IResponseHandler<?>> mappings;
 
     @Inject
     public StompSessionHandler() {
