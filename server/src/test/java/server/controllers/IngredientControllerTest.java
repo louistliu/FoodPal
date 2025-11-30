@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import commons.Ingredient;
 import java.lang.reflect.Type;
-import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
@@ -17,17 +16,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.messaging.converter.MappingJackson2MessageConverter;
+import org.springframework.messaging.converter.JacksonJsonMessageConverter;
 import org.springframework.messaging.simp.stomp.StompFrameHandler;
 import org.springframework.messaging.simp.stomp.StompHeaders;
 import org.springframework.messaging.simp.stomp.StompSession;
 import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter;
-import org.springframework.scheduling.TaskScheduler;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
-import org.springframework.web.socket.sockjs.client.SockJsClient;
-import org.springframework.web.socket.sockjs.client.WebSocketTransport;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
@@ -39,19 +35,14 @@ class IngredientControllerTest {
 
     @BeforeEach
     void setup() throws ExecutionException, InterruptedException, TimeoutException {
-        client = new WebSocketStompClient((
-              new SockJsClient(
-                    List.of(new WebSocketTransport(new StandardWebSocketClient()
-                    )))
-        ));
-        client.setMessageConverter(new MappingJackson2MessageConverter());
+        client = new WebSocketStompClient(
+              new StandardWebSocketClient()
+        );
+        client.setMessageConverter(new JacksonJsonMessageConverter());
         session = client.connectAsync("ws://localhost:" + port + "/food-pal",
               new StompSessionHandlerAdapter() {
                   @Override
-                  public Type getPayloadType(StompHeaders headers) {
-                      //super.getPayloadType(headers);
-                      return Ingredient.class;
-                  }
+                  public Type getPayloadType(StompHeaders headers) {return Ingredient.class;}
               }).get(1, TimeUnit.SECONDS);
     }
 

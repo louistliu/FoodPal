@@ -21,6 +21,7 @@ import static com.google.inject.Guice.createInjector;
 import client.scenes.AddQuoteCtrl;
 import client.scenes.MainCtrl;
 import client.scenes.QuoteOverviewCtrl;
+import client.utils.ServerSockets;
 import client.utils.ServerUtils;
 import com.google.inject.Injector;
 import java.io.IOException;
@@ -58,6 +59,7 @@ public class Main extends Application {
             System.err.println(msg);
             return;
         }
+        var serverSockets = INJECTOR.getInstance(ServerSockets.class);
 
         var overview = FXML.load(QuoteOverviewCtrl.class, "client", "scenes", "QuoteOverview.fxml");
         var add = FXML.load(AddQuoteCtrl.class, "client", "scenes", "AddQuote.fxml");
