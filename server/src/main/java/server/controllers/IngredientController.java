@@ -1,6 +1,7 @@
 package server.controllers;
 
 import commons.Ingredient;
+import commons.sockets.ErrorObject;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -31,26 +32,29 @@ public class IngredientController {
      * and is valid, then broadcasts it, otherwise returns an error.
      *
      * @param ingredient the basic ingredient object automatically validated
-     * @return returns the new to all subscribed sockets or nothing
+     * @return returns the new to all subscribed sockets or nothing,
+     *       from client side {@code /topic/ingredients/create}
      * @throws Exception STOMP exception
      */
-    @MessageMapping("ingredients/create")
+    @MessageMapping("/ingredients/create")
     @Valid
     public Ingredient create(@Payload Ingredient ingredient) throws Exception {
         var saved = ingredientDB.save(ingredient);
         // TODO: process ingredient here
-        return ingredient;
+        return saved;
     }
 
+
     /**
-     * Get all ingredients when subscribing to {@code ingredients/create}.
+     * Get all ingredients when subscribing to {@code /user/queue/ingredients/create}.
      *
      * @return returns all ingredients in the database
      * @throws Exception STOMP exception
      */
-    @SubscribeMapping("ingredients/create")
-    public List<Ingredient> initialReply() throws Exception {
-        return ingredientDB.findAll();
+    @SubscribeMapping("/ingredients/fetch")
+    public List<Ingredient> fetchIngredients() throws Exception {
+        System.out.println("SUBSCRIBED");
+        return ingredientDB.findAll().stream().toList();
     }
 
     /**
@@ -61,7 +65,7 @@ public class IngredientController {
      * @return returns the deleted ingredient for clients to process
      * @throws Exception STOMP exception
      */
-    @MessageMapping("ingredients/delete")
+    @MessageMapping("/ingredients/delete")
     @Valid
     public Ingredient delete(@Payload Ingredient ingredient) throws Exception {
         if (!ingredientDB.existsById(ingredient.getId())) {
@@ -74,14 +78,15 @@ public class IngredientController {
 
 
     /**
-     * Handle errors that occur, when processing requests.
+     * Handle errors that occur, when processing requests.<br>
+     * Subscribable on {@code /user/queue/errors}
      *
      * @param exception an exception, which occurred during the processing of a request
-     * @return returns the message of the exception
+     * @return returns the message of the exception to the individual client
      */
     @MessageExceptionHandler
-    @SendToUser(value = "/queue/errors", broadcast = false)
-    public String handleException(Throwable exception) {
-        return exception.getMessage();
+    @SendToUser("/queue/errors")
+    public ErrorObject handleException(Throwable exception) {
+        return new ErrorObject(exception);
     }
 }

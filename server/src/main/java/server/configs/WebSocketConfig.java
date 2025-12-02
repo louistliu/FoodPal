@@ -2,6 +2,7 @@ package server.configs;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
@@ -12,6 +13,7 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
  * The broker automatically interchanges these, when handling requests based on default behavior.
  */
 @Configuration
+@EnableScheduling
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
@@ -19,6 +21,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
      *  Configures broker prefixes {@code /topic} for channels that broadcast new changes,
      *  {@code /queue} for client specific messages.<br>
      *  All should be sent and handled at {@code /api} prefixed endpoints.
+     *  All methods should return Objects, that are Jackson parsable
      *
      * @param registry Web Socket server configuration object.
      */
@@ -35,6 +38,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
      */
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/food-pal").withSockJS();
+        registry.addEndpoint("/food-pal");
     }
 }

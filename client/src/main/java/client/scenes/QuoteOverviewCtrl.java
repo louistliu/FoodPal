@@ -16,10 +16,17 @@
 
 package client.scenes;
 
+import client.utils.ResponseHandler;
+import client.utils.ServerSockets;
 import client.utils.ServerUtils;
+import client.utils.TypeParser;
 import com.google.inject.Inject;
+import commons.Ingredient;
 import commons.Quote;
+import commons.sockets.ErrorObject;
+import commons.sockets.PayloadType;
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -36,6 +43,7 @@ public class QuoteOverviewCtrl implements Initializable {
 
     private final ServerUtils server;
     private final MainCtrl mainCtrl;
+    private final ServerSockets socketUtils;
 
     private ObservableList<Quote> data;
 
@@ -51,13 +59,15 @@ public class QuoteOverviewCtrl implements Initializable {
     /**
      * Creates a new class instance and injects dependencies to the constructor and fields.
      *
-     * @param server server client communication utility
+     * @param server   server client communication utility
      * @param mainCtrl main scene controller responsible for stage switching
      */
     @Inject
-    public QuoteOverviewCtrl(ServerUtils server, MainCtrl mainCtrl) {
+    public QuoteOverviewCtrl(ServerUtils server, MainCtrl mainCtrl, ServerSockets socketUtils) {
         this.server = server;
         this.mainCtrl = mainCtrl;
+        this.socketUtils = socketUtils;
+        socketDemo();
     }
 
     @Override
@@ -83,5 +93,32 @@ public class QuoteOverviewCtrl implements Initializable {
         var quotes = server.getQuotes();
         data = FXCollections.observableList(quotes);
         table.setItems(data);
+    }
+
+    /**
+     * Show a demo, how current socket implementation works.
+     */
+    private void socketDemo() {
+        ResponseHandler<Ingredient> ingredientResponseHandler = new ResponseHandler<>(
+              System.out::println,
+              Ingredient.class
+        );
+        ResponseHandler<ErrorObject> exceptionHandler = new ResponseHandler<>(
+              System.out::println,
+              ErrorObject.class
+        );
+        ResponseHandler<List<Ingredient>> ingredientProcess = new ResponseHandler<>(
+              System.out::println,
+              TypeParser.getPayloadType(PayloadType.IngredientCollection)
+        );
+        socketUtils.subscribe(
+              ServerSockets.setDestination("/topic/ingredients/create"),
+              ingredientResponseHandler);
+        socketUtils.subscribe(
+              ServerSockets.setDestination("/user/queue/errors"), exceptionHandler);
+        socketUtils.subscribe(
+              ServerSockets.setDestination("/app/ingredients/fetch"), ingredientProcess);
+
+        socketUtils.addIngredient(new Ingredient("test"));
     }
 }
