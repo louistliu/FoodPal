@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import commons.Ingredient;
 import commons.RecipeIngredient;
 import commons.sockets.PayloadType;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.List;
 import org.apache.commons.lang3.NotImplementedException;

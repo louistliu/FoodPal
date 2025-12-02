@@ -52,7 +52,7 @@ public class ServerSockets {
      * @param destination endpoint path
      * @return returns STOMP headers
      */
-    public static StompHeaders createHeaders(String destination) {
+    public static StompHeaders setDestination(String destination) {
         StompHeaders headers = new StompHeaders();
         headers.setDestination(destination);
         return headers;
@@ -81,7 +81,7 @@ public class ServerSockets {
      * @param ingredient ingredient to add.
      */
     public void addIngredient(Ingredient ingredient) {
-        StompHeaders headers = createHeaders("/app/ingredients/create");
+        StompHeaders headers = setDestination("/app/ingredients/create");
         sessionHandler.send(headers, ingredient);
     }
 
@@ -100,7 +100,7 @@ public class ServerSockets {
      * @param path endpoint
      */
     public void get(String path) {
-        StompHeaders headers = createHeaders(path);
+        StompHeaders headers = setDestination(path);
         sessionHandler.send(headers, null);
     }
 }

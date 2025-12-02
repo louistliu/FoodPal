@@ -23,6 +23,7 @@ import client.utils.TypeParser;
 import com.google.inject.Inject;
 import commons.Ingredient;
 import commons.Quote;
+import commons.sockets.ErrorObject;
 import commons.sockets.PayloadType;
 import java.net.URL;
 import java.util.List;
@@ -102,21 +103,21 @@ public class QuoteOverviewCtrl implements Initializable {
               System.out::println,
               Ingredient.class
         );
-        ResponseHandler<Ingredient> exceptionHandler = new ResponseHandler<>(
+        ResponseHandler<ErrorObject> exceptionHandler = new ResponseHandler<>(
               System.out::println,
-              Ingredient.class
+              ErrorObject.class
         );
         ResponseHandler<List<Ingredient>> ingredientProcess = new ResponseHandler<>(
               System.out::println,
               TypeParser.getPayloadType(PayloadType.IngredientCollection)
         );
         socketUtils.subscribe(
-              ServerSockets.createHeaders("/topic/ingredients/create"),
+              ServerSockets.setDestination("/topic/ingredients/create"),
               ingredientResponseHandler);
         socketUtils.subscribe(
-              ServerSockets.createHeaders("/user/queue/errors"), exceptionHandler);
+              ServerSockets.setDestination("/user/queue/errors"), exceptionHandler);
         socketUtils.subscribe(
-              ServerSockets.createHeaders("/app/ingredients/fetch"), ingredientProcess);
+              ServerSockets.setDestination("/app/ingredients/fetch"), ingredientProcess);
 
         socketUtils.addIngredient(new Ingredient("test"));
     }
