@@ -1,7 +1,6 @@
 package server.controllers;
 
 import commons.Ingredient;
-import commons.sockets.ErrorObject;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -54,7 +53,7 @@ public class IngredientController {
     @SubscribeMapping("/ingredients/fetch")
     public List<Ingredient> fetchIngredients() throws Exception {
         System.out.println("SUBSCRIBED");
-        return ingredientDB.findAll().stream().toList();
+        return ingredientDB.findAll();
     }
 
     /**
@@ -86,7 +85,7 @@ public class IngredientController {
      */
     @MessageExceptionHandler
     @SendToUser("/queue/errors")
-    public ErrorObject handleException(Throwable exception) {
-        return new ErrorObject(exception);
+    public Throwable handleException(Throwable exception) {
+        return exception;
     }
 }
