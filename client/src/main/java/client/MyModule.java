@@ -24,6 +24,7 @@ import client.scenes.MainScreenCtrl;
 import client.scenes.QuoteOverviewCtrl;
 import client.utils.ServerRecipeUtils;
 import client.utils.ServerSockets;
+import client.utils.Config;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.Scopes;
@@ -33,8 +34,15 @@ import com.google.inject.Scopes;
  */
 public class MyModule implements Module {
 
+    private final Config config;
+    // Constructor now accepts the Config object loaded in Main
+    public MyModule(Config config) {
+        this.config = config;
+    }
+
     @Override
     public void configure(Binder binder) {
+        binder.bind(Config.class).toInstance(config);
         binder.bind(MainCtrl.class).in(Scopes.SINGLETON);
         binder.bind(AddQuoteCtrl.class).in(Scopes.SINGLETON);
         binder.bind(QuoteOverviewCtrl.class).in(Scopes.SINGLETON);

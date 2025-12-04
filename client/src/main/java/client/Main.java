@@ -22,12 +22,17 @@ import client.scenes.AddQuoteCtrl;
 import client.scenes.MainCtrl;
 import client.scenes.MainScreenCtrl;
 import client.scenes.QuoteOverviewCtrl;
+import client.utils.Config;
 import client.utils.ServerUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.inject.Guice;
 import com.google.inject.Injector;
+import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import javafx.application.Application;
 import javafx.stage.Stage;
+import org.apache.commons.io.FileUtils;
 
 public class Main extends Application {
 
@@ -35,13 +40,24 @@ public class Main extends Application {
     private static final MyFXML FXML = new MyFXML(INJECTOR);
 
     public static void main(String[] args) throws URISyntaxException, IOException {
-        launch();
+        launch(args); // Pass args so we can read them in start()
     }
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+        var params = getParameters().getNamed();
+        String configPath = params.getOrDefault("cfg", "config.json");
+        File configFile = new File(configPath);
+        // Load configuration (or create defaults)
+        Config config = loadConfig(configFile);
+        // Save configuration when the application closes
+        primaryStage.setOnCloseRequest(e -> saveConfig(configFile, config));
 
-        var serverUtils = INJECTOR.getInstance(ServerUtils.class);
+        // Create Injector with configuration
+        Injector injector = Guice.createInjector(new MyModule(config));
+        // Create MyFXML instance locally
+        var fxml = new MyFXML(injector);
+        var serverUtils = injector.getInstance(ServerUtils.class);
         if (!serverUtils.isServerAvailable()) {
             var msg = "Server needs to be started before the client,"
                     + " but it does not seem to be available. Shutting down.";
@@ -62,5 +78,31 @@ public class Main extends Application {
 
     public static MyFXML getFxml() {
         return FXML;
+    }
+
+    // Load config using Jackson
+    private Config loadConfig(File file) {
+        var mapper = new ObjectMapper();
+        try {
+            if (file.exists()) {
+                return mapper.readValue(file, Config.class);
+            }
+        } catch (IOException e) {
+            System.err.println("Could not load config, using defaults.");
+            e.printStackTrace();
+        }
+        return new Config();
+    }
+
+    // Save config using Jackson + Commons IO
+    private void saveConfig(File file, Config config) {
+        var mapper = new ObjectMapper();
+        try {
+            String json = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(config);
+            FileUtils.writeStringToFile(file, json, "UTF-8");
+        } catch (IOException e) {
+            System.err.println("Could not save config.");
+            e.printStackTrace();
+        }
     }
 }
