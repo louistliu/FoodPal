@@ -19,12 +19,9 @@ package client.scenes;
 import client.utils.ResponseHandler;
 import client.utils.ServerSockets;
 import client.utils.ServerUtils;
-import client.utils.TypeParser;
 import com.google.inject.Inject;
 import commons.Ingredient;
 import commons.Quote;
-import commons.sockets.ErrorObject;
-import commons.sockets.PayloadType;
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -100,17 +97,13 @@ public class QuoteOverviewCtrl implements Initializable {
      */
     private void socketDemo() {
         ResponseHandler<Ingredient> ingredientResponseHandler = new ResponseHandler<>(
-              System.out::println,
-              Ingredient.class
-        );
-        ResponseHandler<ErrorObject> exceptionHandler = new ResponseHandler<>(
-              System.out::println,
-              ErrorObject.class
-        );
+              System.out::println) {
+        };
+        ResponseHandler<Throwable> exceptionHandler = new ResponseHandler<>(
+              System.out::println) {};
         ResponseHandler<List<Ingredient>> ingredientProcess = new ResponseHandler<>(
-              System.out::println,
-              TypeParser.getPayloadType(PayloadType.IngredientCollection)
-        );
+              x -> x.forEach(System.out::println)) {
+        };
         socketUtils.subscribe(
               ServerSockets.setDestination("/topic/ingredients/create"),
               ingredientResponseHandler);
