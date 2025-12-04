@@ -3,7 +3,9 @@ package client.scenes;
 import commons.Recipe;
 import client.scenes.MainCtrl;
 import com.google.inject.Inject;
+import commons.RecipeList;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import commons.RecipeIngredient;
@@ -13,24 +15,32 @@ import java.util.*;
 public class MainScreenCtrl {
 
     private final MainCtrl mainCtrl;
+    private ObservableList<Recipe> observableRecipes;
     private Recipe selectedRecipe;
 
-    private int recipeCounter = 0;
-
     @FXML private ListView<Recipe> recipeListView;
+    @FXML private ListView<String> IngredientListView;
+    @FXML private ListView<String> InstructionListView;
+
     @FXML private TextField searchRecipesField;
     @FXML private ChoiceBox<String> languageChoiceBox;
 
     @FXML private TextField recipeNameField;
-    @FXML private TextArea ingredientsTextArea;
-    @FXML private TextArea preparationTextArea;
+    @FXML private TextField recipeDescriptionField;
 
+    @FXML private Button saveButton;
     @FXML private Button addButton;
     @FXML private Button deleteButton;
+    @FXML private Button addInstructionButton;
+    @FXML private Button deleteInstructionButton;
+    @FXML private Button addIngredientButton;
+    @FXML private Button deleteIngredientButton;
     @FXML private Button duplicateButton;
     @FXML private Button favoritesButton;
     @FXML private Button allButton;
     @FXML private Button printButton;
+
+    RecipeList ListOfRecipes = new RecipeList();
 
     /**
      * Constructs the MainScreenCtrl, injecting the scene controller.
@@ -51,10 +61,9 @@ public class MainScreenCtrl {
         ));
         languageChoiceBox.getSelectionModel().selectFirst();
 
-        List<Recipe> initialRecipes = createDummyRecipes();
-        recipeListView.setItems(FXCollections.observableList(initialRecipes));
+        observableRecipes = FXCollections.observableList(ListOfRecipes.getRecipeList());
 
-        this.recipeCounter = initialRecipes.size();
+        recipeListView.setItems(observableRecipes);
 
         recipeListView.setCellFactory(lv -> new ListCell<>() {
             public void updateItem(Recipe recipe, boolean empty) {
@@ -72,77 +81,133 @@ public class MainScreenCtrl {
     }
 
     /**
-     * Updates the detail fields on the right pane with the contents of the selected recipe.
-     * @param recipe The recipe object whose details should be displayed.
+     * Updates the text areas to show the details of the selected recipe.
      */
     private void showRecipeDetails(Recipe recipe) {
         this.selectedRecipe = recipe;
-        if (recipe != null) {
-            recipeNameField.setText(recipe.getName());
-            if (recipe.getIngredients() != null && !recipe.getIngredients().isEmpty()) {
-                ingredientsTextArea.setText("Ingredients loaded (" + recipe.getIngredients().size() + " items)");
-            } else {
-                ingredientsTextArea.setText("[No Ingredients Defined]");
-            }
 
-            if (recipe.getInstructions() != null) {
-                preparationTextArea.setText(String.join("\n", recipe.getInstructions()));
-            } else {
-                preparationTextArea.setText("");
-            }
-
-        } else {
+        if (recipe == null) {
             recipeNameField.clear();
-            ingredientsTextArea.clear();
-            preparationTextArea.clear();
+            recipeDescriptionField.clear();
+            IngredientListView.getItems().clear();
+            InstructionListView.getItems().clear();
+            return;
         }
+
+        // 1. Set Name and Description
+        recipeNameField.setText(recipe.getName());
+        recipeDescriptionField.setText(recipe.getDescription());
     }
-
     /**
-     * Creates a list of dummy recipe objects for initial display and testing.
-     * @return A mutable list containing initial Recipe objects.
+     * Saves the changes made in the text fields to the selected Recipe object.
+     * Linked to the Save button in FXML.
      */
-    private List<Recipe> createDummyRecipes() {
-        List<RecipeIngredient> emptyIngredients = Collections.emptyList();
-        List<String> emptyInstructions = Collections.emptyList();
+    public void saveRecipe() {
+        if (selectedRecipe == null) {
+            return;
+        }
 
-        List<Recipe> fixedList = Arrays.asList(
-                new Recipe("Recipe 1", "Recipe 1 description", emptyIngredients, emptyInstructions),
-                new Recipe("Recipe 2", "Recipe 2 description", emptyIngredients, emptyInstructions)
-        );
+        // 1. Get text from fields
+        String newName = recipeNameField.getText();
+        String newDescription = recipeDescriptionField.getText();
 
-        return new ArrayList<>(fixedList);
+        // 2. Update the object
+        selectedRecipe.setName(newName);
+        selectedRecipe.setDescription(newDescription);
+
+        // 3. Refresh the list view so the name updates in the sidebar immediately
+        recipeListView.refresh();
+
+        System.out.println("Saved changes for: " + newName);
+    }
+    /**
+     * Finds the lowest available integer for a given naming pattern.
+     * Example: If inputs are "Recipe 1", "Recipe 3", and prefix is "Recipe ", returns 2.
+     *
+     * @param prefix The start of the string to look for (e.g., "Recipe " or "Chocolate Cake clone ")
+     * @return The first available integer.
+     */
+    private int findNextId(String prefix) {
+        Set<Integer> takenNumbers = new HashSet<>();
+
+        for (Recipe r : observableRecipes) {
+            String name = r.getName();
+
+            if (name.startsWith(prefix)) {
+                try {
+                    String numberPart = name.substring(prefix.length()).trim();
+                    int number = Integer.parseInt(numberPart);
+                    takenNumbers.add(number);
+                } catch (NumberFormatException e) {}
+            }
+        }
+        int i = 1;
+        while (takenNumbers.contains(i)) {
+            i++;
+        }
+        return i;
     }
 
     /**
      * Handles the addition of a new recipe placeholder, increments the counter, and selects the new item.
      */
     public void addRecipe() {
-        this.recipeCounter++;
 
-        String newName = "Recipe " + this.recipeCounter;
+        String newName = "Recipe " + findNextId("Recipe ");
 
         List<commons.RecipeIngredient> emptyIngredients = Collections.emptyList();
         List<String> emptyInstructions = Collections.emptyList();
-        Recipe newRecipe = new Recipe(newName, "New recipe created by user.", emptyIngredients, emptyInstructions);
-        recipeListView.getItems().add(newRecipe);
-        recipeListView.getSelectionModel().select(newRecipe);
+        Recipe newRecipe = new Recipe(newName, "", emptyIngredients, emptyInstructions);
+
+        observableRecipes.add(newRecipe);
 
         System.out.println("Added new recipe: " + newName);
+        System.out.println("Logic List Size: " + ListOfRecipes.getRecipeList().size());
     }
 
     /**
      * Handles the deletion of the currently selected recipe.
      */
     public void deleteRecipe() {
-        System.out.println("Deleting selected recipe.");
+        if (selectedRecipe == null) {
+            System.out.println("No recipe selected!");
+            return;
+        }
+        observableRecipes.remove(selectedRecipe);
+        System.out.println("Deleted recipe: " + selectedRecipe.getName());
     }
 
     /**
      * Handles the duplication (cloning) of the currently selected recipe.
      */
     public void duplicateRecipe() {
-        System.out.println("Cloning selected recipe.");
+        if (selectedRecipe == null) {
+            return;
+        }
+        Recipe newRecipe = new Recipe(selectedRecipe.getName() + " Clone " + findNextId(selectedRecipe.getName() + " Clone "), selectedRecipe.getDescription(), selectedRecipe.getIngredients(), selectedRecipe.getInstructions());
+
+        observableRecipes.add(newRecipe);
+
+        System.out.println("Added new recipe: " + newRecipe.getName());
+        System.out.println("Logic List Size: " + ListOfRecipes.getRecipeList().size());
+
+        System.out.println("Cloning " + selectedRecipe.getName());
+    }
+
+    public void addIngredient() {
+        System.out.println("Add Ingredient clicked (Not implemented)");
+    }
+
+    public void deleteIngredient() {
+        System.out.println("Delete Ingredient clicked (Not implemented)");
+    }
+
+    public void addInstruction() {
+        System.out.println("Add Instruction clicked (Not implemented)");
+    }
+
+    public void deleteInstruction() {
+        System.out.println("Delete Instruction clicked (Not implemented)");
     }
 
     /**
