@@ -20,6 +20,7 @@ import static com.google.inject.Guice.createInjector;
 
 import client.scenes.AddQuoteCtrl;
 import client.scenes.MainCtrl;
+import client.scenes.MainScreenCtrl;
 import client.scenes.QuoteOverviewCtrl;
 import client.utils.ServerSockets;
 import client.utils.ServerUtils;
