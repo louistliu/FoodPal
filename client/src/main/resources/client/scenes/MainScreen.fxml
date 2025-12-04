@@ -1,52 +1,54 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.Button?>
-<?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TextField?>
-<?import javafx.scene.control.TextArea?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
 
-<SplitPane dividerPositions="0.32608695652173914" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="900.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/25" fx:controller="client.scenes.MainScreenCtrl">
+<SplitPane dividerPositions="0.32608695652173914" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.scenes.MainScreenCtrl">
     <items>
         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="598.0" prefWidth="250.0">
             <children>
-                <Button layoutX="14.0" layoutY="550.0" mnemonicParsing="false" text="+"
-                        fx:id="addButton" onAction="#addRecipe" />
-                <Button layoutX="57.0" layoutY="550.0" mnemonicParsing="false" text="-"
-                        fx:id="deleteButton" onAction="#deleteRecipe" />
-                <Button layoutX="98.0" layoutY="550.0" mnemonicParsing="false" text="Duplicate"
-                        fx:id="duplicateButton" onAction="#duplicateRecipe" />
+                <Button fx:id="addButton" layoutX="14.0" layoutY="550.0" mnemonicParsing="false" onAction="#addRecipe" text="+" />
+                <Button fx:id="deleteButton" layoutX="57.0" layoutY="550.0" mnemonicParsing="false" onAction="#deleteRecipe" text="-" />
+                <Button fx:id="duplicateButton" layoutX="98.0" layoutY="550.0" mnemonicParsing="false" onAction="#duplicateRecipe" text="Duplicate" />
 
-                <TextField layoutX="15.0" layoutY="45.0" text="Search Recipes..."
-                           fx:id="searchRecipesField" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" />
-                <Button layoutX="15.0" layoutY="14.0" mnemonicParsing="false" text="Favorites"
-                        fx:id="favoritesButton" onAction="#showFavorites" />
-                <Button layoutX="106.0" layoutY="14.0" mnemonicParsing="false" text="All"
-                        fx:id="allButton" onAction="#showAllRecipes" />
+                <TextField fx:id="searchRecipesField" layoutX="15.0" layoutY="45.0" promptText="Search Recipes..." AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" />
+                <Button fx:id="favoritesButton" layoutX="15.0" layoutY="14.0" mnemonicParsing="false" onAction="#showFavorites" text="Favorites" />
+                <Button fx:id="allButton" layoutX="106.0" layoutY="14.0" mnemonicParsing="false" onAction="#showAllRecipes" text="All" />
 
-                <ListView fx:id="recipeListView"
-                          layoutX="15.0" layoutY="78.0"
-                          AnchorPane.bottomAnchor="70.0"
-                          AnchorPane.leftAnchor="15.0"
-                          AnchorPane.rightAnchor="15.0"
-                          AnchorPane.topAnchor="78.0" />
+                <ListView fx:id="recipeListView" layoutX="15.0" layoutY="78.0" AnchorPane.bottomAnchor="70.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="78.0" />
             </children>
         </AnchorPane>
 
         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
             <children>
-                <ChoiceBox layoutX="169.0" layoutY="14.0" prefWidth="150.0"
-                           fx:id="languageChoiceBox" onAction="#onLanguageChange" AnchorPane.rightAnchor="140.0" />
-                <Button layoutX="330.0" layoutY="14.0" mnemonicParsing="false" text="Print"
-                        fx:id="printButton" onAction="#printRecipe" AnchorPane.rightAnchor="14.0" />
+                <ChoiceBox fx:id="languageChoiceBox" layoutX="169.0" layoutY="14.0" onAction="#onLanguageChange" prefWidth="150.0" AnchorPane.rightAnchor="140.0" />
+                <Button fx:id="printButton" layoutX="330.0" layoutY="14.0" mnemonicParsing="false" onAction="#printRecipe" text="Print" AnchorPane.rightAnchor="14.0" />
 
                 <TextField fx:id="recipeNameField" layoutX="14.0" layoutY="50.0" promptText="Recipe Name" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" />
-
-                <TextArea fx:id="ingredientsTextArea" layoutX="14.0" layoutY="95.0" prefHeight="100.0" promptText="Ingredients" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" />
-
-                <TextArea fx:id="preparationTextArea" layoutX="14.0" layoutY="210.0" prefHeight="150.0" promptText="Preparation Instructions" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" />
+            <TextField fx:id="recipeDescriptionField" alignment="TOP_LEFT" layoutX="14.0" layoutY="88.0" prefHeight="87.0" prefWidth="574.0" promptText="Description" />
+            <ListView fx:id="IngredientListView" layoutX="14.0" layoutY="242.0" prefHeight="286.0" prefWidth="210.0" />
+            <ListView fx:id="InstructionListView" layoutX="244.0" layoutY="242.0" prefHeight="286.0" prefWidth="344.0" />
+            <Label layoutX="74.0" layoutY="199.0" text="Ingredients">
+               <font>
+                  <Font size="18.0" />
+               </font>
+            </Label>
+            <Label layoutX="370.0" layoutY="199.0" text="Instructions">
+               <font>
+                  <Font size="18.0" />
+               </font>
+            </Label>
+            <Button fx:id="addIngredientButton" layoutX="151.0" layoutY="535.0" mnemonicParsing="false" onAction="#addIngredient" text="+" />
+            <Button fx:id="addInstructionButton" layoutX="522.0" layoutY="534.0" mnemonicParsing="false" onAction="#addInstruction" text="+" />
+            <Button fx:id="deleteIngredientButton" layoutX="187.0" layoutY="535.0" mnemonicParsing="false" onAction="#deleteIngredient" text="-" />
+            <Button fx:id="deleteInstructionButton" layoutX="557.0" layoutY="534.0" mnemonicParsing="false" onAction="#deleteInstruction" text="-" />
+            <Button fx:id="saveButton" layoutX="14.0" layoutY="14.0" mnemonicParsing="false" onAction="#saveRecipe" text="Save" />
 
             </children>
         </AnchorPane>
