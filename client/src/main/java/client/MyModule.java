@@ -18,6 +18,7 @@ package client;
 
 import client.scenes.AddQuoteCtrl;
 import client.scenes.MainCtrl;
+import client.scenes.MainScreenCtrl;
 import client.scenes.QuoteOverviewCtrl;
 import com.google.inject.Binder;
 import com.google.inject.Module;
@@ -33,5 +34,8 @@ public class MyModule implements Module {
         binder.bind(MainCtrl.class).in(Scopes.SINGLETON);
         binder.bind(AddQuoteCtrl.class).in(Scopes.SINGLETON);
         binder.bind(QuoteOverviewCtrl.class).in(Scopes.SINGLETON);
+
+        // Bind the FoodPal Main Screen controller
+        binder.bind(MainScreenCtrl.class).in(Scopes.SINGLETON);
     }
 }
