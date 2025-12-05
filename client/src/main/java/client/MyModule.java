@@ -16,6 +16,8 @@
 
 package client;
 
+import client.scenes.AddIngredientScreenCtrl;
+import client.scenes.AddInstructionScreenCtrl;
 import client.scenes.AddQuoteCtrl;
 import client.scenes.MainCtrl;
 import client.scenes.MainScreenCtrl;
@@ -37,5 +39,7 @@ public class MyModule implements Module {
 
         // Bind the FoodPal Main Screen controller
         binder.bind(MainScreenCtrl.class).in(Scopes.SINGLETON);
+        binder.bind(AddIngredientScreenCtrl.class).in(Scopes.SINGLETON);
+        binder.bind(AddInstructionScreenCtrl.class).in(Scopes.SINGLETON);
     }
 }

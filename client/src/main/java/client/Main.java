@@ -61,4 +61,8 @@ public class Main extends Application {
         // Pass the mainScreen Pair to initialize
         mainCtrl.initialize(primaryStage, overview, add, mainScreen);
     }
+
+    public static MyFXML getFxml() {
+        return FXML;
+    }
 }
