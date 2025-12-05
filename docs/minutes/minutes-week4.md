@@ -6,10 +6,10 @@ Agenda for today:
 | Time :       | 13:45                                  |     |
 | Location :   | DW PC Hall 2                           |     |
 | Chair        | Louis                                  |     |
-| Minute Taker | Soham                                  |     |
+| Minute Taker | Vilius                                  |     |
 | Attendees :  | Vilius, Omer, Soham, Floyd, Ege, Louis |     |
 
-Attendence
+Attendence:
 
 - Louis
 - Ege
@@ -18,7 +18,7 @@ Attendence
 - Vilius
 - Soham (15 min late)
 
-Agenda Items :  
+Agenda Items:  
   
 - Opening by chair (1 min )  
 - Check-in: How is everyone doing? (1 min)  
@@ -83,7 +83,7 @@ Agenda Items :
 - Feedback round: 
 	- What went well and what can be improved next time ? (3 min)
 		- Everything seemed good
-    - Planned meeting duration != actual duration?
+    - Planned meeting duration != actual duration? 
 		- None
 	- Where / why did you misestimate? (2 min)
 		- None
