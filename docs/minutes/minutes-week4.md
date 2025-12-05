@@ -1,16 +1,8 @@
-Agenda for today:
+## Minute taker Vilius
 
-| Key          | Value                                  |     |
-| ------------ | -------------------------------------- | --- |
-| Date :       | 2025-12-04                             |     |
-| Time :       | 13:45                                  |     |
-| Location :   | DW PC Hall 2                           |     |
-| Chair        | Louis                                  |     |
-| Minute Taker | Vilius                                  |     |
-| Attendees :  | Vilius, Omer, Soham, Floyd, Ege, Louis |     |
+Meeting started 13:45 and finished at 14:24
 
-Attendence:
-
+Attendence (Present):
 - Louis
 - Ege
 - Floyd
@@ -34,6 +26,7 @@ Agenda Items:
 	- Pull/merge in changes from/to gitlab before **Wednesday**.
 	- Code contribution review formative feedback happening soon.
 	- Formative feedback - can be a good way to get a general idea how the final version will be graded.
+
 - Presentation of the current app to TA (3 min)  
 	- UI demostration of recipes and ingredients.
 	- Server to client communication via sockets.
@@ -46,15 +39,21 @@ Agenda Items:
 			- Assignees.
 			- Milestone.
 			- Time spent to issue.
-		- Can create branches from issues, this way all information between the branch, merge request from the branch and the GitLab issue are linked.
+		- Can create branches from issues,
+		  this way all information between the branch,
+		  merge request from the branch and the GitLab issue are linked.
+
 	- Discuss - Midweek meeting planning (5 min)
 		- Mid week meeting is necessary
 		- Meeting details **Wednesday immediatly after the tutorial**. (not when the lab ends)
 		- Notify if can not make it in advance.
+		
 	- Brainstorm - Potential tasks to be added in the upcoming sprint (3 min)
 		- Finish all tasks that are still open from previous sprints
 		- Testing
+
 	- Discuss - Create a proper list of tasks for the upcoming sprint (2 min)
+
 	- Decision - Allocate existing work to team members (2 min)  
 		- Ege + Louis
 			- Warning window (if an error occured/item already exists)
@@ -67,18 +66,22 @@ Agenda Items:
 		- Soham
 			- Ingredients hook up
 		- Omer
+
 	- Decision - next chair + minute taker (30 sec)  
 		- Minute taker
 			- Soham
 		- Chair
 			- Ege
+
 	- Additional: Failed pipeline
 		- **Do not merge code that failed the pipeline**
 		- Do not cancel a pipeline (for merging purposes)
+
 	- Additional: Communication
 		- Check notifications frequently
 		- If there is a merge open, review it
-		- Not responding for a prolonged period of time may result in raising this to the TA in accordance to the Code of Conduct
+		- Not responding for a prolonged period of time
+		  may result in raising this to the TA in accordance to the Code of Conduct.
 
 - Feedback round: 
 	- What went well and what can be improved next time ? (3 min)
