@@ -1,5 +1,6 @@
 package client.scenes;
 
+import client.utils.PrintRecipe;
 import com.google.inject.Inject;
 import commons.Recipe;
 import commons.RecipeList;
@@ -233,7 +234,15 @@ public class MainScreenCtrl {
      * Handles the request to download a printable version of the recipe.
      */
     public void printRecipe() {
-        System.out.println("Downloading printable version of recipe.");
+
+        if (selectedRecipe == null) return;
+
+        PrintRecipe.exportRecipe(
+                printButton.getScene().getWindow(),
+                selectedRecipe
+        );
+
+        System.out.println("Exported recipe: " + selectedRecipe.getName());
     }
 
     /**
