@@ -238,7 +238,7 @@ public class MainScreenCtrl {
         if (selectedRecipe == null) return;
 
         PrintRecipe.exportRecipe(
-                printButton.getScene().getWindow(),  // pass the current window
+                printButton.getScene().getWindow(),
                 selectedRecipe
         );
 
