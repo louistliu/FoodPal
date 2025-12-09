@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.Pane?>
+
+<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="162.0" prefWidth="401.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.scenes.AddInstructionScreenCtrl">
+    <children>
+        <Button fx:id="cancelButton" layoutX="273.0" layoutY="121.0" mnemonicParsing="false" text="Cancel" onAction="#handleCancel" />
+        <Button fx:id="okButton" layoutX="83.0" layoutY="121.0" mnemonicParsing="false" text="    OK    " onAction="#handleOk" />
+        <TextArea fx:id="inputTextArea" layoutX="16.0" layoutY="14.0" prefHeight="90.0" prefWidth="370.0" promptText="Enter Instruction" />
+    </children>
+</Pane>
