@@ -2,6 +2,7 @@ package commons;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.ObjectMapper;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -11,6 +12,7 @@ class RecipeIngredientTest {
     private RecipeIngredient ing2;
     private Ingredient ingredient1;
     private Ingredient ingredient2;
+    private static final ObjectMapper mapper = new ObjectMapper();
 
 
     @BeforeEach
@@ -22,83 +24,90 @@ class RecipeIngredientTest {
     }
 
     @Test
-    public void constructorTest() {
+    public void constructorSetsIngredientTest() {
         assertEquals(ingredient1, ing1.getIngredient());
     }
 
     @Test
-    public void constructorTest1() {
+    public void constructorSetsAmountTest() {
         assertEquals(750f, ing1.getAmount());
     }
 
 
     @Test
-    public void constructorTest2() {
+    public void constructorSetsUnitTest() {
         assertEquals("g", ing1.getUnit());
     }
 
 
     @Test
-    public void testEquals() {
+    public void equalsSelfTest() {
         assertEquals(ingredient1, ingredient1);
     }
 
     @Test
-    public void testNotEquals1() {
+    public void notEqualsDifferentAmountTest() {
         var ing3 = new RecipeIngredient(ingredient1, 745, "g");
         assertNotEquals(ing1, ing3);
     }
 
     @Test
-    public void testNotEquals2() {
+    public void notEqualsDifferentUnitTest() {
         var ing3 = new RecipeIngredient(ingredient1, 750, "L");
         assertNotEquals(ing1, ing3);
     }
 
     @Test
-    public void testNotEquals3() {
+    public void notEqualsDifferentIngredientTest() {
         var ing3 = new RecipeIngredient(ingredient2, 750, "g");
         assertNotEquals(ing1, ing3);
     }
 
     @Test
     public void equalsNullTest() {
-        assertNotEquals(ing1, null);
+        assertNotEquals(null, ing1);
     }
 
-
     @Test
-    void testHashCodeFalse() {
+    void hashCodeDifferentTest() {
         assertNotEquals(ing1.hashCode(), ing2.hashCode());
     }
 
     @Test
-    void testHashCodeTrue() {
+    void hashCodeEqualTest() {
         var ing3 = new RecipeIngredient(ingredient1, 750, "g");
         assertEquals(ing1.hashCode(), ing3.hashCode());
     }
 
     @Test
-    void testToString() {
+    void toStringContainsIngredientTest() {
         var string = ing1.toString();
         assertTrue(string.contains("ingredient"));
     }
 
     @Test
-    void testToString1() {
+    void toStringContainsAmountTest() {
         var string = ing1.toString();
         assertTrue(string.contains("amount"));
     }
 
     @Test
-    void testToString2() {
+    void toStringContainsUnitTest() {
         var string = ing1.toString();
         assertTrue(string.contains("unit"));
     }
 
     @Test
-    void testToString3() {
+    void toStringContainsIdTest() {
         var string = ing1.toString();
         assertTrue(string.contains("id"));
+    }
+
+    @Test
+    void serializationEqualsTest() throws Exception {
+        RecipeIngredient original = new RecipeIngredient(new Ingredient("Salt"), 5, "g");
+        String json = mapper.writeValueAsString(original);
+        RecipeIngredient parsed = mapper.readValue(json, RecipeIngredient.class);
+        assertEquals(original, parsed);
     }
 }
