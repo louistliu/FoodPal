@@ -2,6 +2,7 @@ package commons;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.ObjectMapper;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -9,6 +10,7 @@ class IngredientTest {
 
     private Ingredient ingredient1;
     private Ingredient ingredient2;
+    private static final ObjectMapper mapper = new ObjectMapper();
 
     @BeforeEach
     public void setUp() {
@@ -42,7 +44,7 @@ class IngredientTest {
 
     @Test
     public void equalsNullTest() {
-        assertNotEquals(ingredient1, null);
+        assertNotNull(ingredient1);
     }
 
     @Test
@@ -60,6 +62,13 @@ class IngredientTest {
     public void toStringTest() {
         var string = ingredient1.toString();
         assertTrue(string.contains("name"));
+    }
+
+    @Test
+    public void jacksonIngredientSerializationEquals() {
+        String json = mapper.writeValueAsString(ingredient1);
+        Ingredient parsed = mapper.readValue(json, Ingredient.class);
+        assertEquals(ingredient1, parsed);
     }
 
 
