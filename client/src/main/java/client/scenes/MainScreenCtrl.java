@@ -2,22 +2,28 @@ package client.scenes;
 
 import client.Main;
 import client.utils.PrintRecipe;
+import client.utils.ResponseHandler;
+import client.utils.ServerSockets;
 import com.google.inject.Inject;
 import commons.Recipe;
-import commons.RecipeList;
 import commons.RecipeIngredient;
-
+import commons.RecipeList;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
+import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -28,29 +34,26 @@ import javafx.util.Pair;
  */
 public class MainScreenCtrl {
 
+    private final ServerSockets serverRecipes;
+    RecipeList listOfRecipes = new RecipeList();
     private ObservableList<Recipe> observableRecipes;
     private Recipe selectedRecipe;
-
     @FXML
     private AnchorPane rightPane;
-
     @FXML
     private ListView<Recipe> recipeListView;
     @FXML
     private ListView<String> ingredientListView;
     @FXML
     private ListView<String> instructionListView;
-
     @FXML
     private TextField searchRecipesField;
     @FXML
     private ChoiceBox<String> languageChoiceBox;
-
     @FXML
     private TextField recipeNameField;
     @FXML
     private TextField recipeDescriptionField;
-
     @FXML
     private ToggleButton switchMenuButton;
     @FXML
@@ -76,15 +79,14 @@ public class MainScreenCtrl {
     @FXML
     private Button printButton;
 
-    RecipeList listOfRecipes = new RecipeList();
-
     /**
      * Constructs the MainScreenCtrl, injecting the scene controller.
      *
      * @param m The main application controller for scene transitions.
      */
     @Inject
-    public MainScreenCtrl(MainCtrl m) {
+    public MainScreenCtrl(MainCtrl m, ServerSockets server) {
+        this.serverRecipes = server;
     }
 
     /**
@@ -93,13 +95,8 @@ public class MainScreenCtrl {
      */
     public void initialize() {
         languageChoiceBox.setItems(FXCollections.observableArrayList(
-                "English", "Dutch", "German"
-        ));
+              "English", "Dutch", "German"));
         languageChoiceBox.getSelectionModel().selectFirst();
-
-        // Load the actual list from the RecipeList singleton.
-        observableRecipes = FXCollections.observableList(listOfRecipes.getRecipeList());
-        recipeListView.setItems(observableRecipes);
 
         // --- Cell Factory and Listeners ---
         recipeListView.setCellFactory(lv -> new ListCell<>() {
@@ -109,12 +106,80 @@ public class MainScreenCtrl {
             }
         });
 
-        // This listener will fire immediately if data is bound, triggering showRecipeDetails
+        // This listener will fire immediately if data is bound, triggering
+        // showRecipeDetails
         recipeListView.getSelectionModel().selectedItemProperty()
-                .addListener((obs, oldRecipe, newRecipe) -> showRecipeDetails(newRecipe));
+              .addListener((obs, oldRecipe, newRecipe) -> showRecipeDetails(newRecipe));
 
         System.out.println("FoodPal Main Screen UI initialized.");
         rightPane.setVisible(false);
+
+        observableRecipes = FXCollections.observableList(new ArrayList<>());
+        recipeListView.setItems(observableRecipes);
+
+        serverRecipes.subscribe(ServerSockets.setDestination("/app/recipes/fetch"),
+              new ResponseHandler<List<Recipe>>(this::onUpdateRecipeList) {
+              });
+
+        serverRecipes.subscribe(ServerSockets.setDestination("/topic/recipes/create"),
+              new ResponseHandler<Recipe>(this::onAddRecipe) {
+              });
+        serverRecipes.subscribe(ServerSockets.setDestination("/topic/recipes/update"),
+              new ResponseHandler<Recipe>(this::onUpdateRecipe) {
+              });
+        serverRecipes.subscribe(ServerSockets.setDestination("/topic/recipes/delete"),
+              new ResponseHandler<Recipe>(this::onDeleteRecipe) {
+              });
+
+    }
+
+    private void onUpdateRecipeList(List<Recipe> recipes) {
+
+        System.out.print("RECIPES ARRIVED");
+        Platform.runLater(() -> {
+            // Load the actual list from the RecipeList singleton.
+            observableRecipes.addAll(recipes);
+            recipeListView.refresh();
+        });
+    }
+
+    private void onAddRecipe(Recipe recipe) {
+        Platform.runLater(() -> {
+            observableRecipes.add(recipe);
+            selectRecipe(recipe);
+            recipeListView.refresh();
+        });
+
+    }
+
+    private void onDeleteRecipe(Recipe recipe) {
+        Platform.runLater(() -> {
+            observableRecipes.remove(recipe);
+            recipeListView.refresh();
+        });
+    }
+
+    private void onUpdateRecipe(Recipe recipe) {
+        Platform.runLater(() -> {
+            int ind = observableRecipes.indexOf(selectedRecipe);
+            if (ind == -1) {
+                observableRecipes.add(recipe);
+                return;
+            }
+
+            observableRecipes.remove(ind);
+            observableRecipes.add(ind, recipe);
+            recipeListView.refresh();
+            selectRecipe(recipe);
+        });
+    }
+
+    private void selectRecipe(Recipe recipe) {
+        if (!observableRecipes.contains(recipe)) {
+            return;
+        }
+        this.selectedRecipe = recipe;
+        recipeListView.getSelectionModel().select(recipe);
     }
 
     /**
@@ -127,8 +192,12 @@ public class MainScreenCtrl {
             recipeNameField.clear();
             recipeDescriptionField.clear();
 
-            if (ingredientListView != null) ingredientListView.getItems().clear();
-            if (instructionListView != null) instructionListView.getItems().clear();
+            if (ingredientListView != null) {
+                ingredientListView.getItems().clear();
+            }
+            if (instructionListView != null) {
+                instructionListView.getItems().clear();
+            }
             rightPane.setVisible(false);
             return;
         }
@@ -176,7 +245,13 @@ public class MainScreenCtrl {
             selectedRecipe.setInstructions(currentInstructions);
         }
 
-        recipeListView.refresh();
+        // if recipe is already created - update recipe otherwise save recipe,
+        // update the list of recipes once server sends response
+        if (observableRecipes.contains(selectedRecipe)) {
+            serverRecipes.send(ServerSockets.setDestination("/app/recipes/update"), selectedRecipe);
+        } else {
+            serverRecipes.send(ServerSockets.setDestination("/app/recipes/create"), selectedRecipe);
+        }
 
         System.out.println("Saved changes for: " + newName);
     }
@@ -211,15 +286,18 @@ public class MainScreenCtrl {
      * Handles the addition of a new recipe placeholder.
      */
     public void addRecipe() {
+
         String newName = "Recipe " + findNextId("Recipe ");
+        showRecipeDetails(new Recipe(newName));
 
-        List<commons.RecipeIngredient> emptyIngredients = new ArrayList<>();
-        List<String> emptyInstructions = new ArrayList<>();
-        Recipe newRecipe = new Recipe(newName, "", emptyIngredients, emptyInstructions);
-
-        observableRecipes.add(newRecipe);
-        recipeListView.getSelectionModel().select(newRecipe);
-
+        // List<commons.RecipeIngredient> emptyIngredients = new ArrayList<>();
+        // List<String> emptyInstructions = new ArrayList<>();
+        // Recipe newRecipe = new Recipe(newName, "", emptyIngredients,
+        // emptyInstructions);
+        //
+        // observableRecipes.add(newRecipe);
+        // recipeListView.getSelectionModel().select(newRecipe);
+        //
         System.out.println("Added new recipe: " + newName);
     }
 
@@ -233,7 +311,7 @@ public class MainScreenCtrl {
             System.out.println("No recipe selected!");
             return;
         }
-        observableRecipes.remove(selected);
+        serverRecipes.send(ServerSockets.setDestination("/app/recipes/delete"), selected);
         System.out.println("Deleted recipe: " + selected.getName());
     }
 
@@ -255,10 +333,10 @@ public class MainScreenCtrl {
         }
 
         Recipe newRecipe = new Recipe(selectedRecipe.getName() + " Clone "
-                + findNextId(selectedRecipe.getName() + " Clone "),
-                selectedRecipe.getDescription(),
-                clonedIngredients,
-                clonedInstructions);
+              + findNextId(selectedRecipe.getName() + " Clone "),
+              selectedRecipe.getDescription(),
+              clonedIngredients,
+              clonedInstructions);
 
         observableRecipes.add(newRecipe);
         recipeListView.getSelectionModel().select(newRecipe);
@@ -271,7 +349,8 @@ public class MainScreenCtrl {
      */
     private <T> T launchModal(Class<T> controllerClass, String fxmlFileName, String title) {
         try {
-            Pair<T, Parent> pair = Main.getFxml().load(controllerClass, "client", "scenes", fxmlFileName);
+            Pair<T, Parent> pair =
+                  Main.getFxml().load(controllerClass, "client", "scenes", fxmlFileName);
             Stage modalStage = new Stage();
 
             // Set owner to block main window interactions
@@ -307,7 +386,9 @@ public class MainScreenCtrl {
             return;
         }
 
-        AddIngredientScreenCtrl controller = launchModal(AddIngredientScreenCtrl.class, "AddIngredientScreen.fxml", "Add New Ingredient");
+        AddIngredientScreenCtrl controller =
+              launchModal(AddIngredientScreenCtrl.class, "AddIngredientScreen.fxml",
+                    "Add New Ingredient");
 
         if (controller != null) {
             String inputResult = controller.getResult();
@@ -328,7 +409,9 @@ public class MainScreenCtrl {
             return;
         }
 
-        AddInstructionScreenCtrl controller = launchModal(AddInstructionScreenCtrl.class, "AddInstructionScreen.fxml", "Add Instruction");
+        AddInstructionScreenCtrl controller =
+              launchModal(AddInstructionScreenCtrl.class, "AddInstructionScreen.fxml",
+                    "Add Instruction");
 
         if (controller != null) {
             String instructionText = controller.getResult();
@@ -367,12 +450,13 @@ public class MainScreenCtrl {
      */
     public void printRecipe() {
 
-        if (selectedRecipe == null) return;
+        if (selectedRecipe == null) {
+            return;
+        }
 
         PrintRecipe.exportRecipe(
-                printButton.getScene().getWindow(),
-                selectedRecipe
-        );
+              printButton.getScene().getWindow(),
+              selectedRecipe);
 
         System.out.println("Exported recipe: " + selectedRecipe.getName());
     }
@@ -385,7 +469,8 @@ public class MainScreenCtrl {
     }
 
     /**
-     * Handles switching the recipe list view to show all recipes available on the server.
+     * Handles switching the recipe list view to show all recipes available on the
+     * server.
      */
     public void showAllRecipes() {
         System.out.println("Switching view to show all recipes.");

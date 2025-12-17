@@ -16,7 +16,6 @@
 
 package client.scenes;
 
-import client.scenes.MainScreenCtrl;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
@@ -47,7 +46,8 @@ public class MainCtrl {
      * @param add          stage showing the UI for adding a new quote
      */
     public void initialize(Stage primaryStage, Pair<QuoteOverviewCtrl, Parent> overview,
-                           Pair<AddQuoteCtrl, Parent> add, Pair<MainScreenCtrl, Parent> mainScreen) {
+                           Pair<AddQuoteCtrl, Parent> add,
+                           Pair<MainScreenCtrl, Parent> mainScreen) {
         this.primaryStage = primaryStage;
         this.overviewCtrl = overview.getKey();
         this.overview = new Scene(overview.getValue());

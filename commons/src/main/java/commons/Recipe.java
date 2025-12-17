@@ -5,6 +5,7 @@ import static org.apache.commons.lang3.builder.ToStringStyle.MULTI_LINE_STYLE;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -16,7 +17,6 @@ import java.util.List;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
-
 
 /**
  * A recipe entity, containing all the necessary details.
@@ -32,10 +32,11 @@ public class Recipe {
     @NotNull
     private String description;
 
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     // One recipe can contain many different RecipeIngredients.
     private List<RecipeIngredient> ingredients = new ArrayList<>();
-    @ElementCollection
+
+    @ElementCollection(fetch = FetchType.EAGER)
     @OrderColumn(name = "instruction_sequence") // Persists the List order in the database.
     private List<String> instructions = new ArrayList<>();
 
@@ -55,11 +56,18 @@ public class Recipe {
      * @param instructions The list of the instruction steps
      */
     public Recipe(@NotNull String name, @NotNull String description,
-                  List<RecipeIngredient> ingredients, List<String> instructions) {
+            List<RecipeIngredient> ingredients, List<String> instructions) {
         this.name = name;
         this.description = description;
         this.ingredients = ingredients;
         this.instructions = instructions;
+    }
+
+    public Recipe(String name) {
+        this.name = name;
+        this.description = "";
+        this.ingredients = new ArrayList<>();
+        this.instructions = new ArrayList<>();
     }
 
     public long getId() {

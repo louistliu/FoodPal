@@ -3,7 +3,12 @@ package client.scenes;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.MenuButton;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
 public class AddIngredientScreenCtrl {
@@ -31,26 +36,28 @@ public class AddIngredientScreenCtrl {
 
     @FXML
     public void initialize() {
-        ingredientChoiceBox.setItems(FXCollections.observableArrayList(
-                "Ingredient 1", "Ingredient 2", "Ingredient 3", "Other"
-        ));
+        ingredientChoiceBox.setItems(
+              FXCollections.observableArrayList("Ingredient 1", "Ingredient 2", "Ingredient 3",
+                    "Other"));
 
         ingredientChoiceBox.getSelectionModel().selectFirst();
 
         // Add listener to show/hide the inputTextArea based on selection
-        ingredientChoiceBox.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
-            if ("Other".equals(newVal)) {
-                inputTextArea.setVisible(true);
-                inputTextArea.clear();
-                inputTextArea.requestFocus();
-            } else {
-                inputTextArea.setVisible(false);
-            }
-        });
+        ingredientChoiceBox.getSelectionModel().selectedItemProperty()
+              .addListener((obs, oldVal, newVal) -> {
+                  if ("Other".equals(newVal)) {
+                      inputTextArea.setVisible(true);
+                      inputTextArea.clear();
+                      inputTextArea.requestFocus();
+                  } else {
+                      inputTextArea.setVisible(false);
+                  }
+              });
     }
 
     /**
      * Sets the stage for this scene, necessary for closing the window.
+     *
      * @param stage The modal stage.
      */
     public void setStage(Stage stage) {
@@ -89,6 +96,7 @@ public class AddIngredientScreenCtrl {
             return;
         }
 
+        // TODO: this should not be string, it's an object
         this.result = amount + " " + unit + " " + ingredientName;
 
         if (stage != null) {
@@ -110,6 +118,7 @@ public class AddIngredientScreenCtrl {
 
     /**
      * Retrieves the input provided by the user.
+     *
      * @return The formatted string, or null if cancelled.
      */
     public String getResult() {
