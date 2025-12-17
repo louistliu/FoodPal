@@ -1,7 +1,7 @@
 
 | Key          | Value                                  |
 |--------------|----------------------------------------|
-| Date :       | 2025-12-17                             |
+| Date :       | 2025-12-18                             |
 | Time :       | 13:45                                  |
 | Location :   | DW PC Hall 1                           |
 | Chair        | Omer                                   |
@@ -15,6 +15,8 @@ Agenda Items :
 - Opening by chair (1 min )
 - Check - in : How is everyone doing ? (1 min)
 - Announcements by the team (2 min )
+- Anything to add to the agenda? (2 min)
+- Do you approve of the last minute-taker notes? (1 min) 
 - Look at everyone's task and progress so far (3 min)
 
 *Discuss feedback and showcase of App*
