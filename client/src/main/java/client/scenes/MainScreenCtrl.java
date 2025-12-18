@@ -102,9 +102,9 @@ public class MainScreenCtrl {
 
         String prefix = item.replaceAll("\\d+(?=\\s*$)", "");
         return strings.stream().filter(s -> s.startsWith(prefix)).map(s -> new ArrayList<>(
-                    Arrays.asList(s.split("\\d+(?=\\s*$)")))
-                    .stream().mapToInt(Integer::parseInt)).mapToInt(x -> x.max().orElse(1)).max()
-              .orElse(1);
+                Arrays.asList(s.split("\\d+(?=\\s*$)")))
+                .stream().mapToInt(Integer::parseInt)).mapToInt(x -> x.max().orElse(1)).max()
+                .orElse(1);
     }
 
     /**
@@ -113,7 +113,7 @@ public class MainScreenCtrl {
      */
     public void initialize() {
         languageChoiceBox.setItems(FXCollections.observableArrayList(
-              "English", "Dutch", "German"));
+                "English", "Dutch", "German"));
         languageChoiceBox.getSelectionModel().selectFirst();
 
         // --- Cell Factory and Listeners ---
@@ -127,7 +127,7 @@ public class MainScreenCtrl {
         // This listener will fire immediately if data is bound, triggering
         // showRecipeDetails
         recipeListView.getSelectionModel().selectedItemProperty()
-              .addListener((obs, oldRecipe, newRecipe) -> showRecipeDetails(newRecipe));
+                .addListener((obs, oldRecipe, newRecipe) -> showRecipeDetails(newRecipe));
 
         System.out.println("FoodPal Main Screen UI initialized.");
         rightPane.setVisible(false);
@@ -136,18 +136,18 @@ public class MainScreenCtrl {
         recipeListView.setItems(observableRecipes);
 
         serverRecipes.subscribe(ServerSockets.setDestination("/app/recipes/fetch"),
-              new ResponseHandler<List<Recipe>>(this::onUpdateRecipeList) {
-              });
+                new ResponseHandler<List<Recipe>>(this::onUpdateRecipeList) {
+                });
 
         serverRecipes.subscribe(ServerSockets.setDestination("/topic/recipes/create"),
-              new ResponseHandler<Recipe>(this::onAddRecipe) {
-              });
+                new ResponseHandler<Recipe>(this::onAddRecipe) {
+                });
         serverRecipes.subscribe(ServerSockets.setDestination("/topic/recipes/update"),
-              new ResponseHandler<Recipe>(this::onUpdateRecipe) {
-              });
+                new ResponseHandler<Recipe>(this::onUpdateRecipe) {
+                });
         serverRecipes.subscribe(ServerSockets.setDestination("/topic/recipes/delete"),
-              new ResponseHandler<Recipe>(this::onDeleteRecipe) {
-              });
+                new ResponseHandler<Recipe>(this::onDeleteRecipe) {
+                });
 
     }
 
@@ -180,7 +180,7 @@ public class MainScreenCtrl {
 
     private void onUpdateRecipe(Recipe recipe) {
         Platform.runLater(() -> {
-            int ind = observableRecipes.indexOf(selectedRecipe);
+            int ind = observableRecipes.indexOf(recipe);
             if (ind == -1) {
                 observableRecipes.add(recipe);
                 return;
@@ -354,14 +354,15 @@ public class MainScreenCtrl {
         String recipeName = selectedRecipe.getName();
 
         System.out.println("RECIPE: " + recipeName);
-        // int index = getMaxId(observableRecipes.stream().map(r -> r.getName()).toList(), recipeName);
+        // int index = getMaxId(observableRecipes.stream().map(r ->
+        // r.getName()).toList(), recipeName);
         // System.out.println("INDEX: " + index);
 
         Recipe newRecipe = new Recipe(selectedRecipe.getName() + " Clone "
-              + findNextId(recipeName) + " Clone",
-              selectedRecipe.getDescription(),
-              clonedIngredients,
-              clonedInstructions);
+                + findNextId(recipeName) + " Clone",
+                selectedRecipe.getDescription(),
+                clonedIngredients,
+                clonedInstructions);
 
         serverRecipes.send(ServerSockets.setDestination("/app/recipes/create"), newRecipe);
 
@@ -373,8 +374,7 @@ public class MainScreenCtrl {
      */
     private <T> T launchModal(Class<T> controllerClass, String fxmlFileName, String title) {
         try {
-            Pair<T, Parent> pair =
-                  Main.getFxml().load(controllerClass, "client", "scenes", fxmlFileName);
+            Pair<T, Parent> pair = Main.getFxml().load(controllerClass, "client", "scenes", fxmlFileName);
             Stage modalStage = new Stage();
 
             // Set owner to block main window interactions
@@ -410,9 +410,8 @@ public class MainScreenCtrl {
             return;
         }
 
-        AddIngredientScreenCtrl controller =
-              launchModal(AddIngredientScreenCtrl.class, "AddIngredientScreen.fxml",
-                    "Add New Ingredient");
+        AddIngredientScreenCtrl controller = launchModal(AddIngredientScreenCtrl.class, "AddIngredientScreen.fxml",
+                "Add New Ingredient");
 
         if (controller != null) {
             String inputResult = controller.getResult();
@@ -433,9 +432,8 @@ public class MainScreenCtrl {
             return;
         }
 
-        AddInstructionScreenCtrl controller =
-              launchModal(AddInstructionScreenCtrl.class, "AddInstructionScreen.fxml",
-                    "Add Instruction");
+        AddInstructionScreenCtrl controller = launchModal(AddInstructionScreenCtrl.class, "AddInstructionScreen.fxml",
+                "Add Instruction");
 
         if (controller != null) {
             String instructionText = controller.getResult();
@@ -479,8 +477,8 @@ public class MainScreenCtrl {
         }
 
         PrintRecipe.exportRecipe(
-              printButton.getScene().getWindow(),
-              selectedRecipe);
+                printButton.getScene().getWindow(),
+                selectedRecipe);
 
         System.out.println("Exported recipe: " + selectedRecipe.getName());
     }
