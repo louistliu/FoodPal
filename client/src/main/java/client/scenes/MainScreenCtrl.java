@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -93,7 +92,7 @@ public class MainScreenCtrl {
      */
     public void initialize() {
         languageChoiceBox.setItems(FXCollections.observableArrayList(
-                "English", "Dutch", "German"
+              "English", "Dutch", "German"
         ));
         languageChoiceBox.getSelectionModel().selectFirst();
 
@@ -111,10 +110,16 @@ public class MainScreenCtrl {
 
         // This listener will fire immediately if data is bound, triggering showRecipeDetails
         recipeListView.getSelectionModel().selectedItemProperty()
-                .addListener((obs, oldRecipe, newRecipe) -> showRecipeDetails(newRecipe));
+              .addListener((obs, oldRecipe, newRecipe) -> showRecipeDetails(newRecipe));
+
+        setupInstructionDragAndDrop();
 
         System.out.println("FoodPal Main Screen UI initialized.");
         rightPane.setVisible(false);
+    }
+
+    private void setupInstructionDragAndDrop() {
+        instructionListView.setCellFactory(param -> new InstructionListCell());
     }
 
     /**
@@ -127,8 +132,12 @@ public class MainScreenCtrl {
             recipeNameField.clear();
             recipeDescriptionField.clear();
 
-            if (ingredientListView != null) ingredientListView.getItems().clear();
-            if (instructionListView != null) instructionListView.getItems().clear();
+            if (ingredientListView != null) {
+                ingredientListView.getItems().clear();
+            }
+            if (instructionListView != null) {
+                instructionListView.getItems().clear();
+            }
             rightPane.setVisible(false);
             return;
         }
@@ -255,10 +264,10 @@ public class MainScreenCtrl {
         }
 
         Recipe newRecipe = new Recipe(selectedRecipe.getName() + " Clone "
-                + findNextId(selectedRecipe.getName() + " Clone "),
-                selectedRecipe.getDescription(),
-                clonedIngredients,
-                clonedInstructions);
+              + findNextId(selectedRecipe.getName() + " Clone "),
+              selectedRecipe.getDescription(),
+              clonedIngredients,
+              clonedInstructions);
 
         observableRecipes.add(newRecipe);
         recipeListView.getSelectionModel().select(newRecipe);
@@ -271,7 +280,8 @@ public class MainScreenCtrl {
      */
     private <T> T launchModal(Class<T> controllerClass, String fxmlFileName, String title) {
         try {
-            Pair<T, Parent> pair = Main.getFxml().load(controllerClass, "client", "scenes", fxmlFileName);
+            Pair<T, Parent> pair =
+                  Main.getFxml().load(controllerClass, "client", "scenes", fxmlFileName);
             Stage modalStage = new Stage();
 
             // Set owner to block main window interactions
@@ -307,7 +317,9 @@ public class MainScreenCtrl {
             return;
         }
 
-        AddIngredientScreenCtrl controller = launchModal(AddIngredientScreenCtrl.class, "AddIngredientScreen.fxml", "Add New Ingredient");
+        AddIngredientScreenCtrl controller =
+              launchModal(AddIngredientScreenCtrl.class, "AddIngredientScreen.fxml",
+                    "Add New Ingredient");
 
         if (controller != null) {
             String inputResult = controller.getResult();
@@ -328,7 +340,9 @@ public class MainScreenCtrl {
             return;
         }
 
-        AddInstructionScreenCtrl controller = launchModal(AddInstructionScreenCtrl.class, "AddInstructionScreen.fxml", "Add Instruction");
+        AddInstructionScreenCtrl controller =
+              launchModal(AddInstructionScreenCtrl.class, "AddInstructionScreen.fxml",
+                    "Add Instruction");
 
         if (controller != null) {
             String instructionText = controller.getResult();
@@ -367,11 +381,13 @@ public class MainScreenCtrl {
      */
     public void printRecipe() {
 
-        if (selectedRecipe == null) return;
+        if (selectedRecipe == null) {
+            return;
+        }
 
         PrintRecipe.exportRecipe(
-                printButton.getScene().getWindow(),
-                selectedRecipe
+              printButton.getScene().getWindow(),
+              selectedRecipe
         );
 
         System.out.println("Exported recipe: " + selectedRecipe.getName());
