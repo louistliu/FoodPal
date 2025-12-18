@@ -24,7 +24,6 @@ import client.scenes.MainScreenCtrl;
 import client.scenes.QuoteOverviewCtrl;
 import client.utils.ServerRecipeUtils;
 import client.utils.ServerSockets;
-
 import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.Scopes;

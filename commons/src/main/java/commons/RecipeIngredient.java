@@ -39,13 +39,23 @@ public class RecipeIngredient {
      * Create a RecipeIngredient to be used in a recipe.
      *
      * @param ingredient The ingredient to be used in the recipe
-     * @param amount The amount of the ingredient that should be used for the recipe
-     * @param unit The unit of the amount (e.g. grams)
+     * @param amount     The amount of the ingredient that should be used for the
+     *                   recipe
+     * @param unit       The unit of the amount (e.g. grams)
      */
-    public RecipeIngredient(Ingredient ingredient, int amount, @NotNull String unit) {
+    public RecipeIngredient(Ingredient ingredient, float amount, @NotNull String unit) {
         this.ingredient = ingredient;
         this.unit = unit;
         this.amount = amount;
+    }
+
+    /**
+     * Copy {@link RecipeIngredient}
+     *
+     * @return a deep copy of {@link RecipeIngredient}
+     */
+    public RecipeIngredient copy() {
+        return new RecipeIngredient(ingredient, amount, unit);
     }
 
     public long getId() {
