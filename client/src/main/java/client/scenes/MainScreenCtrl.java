@@ -278,7 +278,7 @@ public class MainScreenCtrl {
     /**
      * Finds the lowest available integer for a given naming pattern.
      */
-    private int findNextId(String prefix) {
+     int findNextId(String prefix) {
         Set<Integer> takenNumbers = new HashSet<>();
 
         for (Recipe r : observableRecipes) {
