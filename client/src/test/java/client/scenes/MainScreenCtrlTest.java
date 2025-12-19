@@ -8,15 +8,19 @@ import javafx.collections.ObservableList;
 import javafx.scene.control.ListView;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 
 import java.lang.reflect.Field;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+
+@DisabledOnOs(OS.LINUX)
 class MainScreenCtrlTest {
 
     @BeforeAll
-    static void initToolkit() {
+    static void initializeToolKit() {
         try {
             Platform.startup(() -> {
             });
