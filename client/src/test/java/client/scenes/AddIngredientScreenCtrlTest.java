@@ -20,7 +20,6 @@ public class AddIngredientScreenCtrlTest {
     // Needed for the UI components to exist
     @BeforeAll
     static void initializeToolKit() {
-
         try {
             Platform.startup(() -> {
             });
