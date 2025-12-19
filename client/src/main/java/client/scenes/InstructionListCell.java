@@ -1,7 +1,9 @@
 package client.scenes;
 
 import javafx.collections.ObservableList;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.ListCell;
+import javafx.scene.control.MenuItem;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
@@ -13,8 +15,11 @@ import javafx.scene.input.TransferMode;
  */
 public class InstructionListCell extends ListCell<String> {
 
+    private final ContextMenu contextMenu;
+
     /**
      * Constructs a new InstructionListCell and initializes the drag-and-drop event handlers.
+     * Also creates menu for manually moving instructions with right-clicking.
      */
     public InstructionListCell() {
         setOnDragDetected(this::handleDragDetected);
@@ -22,6 +27,13 @@ public class InstructionListCell extends ListCell<String> {
         setOnDragEntered(this::handleDragEntered);
         setOnDragExited(this::handleDragExited);
         setOnDragDropped(this::handleDragDropped);
+
+        contextMenu = new ContextMenu();
+        MenuItem moveUp = new MenuItem("Move Up");
+        moveUp.setOnAction(event -> moveInstruction(-1));
+        MenuItem moveDown = new MenuItem("Move Down");
+        moveDown.setOnAction(event -> moveInstruction(1));
+        contextMenu.getItems().addAll(moveUp, moveDown);
     }
 
     /**
@@ -38,6 +50,24 @@ public class InstructionListCell extends ListCell<String> {
             setGraphic(null);
         } else {
             setText((getIndex() + 1) + ". " + item);
+            setContextMenu(contextMenu);
+        }
+    }
+
+    /**
+     * Moves the item at the current index by the given direction.
+     *
+     * @param direction -1 for up, 1 for down.
+     */
+    private void moveInstruction(int direction) {
+        int index = getIndex();
+        ObservableList<String> items = getListView().getItems();
+        int newIndex = index + direction;
+
+        if (newIndex >= 0 && newIndex < items.size()) {
+            String item = items.remove(index);
+            items.add(newIndex, item);
+            getListView().getSelectionModel().select(newIndex);
         }
     }
 
@@ -68,7 +98,6 @@ public class InstructionListCell extends ListCell<String> {
         if (event.getGestureSource() != this && event.getDragboard().hasString()) {
             event.acceptTransferModes(TransferMode.MOVE);
         }
-        event.consume();
     }
 
     /**
@@ -85,7 +114,7 @@ public class InstructionListCell extends ListCell<String> {
 
     /**
      * Handles the DragExited event.
-     * It will resets opacity when the mouse leaves the cell.
+     * It will reset opacity when the mouse leaves the cell.
      *
      * @param event The DragEvent.
      */
@@ -114,7 +143,7 @@ public class InstructionListCell extends ListCell<String> {
             int draggedIdx = getListView().getSelectionModel().getSelectedIndex();
             int thisIdx = getIndex();
 
-            if (draggedIdx >= 0 && thisIdx >= 0 && draggedIdx != thisIdx) {
+            if (draggedIdx != thisIdx) {
                 String itemToMove = items.remove(draggedIdx);
                 items.add(thisIdx, itemToMove);
                 getListView().getSelectionModel().select(thisIdx);
