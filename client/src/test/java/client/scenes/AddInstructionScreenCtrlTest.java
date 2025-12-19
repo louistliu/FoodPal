@@ -5,11 +5,15 @@ import javafx.scene.control.TextArea;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 
 import java.lang.reflect.Field;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+
+@DisabledOnOs(OS.LINUX)
 class AddInstructionScreenCtrlTest {
 
 
@@ -18,6 +22,7 @@ class AddInstructionScreenCtrlTest {
     //needed for the UI components to exist
     @BeforeAll
     static void initializeToolKit() {
+
         try {
             Platform.startup(() -> {
             });

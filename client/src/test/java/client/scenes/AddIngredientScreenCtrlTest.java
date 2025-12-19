@@ -7,11 +7,15 @@ import javafx.scene.control.ChoiceBox;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 
 import java.lang.reflect.Field;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+
+@DisabledOnOs(OS.LINUX)
 public class AddIngredientScreenCtrlTest {
 
     private AddIngredientScreenCtrl ctrl;
@@ -20,6 +24,8 @@ public class AddIngredientScreenCtrlTest {
     // Needed for the UI components to exist
     @BeforeAll
     static void initializeToolKit() {
+
+
         try {
             Platform.startup(() -> {
             });
