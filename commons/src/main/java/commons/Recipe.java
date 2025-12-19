@@ -162,7 +162,7 @@ public class Recipe {
      */
     public boolean equalsNoId(Recipe recipe) {
         return Objects.equals(name, recipe.name)
-                && Objects.equals(description, description)
+                && Objects.equals(description, recipe.description)
                 && Objects.deepEquals(ingredients, recipe.ingredients)
                 && Objects.deepEquals(instructions, recipe.instructions);
 

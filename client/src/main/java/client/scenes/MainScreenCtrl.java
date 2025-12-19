@@ -9,7 +9,6 @@ import commons.Recipe;
 import commons.RecipeIngredient;
 import commons.RecipeList;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -88,23 +87,6 @@ public class MainScreenCtrl {
     @Inject
     public MainScreenCtrl(MainCtrl m, ServerSockets server) {
         this.serverRecipes = server;
-    }
-
-    /**
-     * Get the highest index from strings.
-     *
-     * @param strings strings to find the next index from
-     * @param item    item fow which to find max id
-     * @return returns max id or 0 if no such item is present
-     */
-    public static int getMaxId(List<String> strings, String item) {
-        // TODO: Fully implement this method, currently it is not functional
-
-        String prefix = item.replaceAll("\\d+(?=\\s*$)", "");
-        return strings.stream().filter(s -> s.startsWith(prefix)).map(s -> new ArrayList<>(
-                    Arrays.asList(s.split("\\d+(?=\\s*$)")))
-                    .stream().mapToInt(Integer::parseInt)).mapToInt(x -> x.max().orElse(1)).max()
-              .orElse(1);
     }
 
     /**

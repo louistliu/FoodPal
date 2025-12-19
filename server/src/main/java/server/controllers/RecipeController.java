@@ -13,6 +13,7 @@ import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.stereotype.Controller;
 import server.database.RecipeRepository;
+import server.utils.DummyData;
 
 /**
  * STOMP API endpoints responsible for creating, fetching and deleting
@@ -29,9 +30,9 @@ public class RecipeController {
     @Autowired
     public RecipeController(RecipeRepository recipeDB) {
         this.recipeDB = recipeDB;
-        recipeDB.save(new Recipe("Test Recipe 1", "Indescribable", List.of(), List.of()));
-        recipeDB.save(new Recipe("Test Recipe 3", "A not very so long of a description.", List.of(),
-              List.of()));
+
+        List<Recipe> recipes = DummyData.getDefaultRecipes();
+        recipeDB.saveAllAndFlush(recipes);
     }
 
     /**
@@ -49,7 +50,7 @@ public class RecipeController {
     public Recipe create(@Payload Recipe recipe) throws Exception {
         if (!recipeDB.findBy(recipe.getName()).isEmpty()) {
             throw new EntityExistsException(
-                  "Recipe with name: " + recipe.getName() + " is already in the database");
+                    "Recipe with name: " + recipe.getName() + " is already in the database");
         }
         return recipeDB.save(recipe);
     }
@@ -81,7 +82,7 @@ public class RecipeController {
     public Recipe delete(@Payload Recipe recipe) throws Exception {
         if (!recipeDB.existsById(recipe.getId())) {
             throw new EntityNotFoundException(
-                  "No recipe with id " + recipe.getId() + " in the database");
+                    "No recipe with id " + recipe.getId() + " in the database");
         }
         recipeDB.deleteById(recipe.getId());
         return recipe;
@@ -101,7 +102,7 @@ public class RecipeController {
     public Recipe update(@Payload Recipe recipe) throws Exception {
         if (!recipeDB.existsById(recipe.getId())) {
             throw new EntityNotFoundException(
-                  "No recipe with id " + recipe.getId() + " in the database");
+                    "No recipe with id " + recipe.getId() + " in the database");
         }
 
         return recipeDB.save(recipe);

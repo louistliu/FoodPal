@@ -50,7 +50,7 @@ public class RecipeIngredient {
     }
 
     /**
-     * Copy {@link RecipeIngredient}
+     * Copy {@link RecipeIngredient}.
      *
      * @return a deep copy of {@link RecipeIngredient}
      */
