@@ -5,6 +5,7 @@ import static org.apache.commons.lang3.builder.ToStringStyle.MULTI_LINE_STYLE;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -13,10 +14,11 @@ import jakarta.persistence.OrderColumn;
 import jakarta.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
-
 
 /**
  * A recipe entity, containing all the necessary details.
@@ -32,10 +34,11 @@ public class Recipe {
     @NotNull
     private String description;
 
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     // One recipe can contain many different RecipeIngredients.
     private List<RecipeIngredient> ingredients = new ArrayList<>();
-    @ElementCollection
+
+    @ElementCollection(fetch = FetchType.EAGER)
     @OrderColumn(name = "instruction_sequence") // Persists the List order in the database.
     private List<String> instructions = new ArrayList<>();
 
@@ -55,11 +58,18 @@ public class Recipe {
      * @param instructions The list of the instruction steps
      */
     public Recipe(@NotNull String name, @NotNull String description,
-                  List<RecipeIngredient> ingredients, List<String> instructions) {
+            List<RecipeIngredient> ingredients, List<String> instructions) {
         this.name = name;
         this.description = description;
         this.ingredients = ingredients;
         this.instructions = instructions;
+    }
+
+    public Recipe(String name) {
+        this.name = name;
+        this.description = "";
+        this.ingredients = new ArrayList<>();
+        this.instructions = new ArrayList<>();
     }
 
     public long getId() {
@@ -142,6 +152,20 @@ public class Recipe {
      */
     public void removeInstruction(@NotNull String instruction) {
         this.instructions.remove(instruction);
+    }
+
+    /**
+     * Checks if two recipes are the same excluding ids.
+     *
+     * @param recipe recipe to check
+     * @return if two recipes are equal
+     */
+    public boolean equalsNoId(Recipe recipe) {
+        return Objects.equals(name, recipe.name)
+                && Objects.equals(description, recipe.description)
+                && Objects.deepEquals(ingredients, recipe.ingredients)
+                && Objects.deepEquals(instructions, recipe.instructions);
+
     }
 
     @Override

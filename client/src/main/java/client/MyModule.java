@@ -22,6 +22,8 @@ import client.scenes.AddQuoteCtrl;
 import client.scenes.MainCtrl;
 import client.scenes.MainScreenCtrl;
 import client.scenes.QuoteOverviewCtrl;
+import client.utils.ServerRecipeUtils;
+import client.utils.ServerSockets;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.Scopes;
@@ -41,5 +43,7 @@ public class MyModule implements Module {
         binder.bind(MainScreenCtrl.class).in(Scopes.SINGLETON);
         binder.bind(AddIngredientScreenCtrl.class).in(Scopes.SINGLETON);
         binder.bind(AddInstructionScreenCtrl.class).in(Scopes.SINGLETON);
+        binder.bind(ServerSockets.class).in(Scopes.SINGLETON);
+        binder.bind(ServerRecipeUtils.class).in(Scopes.SINGLETON);
     }
 }

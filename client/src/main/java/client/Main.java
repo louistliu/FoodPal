@@ -22,7 +22,6 @@ import client.scenes.AddQuoteCtrl;
 import client.scenes.MainCtrl;
 import client.scenes.MainScreenCtrl;
 import client.scenes.QuoteOverviewCtrl;
-import client.utils.ServerSockets;
 import client.utils.ServerUtils;
 import com.google.inject.Injector;
 import java.io.IOException;
@@ -44,13 +43,12 @@ public class Main extends Application {
 
         var serverUtils = INJECTOR.getInstance(ServerUtils.class);
         if (!serverUtils.isServerAvailable()) {
-            var msg =
-                    "Server needs to be started before the client,"
-                            + " but it does not seem to be available. Shutting down.";
+            var msg = "Server needs to be started before the client,"
+                    + " but it does not seem to be available. Shutting down.";
             System.err.println(msg);
             return;
         }
-        var serverSockets = INJECTOR.getInstance(ServerSockets.class);
+        // var serverSockets = INJECTOR.getInstance(ServerSockets.class);
 
         var overview = FXML.load(QuoteOverviewCtrl.class, "client", "scenes", "QuoteOverview.fxml");
         var add = FXML.load(AddQuoteCtrl.class, "client", "scenes", "AddQuote.fxml");

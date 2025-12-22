@@ -21,7 +21,8 @@ public class AddInstructionScreenCtrl {
 
     /**
      * Sets the stage for this scene, necessary for closing the window.
-     * @param stage The modal stage.
+     *
+     * @param stage The modal stage
      */
     public void setStage(Stage stage) {
         this.stage = stage;
@@ -59,7 +60,10 @@ public class AddInstructionScreenCtrl {
 
     /**
      * Retrieves the input provided by the user.
+     *
      * @return The text input string, or null if cancelled.
      */
-    public String getResult() { return result; }
+    public String getResult() {
+        return result;
+    }
 }
