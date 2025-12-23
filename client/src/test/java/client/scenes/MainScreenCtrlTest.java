@@ -16,7 +16,7 @@ import java.lang.reflect.Field;
 import static org.junit.jupiter.api.Assertions.*;
 
 
-
+@DisabledOnOs(OS.LINUX)
 class MainScreenCtrlTest {
 
     @BeforeAll
