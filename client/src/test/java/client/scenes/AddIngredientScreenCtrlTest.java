@@ -15,7 +15,7 @@ import java.lang.reflect.Field;
 import static org.junit.jupiter.api.Assertions.*;
 
 
-@DisabledOnOs(OS.LINUX)
+
 public class AddIngredientScreenCtrlTest {
 
     private AddIngredientScreenCtrl ctrl;
