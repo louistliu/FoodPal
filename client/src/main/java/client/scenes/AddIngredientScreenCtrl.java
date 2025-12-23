@@ -1,5 +1,7 @@
 package client.scenes;
 
+import commons.Ingredient;
+import commons.RecipeIngredient;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -11,6 +13,9 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
+/**
+ * Class, which handles logic for adding ingredients.
+ */
 public class AddIngredientScreenCtrl {
 
     @FXML
@@ -32,8 +37,11 @@ public class AddIngredientScreenCtrl {
     private Button cancelButton;
 
     private Stage stage;
-    private String result = null;
+    private RecipeIngredient result = null;
 
+    /**
+     * Initializes the stage for the addIngredient-screen.
+     */
     @FXML
     public void initialize() {
         ingredientChoiceBox.setItems(
@@ -80,7 +88,7 @@ public class AddIngredientScreenCtrl {
      */
     @FXML
     public void handleOk() {
-        String amount = amountTextField.getText().trim();
+        String amountStr = amountTextField.getText().trim();
         String unit = unitMenuButton.getText();
         String ingredientName;
 
@@ -91,16 +99,22 @@ public class AddIngredientScreenCtrl {
             ingredientName = selected;
         }
 
-        if (ingredientName.isEmpty() || amount.isEmpty() || "Unit".equals(unit)) {
+        if (ingredientName.isEmpty() || amountStr.isEmpty() || "Unit".equals(unit)) {
             System.out.println("Invalid input: Please fill in Amount, Unit, and Ingredient.");
             return;
         }
 
-        // TODO: this should not be string, it's an object
-        this.result = amount + " " + unit + " " + ingredientName;
+        try {
+            float amount = Float.parseFloat(amountStr);
+            Ingredient ingredient = new Ingredient(ingredientName);
+            this.result = new RecipeIngredient(ingredient, amount, unit);
 
-        if (stage != null) {
-            stage.close();
+            if (stage != null) {
+                stage.close();
+            }
+
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid Amount: Must be a whole number.");
         }
     }
 
@@ -121,7 +135,7 @@ public class AddIngredientScreenCtrl {
      *
      * @return The formatted string, or null if cancelled.
      */
-    public String getResult() {
+    public RecipeIngredient getResult() {
         return result;
     }
 }
