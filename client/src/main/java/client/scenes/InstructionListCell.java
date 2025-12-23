@@ -1,0 +1,156 @@
+package client.scenes;
+
+import javafx.collections.ObservableList;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.MenuItem;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.DragEvent;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.input.TransferMode;
+
+/**
+ * Custom ListCell class for instructions that handles dragging and dropping instructions.
+ */
+public class InstructionListCell extends ListCell<String> {
+
+    private final ContextMenu contextMenu;
+
+    /**
+     * Constructs a new InstructionListCell and initializes the drag-and-drop event handlers.
+     * Also creates menu for manually moving instructions with right-clicking.
+     */
+    public InstructionListCell() {
+        setOnDragDetected(this::handleDragDetected);
+        setOnDragOver(this::handleDragOver);
+        setOnDragEntered(this::handleDragEntered);
+        setOnDragExited(this::handleDragExited);
+        setOnDragDropped(this::handleDragDropped);
+
+        contextMenu = new ContextMenu();
+        MenuItem moveUp = new MenuItem("Move Up");
+        moveUp.setOnAction(event -> moveInstruction(-1));
+        MenuItem moveDown = new MenuItem("Move Down");
+        moveDown.setOnAction(event -> moveInstruction(1));
+        contextMenu.getItems().addAll(moveUp, moveDown);
+    }
+
+    /**
+     * Updates the item number and adds a number prefix to the instruction text.
+     *
+     * @param item  The instruction string.
+     * @param empty Whether the cell is empty.
+     */
+    @Override
+    protected void updateItem(String item, boolean empty) {
+        super.updateItem(item, empty);
+        if (empty || item == null) {
+            setText(null);
+            setGraphic(null);
+        } else {
+            setText((getIndex() + 1) + ". " + item);
+            setContextMenu(contextMenu);
+        }
+    }
+
+    /**
+     * Moves the item at the current index by the given direction.
+     *
+     * @param direction -1 for up, 1 for down.
+     */
+    private void moveInstruction(int direction) {
+        int index = getIndex();
+        ObservableList<String> items = getListView().getItems();
+        int newIndex = index + direction;
+
+        if (newIndex >= 0 && newIndex < items.size()) {
+            String item = items.remove(index);
+            items.add(newIndex, item);
+            getListView().getSelectionModel().select(newIndex);
+        }
+    }
+
+    /**
+     * Handles the DragDetected event.
+     * It will initiate the drag-and-drop operation if the cell is not empty.
+     *
+     * @param event The MouseEvent triggering the drag.
+     */
+    private void handleDragDetected(MouseEvent event) {
+        if (getItem() == null) {
+            return;
+        }
+        Dragboard dragboard = startDragAndDrop(TransferMode.MOVE);
+        ClipboardContent content = new ClipboardContent();
+        content.putString(getItem());
+        dragboard.setContent(content);
+        event.consume();
+    }
+
+    /**
+     * Handles the DragOver event.
+     * It will accept the transfer mode if the source is not this cell and data exists.
+     *
+     * @param event The DragEvent.
+     */
+    private void handleDragOver(DragEvent event) {
+        if (event.getGestureSource() != this && event.getDragboard().hasString()) {
+            event.acceptTransferModes(TransferMode.MOVE);
+        }
+    }
+
+    /**
+     * Handles the DragEntered event.
+     * It will change the opacity to indicate a valid drop target.
+     *
+     * @param event The DragEvent.
+     */
+    private void handleDragEntered(DragEvent event) {
+        if (event.getGestureSource() != this && event.getDragboard().hasString()) {
+            setOpacity(0.5);
+        }
+    }
+
+    /**
+     * Handles the DragExited event.
+     * It will reset opacity when the mouse leaves the cell.
+     *
+     * @param event The DragEvent.
+     */
+    private void handleDragExited(DragEvent event) {
+        if (event.getGestureSource() != this && event.getDragboard().hasString()) {
+            setOpacity(1);
+        }
+    }
+
+    /**
+     * Handles the DragDropped event.
+     * It will swap the dragged item with the item at the current position in the list.
+     *
+     * @param event The DragEvent.
+     */
+    private void handleDragDropped(DragEvent event) {
+        if (getItem() == null) {
+            return;
+        }
+
+        Dragboard dragboard = event.getDragboard();
+        boolean success = false;
+
+        if (dragboard.hasString()) {
+            ObservableList<String> items = getListView().getItems();
+            int draggedIdx = getListView().getSelectionModel().getSelectedIndex();
+            int thisIdx = getIndex();
+
+            if (draggedIdx != thisIdx) {
+                String itemToMove = items.remove(draggedIdx);
+                items.add(thisIdx, itemToMove);
+                getListView().getSelectionModel().select(thisIdx);
+                success = true;
+            }
+        }
+        event.setDropCompleted(success);
+        event.consume();
+    }
+}

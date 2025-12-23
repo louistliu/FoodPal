@@ -111,6 +111,8 @@ public class MainScreenCtrl {
         recipeListView.getSelectionModel().selectedItemProperty()
               .addListener((obs, oldRecipe, newRecipe) -> showRecipeDetails(newRecipe));
 
+        setupInstructionDragAndDrop();
+
         System.out.println("FoodPal Main Screen UI initialized.");
         rightPane.setVisible(false);
 
@@ -193,6 +195,10 @@ public class MainScreenCtrl {
             return;
         }
         recipeListView.getSelectionModel().select(recipe);
+    }
+
+    private void setupInstructionDragAndDrop() {
+        instructionListView.setCellFactory(param -> new InstructionListCell());
     }
 
     /**
