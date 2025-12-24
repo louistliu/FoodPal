@@ -100,7 +100,8 @@ public class AddIngredientScreenCtrl {
         }
 
         if (ingredientName.isEmpty() || amountStr.isEmpty() || "Unit".equals(unit)) {
-            System.out.println("Invalid input: Please fill in Amount, Unit, and Ingredient.");
+            ErrorScreenCtrl.showError("Invalid input: Please fill "
+                  + "in Amount, Unit, and Ingredient.");
             return;
         }
 
