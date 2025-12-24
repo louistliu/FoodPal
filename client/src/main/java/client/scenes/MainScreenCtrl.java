@@ -420,11 +420,7 @@ public class MainScreenCtrl {
             if (newIngredient != null) {
                 System.out.println("Ingredient added: " + newIngredient.getIngredient().getName());
 
-                if (selectedRecipe.getIngredients() == null) {
-                    selectedRecipe.setIngredients(new ArrayList<>());
-                }
                 selectedRecipe.getIngredients().add(newIngredient);
-
                 showRecipeDetails(selectedRecipe);
             }
         }
