@@ -416,11 +416,12 @@ public class MainScreenCtrl {
                     "Add New Ingredient");
 
         if (controller != null) {
-            String inputResult = controller.getResult();
-            if (inputResult != null && !inputResult.isEmpty()) {
-                System.out.println("Ingredient input received: " + inputResult);
+            RecipeIngredient newIngredient = controller.getResult();
+            if (newIngredient != null) {
+                System.out.println("Ingredient added: " + newIngredient.getIngredient().getName());
 
-                ingredientListView.getItems().add(inputResult);
+                selectedRecipe.getIngredients().add(newIngredient);
+                showRecipeDetails(selectedRecipe);
             }
         }
     }

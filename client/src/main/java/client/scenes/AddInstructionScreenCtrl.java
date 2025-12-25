@@ -5,6 +5,9 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 import javafx.stage.Stage;
 
+/**
+ * Class, which handles logic for adding instructions.
+ */
 public class AddInstructionScreenCtrl {
 
     @FXML
