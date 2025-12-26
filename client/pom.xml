@@ -11,7 +11,6 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <version.junit>5.10.1</version.junit>
-        <version.mockito>5.8.0</version.mockito>
         <version.jersey>3.1.9</version.jersey>
         <version.jfx>25.0.1</version.jfx>
     </properties>
@@ -114,12 +113,6 @@
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
             <version>${version.junit}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <version>${version.mockito}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
