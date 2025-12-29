@@ -1,14 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.VBox?>
 
-
-<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="141.0" prefWidth="385.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.scenes.ErrorScreenCtrl">
-   <children>
-      <Button fx:id="okButton" layoutX="171.0" layoutY="102.0" mnemonicParsing="false" onAction="#handleOk" text="Okay" />
-      <Label layoutX="174.0" layoutY="14.0" text="ERROR" underline="true" />
-      <Label fx:id="errorMessageLabel" alignment="TOP_CENTER" layoutX="13.0" layoutY="35.0" prefHeight="53.0" prefWidth="358.0" text="Why is the text not good" textAlignment="CENTER" wrapText="true" />
-   </children>
-</Pane>
+<VBox alignment="CENTER" maxWidth="385.0" prefWidth="385.0" spacing="2.0" style="-fx-background-color: white; -fx-background-radius: 5;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.scenes.ErrorScreenCtrl">
+    <children>
+        <Label text="ERROR" underline="true" />
+        <Label fx:id="errorMessageLabel" alignment="CENTER" maxWidth="1.7976931348623157E308" text="Lemme test a longer piece of text,rwjqjbwef qwfbqwbfiqwbfijqwbfwjibfjiqwbfgjqwrbgf" textAlignment="CENTER" wrapText="true" />
+        <Button fx:id="okButton" mnemonicParsing="false" onAction="#handleOk" text="Okay">
+            <VBox.margin>
+                <Insets top="15.0" />
+            </VBox.margin>
+        </Button>
+    </children>
+    <padding>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+    </padding>
+</VBox>
