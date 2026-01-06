@@ -18,14 +18,14 @@
 	</properties>
 
 	<dependencies>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-websocket</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-messaging</artifactId>
-        </dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-websocket</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-messaging</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
@@ -75,6 +75,8 @@
 					<sourceDirectories>${project.basedir}</sourceDirectories>
 					<includes>src/**/*.java,**/*.xml,**/*.yml</includes>
 					<excludes>**/target/**</excludes>
+					<violationSeverity>warning</violationSeverity>
+					<failOnViolation>true</failOnViolation>
 				</configuration>
 				<executions>
 					<execution>
