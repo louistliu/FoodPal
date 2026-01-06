@@ -40,7 +40,9 @@ class RecipeControllerTest {
         session = client.connectAsync("ws://localhost:" + port + "/food-pal",
               new StompSessionHandlerAdapter() {
                   @Override
-                  public Type getPayloadType(StompHeaders headers) {return Recipe.class;}
+                  public Type getPayloadType(StompHeaders headers) {
+                      return Recipe.class;
+                  }
               }).get(1, TimeUnit.SECONDS);
     }
 
@@ -52,7 +54,8 @@ class RecipeControllerTest {
     @Test
     void createRecipeEndpoint() {
         BlockingQueue<Recipe> blockingQueue = new ArrayBlockingQueue<>(1);
-        Recipe payload = new Recipe("test-recipe","a test recipe", new ArrayList<>(), new ArrayList<>());
+        Recipe payload =
+              new Recipe("test-recipe", "a test recipe", new ArrayList<>(), new ArrayList<>());
 
         session.subscribe("/topic/recipes/create",
               new StompFrameHandler() {
