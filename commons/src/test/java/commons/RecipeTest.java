@@ -1,32 +1,32 @@
 package commons;
 
-import tools.jackson.core.type.TypeReference;
-import tools.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 class RecipeTest {
     private static final ObjectMapper mapper = new ObjectMapper();
     private Recipe recipe;
     private Recipe otherRecipe;
-    private Ingredient flour;
     private RecipeIngredient flourIngredient;
 
     @BeforeEach
     void setup() {
-        flour = new Ingredient("Flour");
+        Ingredient flour = new Ingredient("Flour");
         flourIngredient = new RecipeIngredient(flour, 200, "g");
         recipe = new Recipe("Cake", "Yummy",
-                new ArrayList<>(List.of(flourIngredient)), new ArrayList<>(List.of("Mix", "Cook")));
+              new ArrayList<>(List.of(flourIngredient)), new ArrayList<>(List.of("Mix", "Cook")));
         Ingredient sugar = new Ingredient("Sugar");
         RecipeIngredient sugarIngredient = new RecipeIngredient(sugar, 50, "g");
         otherRecipe = new Recipe("Cookie", "Tasty",
-                new ArrayList<>(List.of(sugarIngredient)), new ArrayList<>(List.of("Mix", "Bake")));
+              new ArrayList<>(List.of(sugarIngredient)), new ArrayList<>(List.of("Mix", "Bake")));
     }
 
     @Test
@@ -39,7 +39,8 @@ class RecipeTest {
      */
     @Test
     void equalsNoId() {
-        var r1 = new Recipe(recipe.getName(), "Yummy cake made of flour.", recipe.getIngredients(), List.of());
+        var r1 = new Recipe(recipe.getName(), "Yummy cake made of flour.", recipe.getIngredients(),
+              List.of());
         var r2 = new Recipe(recipe.getName(), "Cake", recipe.getIngredients(), List.of());
 
         assertNotEquals(r1, r2);
@@ -61,7 +62,8 @@ class RecipeTest {
     @Test
     void recipeListSerializationEquals() {
         Recipe local = new Recipe("Cookie", "Tasty",
-                List.of(new RecipeIngredient(new Ingredient("Sugar"), 50, "g")), List.of("Mix", "Bake"));
+              List.of(new RecipeIngredient(new Ingredient("Sugar"), 50, "g")),
+              List.of("Mix", "Bake"));
 
         String json = mapper.writeValueAsString(List.of(local));
         List<Recipe> parsed = mapper.readValue(json, new TypeReference<>() {
@@ -150,7 +152,7 @@ class RecipeTest {
     @Test
     void equalsSameTest() {
         Recipe recipeEqual = new Recipe("Cake", "Yummy",
-                new ArrayList<>(List.of(flourIngredient)), new ArrayList<>(List.of("Mix", "Cook")));
+              new ArrayList<>(List.of(flourIngredient)), new ArrayList<>(List.of("Mix", "Cook")));
         assertEquals(recipe, recipeEqual);
     }
 
@@ -171,7 +173,8 @@ class RecipeTest {
 
     @Test
     void hashCodeTest() {
-        Recipe equalRecipe = new Recipe("Cake", "Yummy", List.of(flourIngredient), List.of("Mix", "Cook"));
+        Recipe equalRecipe =
+              new Recipe("Cake", "Yummy", List.of(flourIngredient), List.of("Mix", "Cook"));
         assertEquals(recipe.hashCode(), equalRecipe.hashCode());
     }
 
