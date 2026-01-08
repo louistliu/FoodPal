@@ -21,8 +21,8 @@ import client.scenes.MainCtrl;
 import client.scenes.MainScreenCtrl;
 import client.scenes.QuoteOverviewCtrl;
 import client.utils.Config;
+import client.utils.ConfigService;
 import client.utils.ServerUtils;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import java.io.File;
@@ -30,7 +30,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import javafx.application.Application;
 import javafx.stage.Stage;
-import org.apache.commons.io.FileUtils;
+
 
 /**
  * Application entry point. Sets up configuration and dependency injection
@@ -40,7 +40,7 @@ public class Main extends Application {
 
     private static Injector INJECTOR;
     private static MyFXML FXML;
-    private static File CONFIG_FILE;
+    private static Config config;
 
     /**
      * Application entry. Loads configuration, initializes Guice injector
@@ -51,30 +51,9 @@ public class Main extends Application {
      * @throws IOException if config file cannot be read
      */
     public static void main(String[] args) throws URISyntaxException, IOException {
-        String configPath = resolveConfigPath(args);
-        CONFIG_FILE = new File(configPath);
-        Config config = loadConfig(CONFIG_FILE);
+        config = ConfigService.loadConfig(args);
         INJECTOR = Guice.createInjector(new MyModule(config));
         launch(args);
-    }
-
-    /**
-     * Resolve the path to the configuration file. Supports -cfg <path>.
-     *
-     * @param args command-line arguments
-     * @return resolved config path or "config.json" when none provided
-     */
-    private static String resolveConfigPath(String[] args) {
-        String configPath = "config.json";
-        if (args == null) {
-            return configPath;
-        }
-        for (int i = 0; i < args.length; i++) {
-            if ("-cfg".equals(args[i]) && i + 1 < args.length) {
-                return args[i + 1];
-            }
-        }
-        return configPath;
     }
 
     /**
@@ -91,7 +70,7 @@ public class Main extends Application {
         FXML = new MyFXML(INJECTOR);
 
         // Ensure config is saved on exit
-        primaryStage.setOnCloseRequest(e -> saveConfig(CONFIG_FILE, INJECTOR.getInstance(Config.class)));
+        primaryStage.setOnCloseRequest(e -> ConfigService.persistConfig(config));
 
         var serverUtils = INJECTOR.getInstance(ServerUtils.class);
         if (!serverUtils.isServerAvailable()) {
@@ -119,56 +98,4 @@ public class Main extends Application {
         return FXML;
     }
 
-    /**
-     * Load configuration from the given file using Jackson. If loading
-     * fails the method returns a new Config with default values.
-     *
-     * @param file file to read from
-     * @return loaded Config or defaults
-     */
-    private static Config loadConfig(File file) {
-        var mapper = new ObjectMapper();
-        try {
-            if (file.exists()) {
-                return mapper.readValue(file, Config.class);
-            }
-        } catch (IOException e) {
-            System.err.println("WARNING: Could not load config file, check the path and the permissions. "
-                  + "Using default values.");
-        }
-        return new Config();
-    }
-
-    /**
-     * Save the given configuration to disk using Jackson and Commons IO.
-     * Errors are logged to stderr.
-     *
-     * @param file destination file
-     * @param config configuration to persist
-     */
-    private static void saveConfig(File file, Config config) {
-        var mapper = new ObjectMapper();
-        try {
-            String json = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(config);
-            FileUtils.writeStringToFile(file, json, "UTF-8");
-        } catch (IOException e) {
-            System.err.println("Could not save config.");
-        }
-    }
-
-    /**
-     * Persist the given config to the configured config file. Public helper
-     * for UI/controllers. If the configured file is not known this method
-     * falls back to config.json in the working directory.
-     *
-     * @param config configuration to persist
-     */
-    public static void persistConfig(Config config) {
-        if (CONFIG_FILE == null) {
-            // fallback to working-directory config
-            saveConfig(new File("config.json"), config);
-        } else {
-            saveConfig(CONFIG_FILE, config);
-        }
-    }
 }

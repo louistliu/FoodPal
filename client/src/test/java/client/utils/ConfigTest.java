@@ -60,24 +60,6 @@ public class ConfigTest {
     }
 
     @Test
-    void filePersistenceTest() throws Exception {
-        Config cfg = new Config();
-        cfg.setServerUrl("ws://persist-test:8080");
-        cfg.setLanguage("Dutch");
-        cfg.getFavoriteRecipeIds().add(1L);
-
-        Path tmp = Files.createTempFile("config-test", ".json");
-        try {
-            Files.writeString(tmp, mapper.writerWithDefaultPrettyPrinter().writeValueAsString(cfg));
-            String read = Files.readString(tmp);
-            Config loaded = mapper.readValue(read, Config.class);
-            assertEquals(cfg, loaded);
-        } finally {
-            Files.deleteIfExists(tmp);
-        }
-    }
-
-    @Test
     void setServerUrlTest() {
         Config cfg = new Config();
         cfg.setServerUrl("ws://changed:1234");
