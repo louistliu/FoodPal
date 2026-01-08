@@ -70,7 +70,7 @@ public class Main extends Application {
         FXML = new MyFXML(INJECTOR);
 
         // Ensure config is saved on exit
-        primaryStage.setOnCloseRequest(e -> ConfigService.persistConfig(config));
+        primaryStage.setOnCloseRequest(e -> ConfigService.persistConfig());
 
         var serverUtils = INJECTOR.getInstance(ServerUtils.class);
         if (!serverUtils.isServerAvailable()) {
