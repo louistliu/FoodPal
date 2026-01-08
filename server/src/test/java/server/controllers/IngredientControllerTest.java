@@ -42,7 +42,9 @@ class IngredientControllerTest {
         session = client.connectAsync("ws://localhost:" + port + "/food-pal",
               new StompSessionHandlerAdapter() {
                   @Override
-                  public Type getPayloadType(StompHeaders headers) {return Ingredient.class;}
+                  public Type getPayloadType(StompHeaders headers) {
+                      return Ingredient.class;
+                  }
               }).get(1, TimeUnit.SECONDS);
     }
 
@@ -88,6 +90,6 @@ class IngredientControllerTest {
 
     @Test
     void initialReply() {
-        //TODO: Test to be implemented
+        // TODO: Test to be implemented
     }
 }

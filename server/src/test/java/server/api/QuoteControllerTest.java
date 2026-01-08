@@ -13,20 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package server.api;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
+import commons.Person;
+import commons.Quote;
 import java.util.Random;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import commons.Person;
-import commons.Quote;
-
+/**
+ * Testing the behavior of quote controller.
+ */
 public class QuoteControllerTest {
 
     public int nextInt;
@@ -35,6 +37,13 @@ public class QuoteControllerTest {
 
     private QuoteController sut;
 
+    private static Quote getQuote(String q) {
+        return new Quote(new Person(q, q), q);
+    }
+
+    /**
+     * Initializing {@link MyRandom}, {@link TestQuoteRepository} and {@link QuoteController}.
+     */
     @BeforeEach
     public void setup() {
         random = new MyRandom();
@@ -65,10 +74,9 @@ public class QuoteControllerTest {
         repo.calledMethods.contains("save");
     }
 
-    private static Quote getQuote(String q) {
-        return new Quote(new Person(q, q), q);
-    }
-
+    /**
+     * Wrapper around the random class.
+     */
     @SuppressWarnings("serial")
     public class MyRandom extends Random {
 
