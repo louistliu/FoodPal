@@ -238,7 +238,8 @@ public class MainScreenCtrl {
             ingredientListView.getItems().clear();
             if (recipe.getIngredients() != null) {
                 for (RecipeIngredient ri : recipe.getIngredients()) {
-                    ingredientListView.getItems().add("Ingredient Item (Placeholder)");
+                    ingredientListView.getItems().add(ri.getAmount()
+                          + " " + ri.getUnit() + " " + ri.getIngredient().getName());
                 }
             }
         }
@@ -388,8 +389,10 @@ public class MainScreenCtrl {
             modalStage.setScene(new Scene(pair.getValue()));
 
             // Pass the stage to the controller so it can close itself
-            if (pair.getKey() instanceof AddIngredientScreenCtrl) {
-                ((AddIngredientScreenCtrl) pair.getKey()).setStage(modalStage);
+            if (pair.getKey() instanceof AddIngredientScreenCtrl ctrl) {
+                ctrl.setStage(modalStage);
+                ctrl.setServer(this.serverRecipes); // Pass the server connection
+                ctrl.refresh(); // Trigger the fetch and subscriptions
             } else if (pair.getKey() instanceof AddInstructionScreenCtrl) {
                 ((AddInstructionScreenCtrl) pair.getKey()).setStage(modalStage);
             }
