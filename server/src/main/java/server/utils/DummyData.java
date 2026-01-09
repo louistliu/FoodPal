@@ -19,6 +19,7 @@ public class DummyData {
         List<Ingredient> ingredients = new ArrayList<>();
         ingredients.add(new Ingredient("Otto"));
         ingredients.add(new Ingredient("Andy"));
+        ingredients.add(new Ingredient("INGREDIENTS ACTUALLY WORK!!!!!!!!!!"));
         return ingredients;
     }
 
