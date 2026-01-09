@@ -25,15 +25,12 @@ import client.utils.ConfigService;
 import client.utils.ServerUtils;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import javafx.application.Application;
 import javafx.stage.Stage;
 
-
-/**
- * Application entry point. Sets up configuration and dependency injection
+/** Application entry point. Sets up configuration and dependency injection
  * before JavaFX starts, and provides access to the injector-backed FXML helper.
  */
 public class Main extends Application {

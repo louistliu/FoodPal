@@ -139,7 +139,7 @@
                 <version>0.0.8</version>
                 <configuration>
                     <mainClass>client.Main</mainClass>
-                    <commandlineArgs>${cfg}</commandlineArgs>
+                    <commandlineArgs>-cfg ${cfg}</commandlineArgs>
                 </configuration>
             </plugin>
             <plugin>
