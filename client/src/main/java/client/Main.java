@@ -16,39 +16,65 @@
 
 package client;
 
-import static com.google.inject.Guice.createInjector;
-
 import client.scenes.AddQuoteCtrl;
 import client.scenes.MainCtrl;
 import client.scenes.MainScreenCtrl;
 import client.scenes.QuoteOverviewCtrl;
+import client.utils.Config;
+import client.utils.ConfigService;
 import client.utils.ServerUtils;
+import com.google.inject.Guice;
 import com.google.inject.Injector;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import javafx.application.Application;
 import javafx.stage.Stage;
 
+/** Application entry point. Sets up configuration and dependency injection
+ * before JavaFX starts, and provides access to the injector-backed FXML helper.
+ */
 public class Main extends Application {
 
-    private static final Injector INJECTOR = createInjector(new MyModule());
-    private static final MyFXML FXML = new MyFXML(INJECTOR);
+    private static Injector INJECTOR;
+    private static MyFXML FXML;
+    private static Config config;
 
+    /**
+     * Application entry. Loads configuration, initializes Guice injector
+     * and starts the JavaFX runtime.
+     *
+     * @param args command-line arguments (supports -cfg <path>)
+     * @throws URISyntaxException when config path resolution fails
+     * @throws IOException if config file cannot be read
+     */
     public static void main(String[] args) throws URISyntaxException, IOException {
-        launch();
+        config = ConfigService.loadConfig(args);
+        INJECTOR = Guice.createInjector(new MyModule(config));
+        launch(args);
     }
 
+    /**
+     * JavaFX application start hook. Initializes the FXML helper, verifies
+     * the server is available, wires controllers and sets up config saving
+     * on close.
+     *
+     * @param primaryStage primary JavaFX stage
+     * @throws Exception on FXML loading or initialization problems
+     */
     @Override
     public void start(Stage primaryStage) throws Exception {
+        // Initialize FXML helper with the configured injector
+        FXML = new MyFXML(INJECTOR);
+
+        // Ensure config is saved on exit
+        primaryStage.setOnCloseRequest(e -> ConfigService.persistConfig());
 
         var serverUtils = INJECTOR.getInstance(ServerUtils.class);
         if (!serverUtils.isServerAvailable()) {
-            var msg = "Server needs to be started before the client,"
-                    + " but it does not seem to be available. Shutting down.";
+            var msg = "Server needs to be started before the client," + " but it does not seem to be available. Shutting down.";
             System.err.println(msg);
             return;
         }
-        // var serverSockets = INJECTOR.getInstance(ServerSockets.class);
 
         var overview = FXML.load(QuoteOverviewCtrl.class, "client", "scenes", "QuoteOverview.fxml");
         var add = FXML.load(AddQuoteCtrl.class, "client", "scenes", "AddQuote.fxml");
@@ -60,7 +86,13 @@ public class Main extends Application {
         mainCtrl.initialize(primaryStage, overview, add, mainScreen);
     }
 
+    /**
+     * Returns the shared MyFXML helper initialized during startup.
+     *
+     * @return MyFXML instance or null if called before startup
+     */
     public static MyFXML getFxml() {
         return FXML;
     }
+
 }

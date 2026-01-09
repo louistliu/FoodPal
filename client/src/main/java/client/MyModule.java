@@ -22,6 +22,7 @@ import client.scenes.AddQuoteCtrl;
 import client.scenes.MainCtrl;
 import client.scenes.MainScreenCtrl;
 import client.scenes.QuoteOverviewCtrl;
+import client.utils.Config;
 import client.utils.ServerRecipeUtils;
 import client.utils.ServerSockets;
 import com.google.inject.Binder;
@@ -33,8 +34,25 @@ import com.google.inject.Scopes;
  */
 public class MyModule implements Module {
 
+    private final Config config;
+
+    /**
+     * Create a new Guice module instance bound with the provided configuration.
+     *
+     * @param config application configuration to install into the injector
+     */
+    public MyModule(Config config) {
+        this.config = config;
+    }
+
+    /**
+     * Bind application-wide singleton controllers and utilities. The
+     * provided config instance is bound so it can be injected
+     * into scene controllers and helpers.
+     */
     @Override
     public void configure(Binder binder) {
+        binder.bind(Config.class).toInstance(config);
         binder.bind(MainCtrl.class).in(Scopes.SINGLETON);
         binder.bind(AddQuoteCtrl.class).in(Scopes.SINGLETON);
         binder.bind(QuoteOverviewCtrl.class).in(Scopes.SINGLETON);
