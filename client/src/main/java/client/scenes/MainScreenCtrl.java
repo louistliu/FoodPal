@@ -493,23 +493,52 @@ public class MainScreenCtrl {
     }
 
     /**
-     * Deletes an ingredient.
+     * Deletes an ingredient after user confirmation.
      */
     public void deleteIngredient() {
         String selected = ingredientListView.getSelectionModel().getSelectedItem();
         if (selected != null) {
-            ingredientListView.getItems().remove(selected);
+            if (showConfirmation("Do you really want to delete this ingredient?")) {
+                ingredientListView.getItems().remove(selected);
+                // In a full implementation, you'd also remove from selectedRecipe.getIngredients()
+            }
         }
     }
 
     /**
-     * Deletes an instruction.
+     * Deletes an instruction after user confirmation.
      */
     public void deleteInstruction() {
         String selected = instructionListView.getSelectionModel().getSelectedItem();
         if (selected != null) {
-            instructionListView.getItems().remove(selected);
-            selectedRecipe.getInstructions().remove(selected);
+            if (showConfirmation("Delete this instruction step?")) {
+                instructionListView.getItems().remove(selected);
+                selectedRecipe.getInstructions().remove(selected);
+            }
+        }
+    }
+
+    /**
+     * Launches a confirmation modal to warn the user before deletion.
+     * @param message The warning message to display.
+     * @return true if the user confirmed, false otherwise.
+     */
+    private boolean showConfirmation(String message) {
+        try {
+            var pair = Main.getFxml().load(ConfirmationScreenCtrl.class, "client", "scenes", "ConfirmationScreen.fxml");
+            Stage stage = new Stage();
+            stage.initModality(Modality.WINDOW_MODAL);
+            stage.initOwner(recipeListView.getScene().getWindow());
+            stage.setScene(new Scene(pair.getValue()));
+
+            ConfirmationScreenCtrl ctrl = pair.getKey();
+            ctrl.setStage(stage);
+            ctrl.setMessage(message);
+
+            stage.showAndWait();
+            return ctrl.isConfirmed();
+        } catch (Exception e) {
+            return false;
         }
     }
 
