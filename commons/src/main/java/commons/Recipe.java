@@ -34,6 +34,8 @@ public class Recipe {
     @NotNull
     private String description;
 
+    private boolean isFavorite = false;
+
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     // One recipe can contain many different RecipeIngredients.
     private List<RecipeIngredient> ingredients = new ArrayList<>();
@@ -90,6 +92,14 @@ public class Recipe {
 
     public void setDescription(@NotNull String description) {
         this.description = description;
+    }
+
+    public boolean isFavorite() {
+        return isFavorite;
+    }
+
+    public void setFavorite(boolean favorite) {
+        isFavorite = favorite;
     }
 
     public List<RecipeIngredient> getIngredients() {
@@ -161,7 +171,8 @@ public class Recipe {
      * @return if two recipes are equal
      */
     public boolean equalsNoId(Recipe recipe) {
-        return Objects.equals(name, recipe.name)
+        return isFavorite == recipe.isFavorite
+                && Objects.equals(name, recipe.name)
                 && Objects.equals(description, recipe.description)
                 && Objects.deepEquals(ingredients, recipe.ingredients)
                 && Objects.deepEquals(instructions, recipe.instructions);

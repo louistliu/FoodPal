@@ -40,6 +40,10 @@ public class MainScreenCtrl {
     RecipeList listOfRecipes = new RecipeList();
     private ObservableList<Recipe> observableRecipes;
     private Recipe selectedRecipe;
+
+    private List<Recipe> allRecipesMaster = new ArrayList<>(); // To store everything
+    private boolean showingFavoritesOnly = false; // To track current view state
+
     @FXML
     private AnchorPane rightPane;
     @FXML
@@ -80,6 +84,8 @@ public class MainScreenCtrl {
     private Button allButton;
     @FXML
     private Button printButton;
+    @FXML
+    private Button favoriteButton;
 
     /**
      * Constructs the MainScreenCtrl, injecting the scene controller.
@@ -138,25 +144,39 @@ public class MainScreenCtrl {
     }
 
     private void onUpdateRecipeList(List<Recipe> recipes) {
-
-        System.out.print("RECIPES ARRIVED");
         Platform.runLater(() -> {
-            // Load the actual list from the RecipeList singleton.
-            observableRecipes.addAll(recipes);
-            recipeListView.refresh();
+            allRecipesMaster.clear();
+            allRecipesMaster.addAll(recipes);
+            refreshListView();
         });
+    }
+
+    // Create this helper to handle filtering
+    private void refreshListView() {
+        List<Recipe> toShow;
+        if (showingFavoritesOnly) {
+            toShow = allRecipesMaster.stream()
+                    .filter(Recipe::isFavorite)
+                    .toList();
+        } else {
+            toShow = allRecipesMaster;
+        }
+        observableRecipes.setAll(toShow);
+        recipeListView.refresh();
     }
 
     private void onAddRecipe(Recipe recipe) {
         Platform.runLater(() -> {
-            observableRecipes.add(recipe);
-            recipeListView.refresh();
+            if (!allRecipesMaster.contains(recipe)) {
+                allRecipesMaster.add(recipe);
+            }
+            refreshListView();
+
             if (selectedRecipe == null || !selectedRecipe.equalsNoId(recipe)) {
                 return;
             }
             selectRecipe(recipe);
         });
-
     }
 
     private void onDeleteRecipe(Recipe recipe) {
@@ -167,28 +187,15 @@ public class MainScreenCtrl {
     }
 
     private void onUpdateRecipe(Recipe recipe) {
-        System.out.println(recipe);
         Platform.runLater(() -> {
-            var recipes =
-                    observableRecipes.stream().filter(x -> x.getId() == recipe.getId()).toList();
+            allRecipesMaster.removeIf(r -> r.getId() == recipe.getId());
+            allRecipesMaster.add(recipe);
 
-            if (recipes.isEmpty()) {
-                observableRecipes.add(recipe);
-                recipeListView.refresh();
-                return;
+            if (selectedRecipe != null && selectedRecipe.getId() == recipe.getId()) {
+                selectRecipe(recipe);
+
+                favoriteButton.setText(recipe.isFavorite() ? "Unfavorite" : "Favorite");
             }
-            int ind = observableRecipes.indexOf(recipes.getLast());
-
-            var isCurrSelected = ind == observableRecipes.indexOf(selectedRecipe);
-            observableRecipes.remove(ind);
-            observableRecipes.add(ind, recipe);
-            recipeListView.refresh();
-
-            if (!isCurrSelected) {
-                return;
-            }
-
-            selectRecipe(recipe);
         });
     }
 
@@ -244,6 +251,7 @@ public class MainScreenCtrl {
                 }
             }
         }
+        favoriteButton.setText(recipe.isFavorite() ? "Unfavorite" : "Favorite");
     }
 
     /**
@@ -493,7 +501,9 @@ public class MainScreenCtrl {
      * Handles switching the recipe list view to show only favorite recipes.
      */
     public void showFavorites() {
-        System.out.println("Switching view to show only favorite recipes.");
+        showingFavoritesOnly = true;
+        refreshListView();
+        System.out.println("Showing only favorites.");
     }
 
     /**
@@ -501,7 +511,29 @@ public class MainScreenCtrl {
      * server.
      */
     public void showAllRecipes() {
-        System.out.println("Switching view to show all recipes.");
+        showingFavoritesOnly = false;
+        refreshListView();
+        System.out.println("Showing all recipes.");
+    }
+
+    public void toggleFavorite() {
+        if (selectedRecipe == null) return;
+
+        selectedRecipe.setFavorite(!selectedRecipe.isFavorite());
+
+        favoriteButton.setText(selectedRecipe.isFavorite() ? "Unfavorite" : "Favorite");
+
+        serverRecipes.send(ServerSockets.setDestination("/app/recipes/update"), selectedRecipe);
+
+        if (showingFavoritesOnly) {
+            refreshListView();
+        }
+        if (selectedRecipe.isFavorite()) {
+            System.out.println("Added " + selectedRecipe.getName() + " to favorites.");
+        }
+        else {
+            System.out.println("Removed " + selectedRecipe.getName() + " from favorites.");
+        }
     }
 
     /**
