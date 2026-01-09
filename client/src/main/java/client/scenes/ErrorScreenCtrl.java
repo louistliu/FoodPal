@@ -24,6 +24,31 @@ public class ErrorScreenCtrl {
     private Stage stage;
 
     /**
+     * static helper method to display an error screen from anywhere.
+     *
+     * @param message The error message to display.
+     */
+    public static void showError(String message) {
+        try {
+            Pair<ErrorScreenCtrl, Parent> pair = Main.getFxml()
+                  .load(ErrorScreenCtrl.class, "client", "scenes", "ErrorScreen.fxml");
+
+            ErrorScreenCtrl ctrl = pair.getKey();
+            ctrl.setErrorMessage(message);
+
+            Stage stage = new Stage();
+            stage.initModality(Modality.APPLICATION_MODAL); // Block all other windows
+            stage.setTitle("Error");
+            stage.setScene(new Scene(pair.getValue()));
+
+            ctrl.setStage(stage);
+            stage.showAndWait();
+        } catch (Exception e) {
+            System.err.println("Failed to show error screen: " + e.getMessage());
+        }
+    }
+
+    /**
      * Sets the stage for this scene, necessary for closing the window.
      *
      * @param stage The modal stage.
@@ -51,30 +76,6 @@ public class ErrorScreenCtrl {
     public void handleOk() {
         if (stage != null) {
             stage.close();
-        }
-    }
-
-    /**
-     * static helper method to display an error screen from anywhere.
-     *
-     * @param message The error message to display.
-     */
-    public static void showError(String message) {
-        try {
-            Pair<ErrorScreenCtrl, Parent> pair = Main.getFxml().load(ErrorScreenCtrl.class, "client", "scenes", "ErrorScreen.fxml");
-
-            ErrorScreenCtrl ctrl = pair.getKey();
-            ctrl.setErrorMessage(message);
-
-            Stage stage = new Stage();
-            stage.initModality(Modality.APPLICATION_MODAL); // Block all other windows
-            stage.setTitle("Error");
-            stage.setScene(new Scene(pair.getValue()));
-
-            ctrl.setStage(stage);
-            stage.showAndWait();
-        } catch (Exception e) {
-            System.err.println("Failed to show error screen: " + e.getMessage());
         }
     }
 }
