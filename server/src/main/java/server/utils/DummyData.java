@@ -1,5 +1,6 @@
 package server.utils;
 
+import commons.Ingredient;
 import commons.Recipe;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,6 +9,13 @@ import java.util.List;
  * Utility class for creating initial data for demo, testing purposes.
  */
 public class DummyData {
+
+    public static List<Ingredient> getDefaultIngredients() {
+        List<Ingredient> ingredients = new ArrayList<>();
+        ingredients.add(new Ingredient("Otto"));
+        ingredients.add(new Ingredient("Andy"));
+        return ingredients;
+    }
 
     /**
      * Get recipes to use as content.
