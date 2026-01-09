@@ -10,15 +10,12 @@ import javax.sql.DataSource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.jpa.test.autoconfigure.TestEntityManager;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-@ExtendWith(SpringExtension.class)
 @DataJpaTest
 @ActiveProfiles("test")
 class RecipeIngredientRepositoryTest {
@@ -60,14 +57,12 @@ class RecipeIngredientRepositoryTest {
     @Order(2)
     void findByIngredientCorrectCount() {
         var ingredient = testIngredients.getFirst();
-        RecipeIngredient recipeIngredient1 =
-              new RecipeIngredient(ingredient, 1.5F, "g");
+        RecipeIngredient recipeIngredient1 = new RecipeIngredient(ingredient, 1.5F, "g");
         recipeIngredientRepository.save(recipeIngredient1);
         recipeIngredientRepository.save(new RecipeIngredient(ingredient, 1F, "g"));
         recipeIngredientRepository.save(new RecipeIngredient(testIngredients.getLast(), 1F, "g"));
         assertThat(
-              recipeIngredientRepository.findByIngredient(ingredient).size()
-        ).isEqualTo(2);
+              recipeIngredientRepository.findByIngredient(ingredient).size()).isEqualTo(2);
     }
 
     @Test
@@ -80,5 +75,28 @@ class RecipeIngredientRepositoryTest {
               .getLast()).isEqualTo(target);
         assertThat(recipeIngredientRepository.findByIngredient(testIngredients.get(0))
               .getFirst()).isEqualTo(target);
+    }
+
+    @Test
+    @Order(4)
+    void findByIngredientAndAmountAndUnit() {
+        var target = recipeIngredientRepository.save(
+              new RecipeIngredient(testIngredients.get(0), 1F, "g"));
+        var queryRes =
+              recipeIngredientRepository.findByIngredientAndAmountAndUnit(testIngredients.get(0),
+                    1F, "g");
+        assertThat(queryRes.size()).isEqualTo(1);
+        assertThat(queryRes.getFirst()).isEqualTo(target);
+    }
+
+    @Test
+    @Order(5)
+    void notFindByIngredientAndAmountAndUnit() {
+        var target = recipeIngredientRepository.save(
+              new RecipeIngredient(testIngredients.get(0), 1F, "g"));
+        var queryRes =
+              recipeIngredientRepository.findByIngredientAndAmountAndUnit(testIngredients.get(0),
+                    1F, "kg");
+        assertThat(queryRes.size()).isEqualTo(0);
     }
 }
