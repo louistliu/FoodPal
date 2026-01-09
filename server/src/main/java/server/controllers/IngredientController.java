@@ -65,7 +65,7 @@ public class IngredientController {
     public Ingredient update(@Payload Ingredient ingredient) throws Exception {
         if (!ingredientDB.existsById(ingredient.getId())) {
             throw new EntityNotFoundException(
-                  "No ingredient with id " + ingredient.getId() + " in the database");
+                  "No recipe with id " + ingredient.getId() + " in the database");
         }
 
         return ingredientDB.save(ingredient);
