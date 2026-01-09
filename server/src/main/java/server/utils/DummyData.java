@@ -10,6 +10,11 @@ import java.util.List;
  */
 public class DummyData {
 
+    /**
+     * Get recipes to use as content.
+     *
+     * @return a list of recipes
+     */
     public static List<Ingredient> getDefaultIngredients() {
         List<Ingredient> ingredients = new ArrayList<>();
         ingredients.add(new Ingredient("Otto"));
