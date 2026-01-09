@@ -24,7 +24,8 @@ public class PrintRecipe {
     public static void exportRecipe(Window owner, Recipe recipe) {
         StringBuilder content = new StringBuilder();
         content.append("# ").append(recipe.getName()).append("\n\n");
-        content.append("## Ingredients\n");
+        content.append(recipe.getDescription()).append("\n\n");
+        content.append("## Ingredients\n\n");
 
         for (RecipeIngredient ing : recipe.getIngredients()) {
             content.append("- ")
@@ -33,8 +34,7 @@ public class PrintRecipe {
                     .append(ing.getIngredient().getName()).append("\n");
         }
 
-
-        content.append("\n## Preparation Steps\n");
+        content.append("\n## Preparation Steps\n\n");
         List<String> instructions = recipe.getInstructions();
         for (int i = 0; i < instructions.size(); i++) {
             content.append(i + 1).append(". ").append(instructions.get(i)).append("\n");
@@ -93,7 +93,3 @@ public class PrintRecipe {
         }
     }
 }
-
-
-
-

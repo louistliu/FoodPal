@@ -1,16 +1,19 @@
 package commons;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import tools.jackson.databind.ObjectMapper;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 class IngredientTest {
 
+    private static final ObjectMapper mapper = new ObjectMapper();
     private Ingredient ingredient1;
     private Ingredient ingredient2;
-    private static final ObjectMapper mapper = new ObjectMapper();
 
     @BeforeEach
     public void setUp() {
@@ -24,7 +27,6 @@ class IngredientTest {
         Ingredient ing = new Ingredient("Test");
         assertNotNull(ing);
     }
-
 
     @Test
     public void constructorTest() {
@@ -70,6 +72,5 @@ class IngredientTest {
         Ingredient parsed = mapper.readValue(json, Ingredient.class);
         assertEquals(ingredient1, parsed);
     }
-
 
 }

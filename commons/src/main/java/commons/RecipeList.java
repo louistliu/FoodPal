@@ -8,6 +8,9 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
+/**
+ * Wrapper class of a list of recipes.
+ */
 public class RecipeList {
 
     private List<Recipe> recipeList;
@@ -24,10 +27,20 @@ public class RecipeList {
         this.recipeList = recipeList;
     }
 
+    /**
+     * Adds a recipe without performing any checks.
+     *
+     * @param recipe recipe object to be added to recipes.
+     */
     public void addRecipe(Recipe recipe) {
         this.recipeList.add(recipe);
     }
 
+    /**
+     * Removes a {@link Recipe} from a list if it is contained.
+     *
+     * @param recipe recipe to remove
+     */
     public void deleteRecipe(Recipe recipe) {
         this.recipeList.remove(recipe);
     }

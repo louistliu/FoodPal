@@ -1,19 +1,20 @@
 package commons;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import tools.jackson.databind.ObjectMapper;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 class RecipeIngredientTest {
 
+    private static final ObjectMapper mapper = new ObjectMapper();
     private RecipeIngredient ing1;
     private RecipeIngredient ing2;
     private Ingredient ingredient1;
     private Ingredient ingredient2;
-    private static final ObjectMapper mapper = new ObjectMapper();
-
 
     @BeforeEach
     public void setUp() {
@@ -33,12 +34,10 @@ class RecipeIngredientTest {
         assertEquals(750f, ing1.getAmount());
     }
 
-
     @Test
     public void constructorSetsUnitTest() {
         assertEquals("g", ing1.getUnit());
     }
-
 
     @Test
     public void equalsSelfTest() {

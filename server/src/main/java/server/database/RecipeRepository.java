@@ -1,6 +1,8 @@
 package server.database;
 
+import commons.Ingredient;
 import commons.Recipe;
+import commons.RecipeIngredient;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -19,4 +21,14 @@ public interface RecipeRepository extends JpaRepository<Recipe, Long> {
      */
     @Query("select r from #{#entityName} r where r.name = ?1")
     List<Recipe> findBy(String name);
+
+    /**
+     * Find all recipe ingredients in a recipe that contain the specified ingredient.
+     *
+     * @param recipe recipe to check
+     * @param ingredient ingredient that the recipe ingredient contains
+     * @return all {@link RecipeIngredient} which are part of the recipe and have the ingredient.
+     */
+    @Query("select ri from Recipe r join r.ingredients ri where r = ?1 and ri.ingredient = ?2")
+    List<RecipeIngredient> findByIngredient(Recipe recipe, Ingredient ingredient);
 }

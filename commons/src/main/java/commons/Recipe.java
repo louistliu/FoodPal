@@ -15,7 +15,6 @@ import jakarta.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -58,7 +57,7 @@ public class Recipe {
      * @param instructions The list of the instruction steps
      */
     public Recipe(@NotNull String name, @NotNull String description,
-            List<RecipeIngredient> ingredients, List<String> instructions) {
+                  List<RecipeIngredient> ingredients, List<String> instructions) {
         this.name = name;
         this.description = description;
         this.ingredients = ingredients;
@@ -162,9 +161,9 @@ public class Recipe {
      */
     public boolean equalsNoId(Recipe recipe) {
         return Objects.equals(name, recipe.name)
-                && Objects.equals(description, recipe.description)
-                && Objects.deepEquals(ingredients, recipe.ingredients)
-                && Objects.deepEquals(instructions, recipe.instructions);
+              && Objects.equals(description, recipe.description)
+              && Objects.deepEquals(ingredients, recipe.ingredients)
+              && Objects.deepEquals(instructions, recipe.instructions);
 
     }
 
