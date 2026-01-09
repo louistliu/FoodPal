@@ -26,6 +26,7 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -41,8 +42,10 @@ public class MainScreenCtrl {
     private ObservableList<Recipe> observableRecipes;
     private Recipe selectedRecipe;
 
-    private List<Recipe> allRecipesMaster = new ArrayList<>(); // To store everything
-    private boolean showingFavoritesOnly = false; // To track current view state
+    private List<Recipe> allRecipesMaster = new ArrayList<>();
+    private boolean showingFavoritesOnly = false;
+
+    private String currentSearchQuery = "";
 
     @FXML
     private AnchorPane rightPane;
@@ -114,6 +117,18 @@ public class MainScreenCtrl {
             }
         });
 
+        searchRecipesField.textProperty().addListener((observable, oldValue, newValue) -> {
+            this.currentSearchQuery = newValue.toLowerCase().trim();
+            refreshListView();
+        });
+
+        searchRecipesField.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.ESCAPE) {
+                searchRecipesField.clear(); // This triggers our listener to show all recipes
+                recipeListView.requestFocus(); // Move focus away from search
+            }
+        });
+
         // This listener will fire immediately if data is bound, triggering
         // showRecipeDetails
         recipeListView.getSelectionModel().selectedItemProperty()
@@ -151,16 +166,33 @@ public class MainScreenCtrl {
         });
     }
 
-    // Create this helper to handle filtering
+    /**
+     * Refreshes the recipe list view by applying both the favorite filter
+     * and the multi-word search filter. [cite: 146, 148]
+     */
     private void refreshListView() {
-        List<Recipe> toShow;
-        if (showingFavoritesOnly) {
-            toShow = allRecipesMaster.stream()
-                    .filter(Recipe::isFavorite)
-                    .toList();
-        } else {
-            toShow = allRecipesMaster;
-        }
+        List<Recipe> toShow = allRecipesMaster.stream()
+                .filter(recipe -> {
+                    boolean matchesFavorite = !showingFavoritesOnly || recipe.isFavorite();
+
+                    boolean matchesSearch = true;
+                    if (!currentSearchQuery.isEmpty()) {
+                        String[] keywords = currentSearchQuery.split("\\s+");
+
+                        String searchArea = (recipe.getName() + " " + recipe.getDescription()).toLowerCase();
+
+                        for (String keyword : keywords) {
+                            if (!searchArea.contains(keyword)) {
+                                matchesSearch = false;
+                                break;
+                            }
+                        }
+                    }
+
+                    return matchesFavorite && matchesSearch;
+                })
+                .toList();
+
         observableRecipes.setAll(toShow);
         recipeListView.refresh();
     }
@@ -181,8 +213,8 @@ public class MainScreenCtrl {
 
     private void onDeleteRecipe(Recipe recipe) {
         Platform.runLater(() -> {
-            observableRecipes.remove(recipe);
-            recipeListView.refresh();
+            allRecipesMaster.removeIf(r -> r.getId() == recipe.getId());
+            refreshListView();
         });
     }
 
@@ -276,7 +308,7 @@ public class MainScreenCtrl {
 
         // if recipe is already created - update recipe otherwise save recipe,
         // update the list of recipes once server sends response
-        if (observableRecipes.contains(selectedRecipe)) {
+        if (selectedRecipe.getId() != 0) {
             serverRecipes.send(ServerSockets.setDestination("/app/recipes/update"), selectedRecipe);
         } else {
             serverRecipes.send(ServerSockets.setDestination("/app/recipes/create"), selectedRecipe);
@@ -516,6 +548,9 @@ public class MainScreenCtrl {
         System.out.println("Showing all recipes.");
     }
 
+    /**
+     * Toggles the favorite status of the selected recipe and updates the UI. [cite: 134, 135]
+     */
     public void toggleFavorite() {
         if (selectedRecipe == null) return;
 

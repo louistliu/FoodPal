@@ -12,6 +12,8 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 
 /**
  * Class, which handles logic for adding ingredients.
@@ -45,22 +47,38 @@ public class AddIngredientScreenCtrl {
     @FXML
     public void initialize() {
         ingredientChoiceBox.setItems(
-              FXCollections.observableArrayList("Ingredient 1", "Ingredient 2", "Ingredient 3",
-                    "Other"));
+                FXCollections.observableArrayList("Ingredient 1", "Ingredient 2", "Ingredient 3",
+                        "Other"));
 
         ingredientChoiceBox.getSelectionModel().selectFirst();
 
-        // Add listener to show/hide the inputTextArea based on selection
+        javafx.event.EventHandler<KeyEvent> keyHandler = event -> {
+            if (event.getCode() == KeyCode.ENTER) {
+                handleOk();
+                event.consume();
+            } else if (event.getCode() == KeyCode.ESCAPE) {
+                handleCancel();
+                event.consume();
+            }
+        };
+
+        amountTextField.setOnKeyPressed(keyHandler);
+        ingredientChoiceBox.setOnKeyPressed(keyHandler);
+        unitMenuButton.setOnKeyPressed(keyHandler);
+        inputTextArea.setOnKeyPressed(keyHandler);
+
         ingredientChoiceBox.getSelectionModel().selectedItemProperty()
-              .addListener((obs, oldVal, newVal) -> {
-                  if ("Other".equals(newVal)) {
-                      inputTextArea.setVisible(true);
-                      inputTextArea.clear();
-                      inputTextArea.requestFocus();
-                  } else {
-                      inputTextArea.setVisible(false);
-                  }
-              });
+                .addListener((obs, oldVal, newVal) -> {
+                    if ("Other".equals(newVal)) {
+                        inputTextArea.setVisible(true);
+                        inputTextArea.clear();
+                        inputTextArea.requestFocus(); // Autofocus if "Other" is picked
+                    } else {
+                        inputTextArea.setVisible(false);
+                    }
+                });
+
+        javafx.application.Platform.runLater(() -> ingredientChoiceBox.requestFocus());
     }
 
     /**
@@ -99,14 +117,24 @@ public class AddIngredientScreenCtrl {
             ingredientName = selected;
         }
 
-        if (ingredientName.isEmpty() || amountStr.isEmpty() || "Unit".equals(unit)) {
-            ErrorScreenCtrl.showError("Invalid input: Please fill "
-                  + "in Amount, Unit, and Ingredient.");
+        if (ingredientName.isEmpty()) {
+            ErrorScreenCtrl.showError("No ingredient selected or entered.");
+            return;
+        }
+
+        if (amountStr.isEmpty()) {
+            ErrorScreenCtrl.showError("No amount entered."); // Custom message requested
+            return;
+        }
+
+        if ("Unit".equals(unit)) {
+            ErrorScreenCtrl.showError("No unit selected.");
             return;
         }
 
         try {
             float amount = Float.parseFloat(amountStr);
+
             Ingredient ingredient = new Ingredient(ingredientName);
             this.result = new RecipeIngredient(ingredient, amount, unit);
 
@@ -115,7 +143,7 @@ public class AddIngredientScreenCtrl {
             }
 
         } catch (NumberFormatException e) {
-            System.out.println("Invalid Amount: Must be a whole number.");
+            ErrorScreenCtrl.showError("The entered amount must be a number.");
         }
     }
 
@@ -128,6 +156,21 @@ public class AddIngredientScreenCtrl {
         this.result = null;
         if (stage != null) {
             stage.close();
+        }
+    }
+
+    /**
+     * Handles keyboard input for the ingredient dialog.
+     * Triggers handleOk on ENTER and handleCancel on ESCAPE.
+     * * @param event The KeyEvent triggered by the user.
+     */
+    private void handleKeyEvents(KeyEvent event) {
+        if (event.getCode() == KeyCode.ENTER) {
+            handleOk();
+            event.consume();
+        } else if (event.getCode() == KeyCode.ESCAPE) {
+            handleCancel();
+            event.consume();
         }
     }
 
