@@ -9,6 +9,9 @@ import java.util.Arrays;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
+/**
+ * Tests config service.
+ */
 public class ConfigServiceTest {
 
     private Path tempDir;
@@ -32,7 +35,7 @@ public class ConfigServiceTest {
         tempDir = Files.createTempDirectory("cfgtest1");
         String cfgPath = tempDir.resolve("nonexistent-config.json").toString();
 
-        Config cfg = ConfigService.loadConfig(new String[]{"-cfg", cfgPath});
+        Config cfg = ConfigService.loadConfig(new String[] {"-cfg", cfgPath});
 
         assertEquals(new Config(), cfg);
     }
@@ -43,7 +46,7 @@ public class ConfigServiceTest {
         String cfgPath = tempDir.resolve("app-config.json").toString();
 
         // initial load (file missing) sets internal target file
-        Config modified = ConfigService.loadConfig(new String[]{"-cfg", cfgPath});
+        Config modified = ConfigService.loadConfig(new String[] {"-cfg", cfgPath});
 
         // modify and persist
         modified.setServerUrl("ws://example:1234");
@@ -53,7 +56,7 @@ public class ConfigServiceTest {
         ConfigService.persistConfig();
 
         // reload from the same path
-        Config reloaded = ConfigService.loadConfig(new String[]{"-cfg", cfgPath});
+        Config reloaded = ConfigService.loadConfig(new String[] {"-cfg", cfgPath});
 
         assertEquals(modified, reloaded);
     }
