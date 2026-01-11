@@ -80,4 +80,24 @@ class RecipeRepositoryTest {
               recipeRepository.findByIngredient(recipe, testIngredients.get(1)).size()).isEqualTo(
               0);
     }
+
+    @Test
+    @Order(2)
+    void findByRecipeIngredientNotExist() {
+        var recipeIngredients = List.of(testRecipeIngredients.get(0));
+        var recipe = new Recipe("stew", "a stew", recipeIngredients, List.of());
+        var recipe1 =
+              new Recipe("chicken", "obviously chicken", List.of(testRecipeIngredients.get(1)),
+                    List.of());
+
+        recipeRepository.save(recipe);
+        recipeRepository.save(recipe1);
+        assertThat(
+              recipeRepository.findByIngredient(recipe, new Ingredient("Potato"))
+                    .size()).isEqualTo(
+              1);
+        assertThat(
+              recipeRepository.findByIngredient(recipe, testIngredients.get(1)).size()).isEqualTo(
+              0);
+    }
 }
