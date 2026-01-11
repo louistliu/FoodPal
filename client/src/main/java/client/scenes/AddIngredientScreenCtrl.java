@@ -46,9 +46,19 @@ public class AddIngredientScreenCtrl {
     private Stage stage;
     private RecipeIngredient result = null;
 
-    private ServerSockets serverIngredients;
+    private final ServerSockets serverIngredients;
     private ObservableList<Ingredient> observableIngredients;
     private final Ingredient otherOption = new Ingredient("Other");
+
+    /**
+     * Constructs the MainScreenCtrl, injecting the scene controller.
+     *
+     * @param serverIngredients - The server sockets to be received by the controller.
+     */
+    @Inject
+    public AddIngredientScreenCtrl(ServerSockets serverIngredients) {
+        this.serverIngredients = serverIngredients;
+    }
 
     /**
      * Initializes the stage for the addIngredient-screen.
@@ -57,6 +67,12 @@ public class AddIngredientScreenCtrl {
     public void initialize() {
         observableIngredients = FXCollections.observableArrayList();
         ingredientChoiceBox.setItems(observableIngredients);
+
+        // Reset UI fields
+        amountTextField.clear();
+        inputTextArea.clear();
+        inputTextArea.setVisible(false);
+        unitMenuButton.setText("Unit");
 
         ingredientChoiceBox.setConverter(new StringConverter<Ingredient>() {
             @Override
@@ -80,35 +96,18 @@ public class AddIngredientScreenCtrl {
                       inputTextArea.setVisible(false);
                   }
               });
-    }
 
-    public void setServer(ServerSockets server) {
-        serverIngredients = server;
-    }
+        serverIngredients.subscribe(ServerSockets.setDestination("/app/ingredients/fetch"),
+              new ResponseHandler<List<Ingredient>>(this::onUpdateIngredientList) {});
 
-    /**
-     * Adding several listeners to server events.
-     */
-    public void refresh() {
-        // Reset UI fields
-        amountTextField.clear();
-        inputTextArea.clear();
-        inputTextArea.setVisible(false);
-        unitMenuButton.setText("Unit");
+        serverIngredients.subscribe(ServerSockets.setDestination("/topic/ingredients/create"),
+              new ResponseHandler<Ingredient>(this::onAddIngredient) {});
 
-        if (serverIngredients != null) {
-            serverIngredients.subscribe(ServerSockets.setDestination("/app/ingredients/fetch"),
-                  new ResponseHandler<List<Ingredient>>(this::onUpdateIngredientList) {});
+        serverIngredients.subscribe(ServerSockets.setDestination("/topic/ingredients/update"),
+              new ResponseHandler<Ingredient>(this::onUpdateIngredient) {});
 
-            serverIngredients.subscribe(ServerSockets.setDestination("/topic/ingredients/create"),
-                  new ResponseHandler<Ingredient>(this::onAddIngredient) {});
-
-            serverIngredients.subscribe(ServerSockets.setDestination("/topic/ingredients/update"),
-                  new ResponseHandler<Ingredient>(this::onUpdateIngredient) {});
-
-            serverIngredients.subscribe(ServerSockets.setDestination("/topic/ingredients/delete"),
-                  new ResponseHandler<Ingredient>(this::onDeleteIngredient) {});
-        }
+        serverIngredients.subscribe(ServerSockets.setDestination("/topic/ingredients/delete"),
+              new ResponseHandler<Ingredient>(this::onDeleteIngredient) {});
     }
 
     // WebSocket callbacks.
