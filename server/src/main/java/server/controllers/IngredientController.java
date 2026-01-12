@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.stereotype.Controller;
@@ -42,6 +43,8 @@ public class IngredientController {
      * @throws Exception when processing fails
      */
     @MessageMapping("/ingredients/create")
+    @SendTo("/topic/ingredients/create")
+    @SendToUser("/queue/ingredients/create")
     @Valid
     public Ingredient create(@Payload Ingredient ingredient) throws Exception {
         if (!ingredientDB.findByName(ingredient.getName()).isEmpty()) {
