@@ -1,5 +1,6 @@
 package client.utils;
 
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import commons.Recipe;
 import org.springframework.messaging.simp.stomp.StompHeaders;
@@ -8,23 +9,38 @@ import org.springframework.messaging.simp.stomp.StompHeaders;
  * Utility class for interfacing with recipes explicitly.
  */
 @Singleton
-public class ServerRecipeUtils extends ServerSockets {
+public class ServerRecipeUtils {
+
+    @Inject
+    private ServerSockets sockets;
 
     /**
      * Adds a new recipe on the server if it does not already exist,
-     * otherwise results in a error.
+     * otherwise results in an error.
      *
      * @param recipe recipe to add
      */
     public void addRecipe(Recipe recipe) {
         StompHeaders headers = ServerSockets.setDestination("/app/recipes/create");
-        super.send(headers, recipe);
+        sockets.send(headers, recipe);
+    }
+
+    /**
+     * Adds a new recipe on the server if it does not already exist,
+     * otherwise results in an error.
+     *
+     * @param recipe recipe to add
+     */
+    public void updateRecipe(Recipe recipe) {
+        StompHeaders headers = ServerSockets.setDestination("/app/recipes/update");
+        sockets.send(headers, recipe);
     }
 
     /**
      * Fetches all recipes.
      */
     public void getRecipes() {
-        super.get("/app/recipes/fetch");
+        sockets.get("/app/recipes/fetch");
     }
+
 }

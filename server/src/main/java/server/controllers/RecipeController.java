@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.stereotype.Controller;
@@ -46,6 +47,8 @@ public class RecipeController {
      * @throws Exception when processing fails
      */
     @MessageMapping("/recipes/create")
+    @SendToUser
+    @SendTo
     @Valid
     public Recipe create(@Payload Recipe recipe) throws Exception {
         if (!recipeDB.findBy(recipe.getName()).isEmpty()) {
@@ -98,6 +101,8 @@ public class RecipeController {
      * @throws Exception when update fails or the recipe is not found
      */
     @MessageMapping("/recipes/update")
+    @SendToUser
+    @SendTo
     @Valid
     public Recipe update(@Payload Recipe recipe) throws Exception {
         if (!recipeDB.existsById(recipe.getId())) {
@@ -105,6 +110,7 @@ public class RecipeController {
                     "No recipe with id " + recipe.getId() + " in the database");
         }
 
+        System.out.println("REcipe updated");
         return recipeDB.save(recipe);
     }
 
