@@ -103,6 +103,9 @@ public class AddIngredientScreenCtrl {
         serverIngredients.subscribe(ServerSockets.setDestination("/topic/ingredients/create"),
               new ResponseHandler<Ingredient>(this::onAddIngredient) {});
 
+        serverIngredients.subscribe(ServerSockets.setDestination("/user/queue/ingredients/create"),
+              new ResponseHandler<Ingredient>(this::onIngredientCreatedCallback) {});
+
         serverIngredients.subscribe(ServerSockets.setDestination("/topic/ingredients/update"),
               new ResponseHandler<Ingredient>(this::onUpdateIngredient) {});
 
@@ -111,6 +114,23 @@ public class AddIngredientScreenCtrl {
     }
 
     // WebSocket callbacks.
+
+    private void onIngredientCreatedCallback(Ingredient ingredient) {
+        Platform.runLater(() -> {
+            try {
+                float amount = Float.parseFloat(amountTextField.getText().trim());
+                String unit = unitMenuButton.getText();
+
+                this.result = new RecipeIngredient(ingredient, amount, unit);
+
+                if (stage != null) {
+                    stage.close();
+                }
+            } catch (NumberFormatException e) {
+                ErrorScreenCtrl.showError("Error processing created ingredient.");
+            }
+        });
+    }
 
     private void onUpdateIngredientList(List<Ingredient> ingredients) {
         Platform.runLater(() -> {
@@ -181,10 +201,27 @@ public class AddIngredientScreenCtrl {
         String unit = unitMenuButton.getText();
 
         Ingredient selected = ingredientChoiceBox.getValue();
-        Ingredient finalIngredient;
 
         if (selected == null) {
-            ErrorScreenCtrl.showError("Please select an ingredient.");
+            ErrorScreenCtrl.showError("Invalid input: Please select an ingredient.");
+            return;
+        }
+
+        if (amountStr.isEmpty()) {
+            ErrorScreenCtrl.showError("Invalid input: Please fill in an amount.");
+            return;
+        }
+
+        if ("Unit".equals(unit)) {
+            ErrorScreenCtrl.showError("Invalid input: Please select an unit.");
+            return;
+        }
+
+        float amount;
+        try {
+            amount = Float.parseFloat(amountStr);
+        } catch (NumberFormatException e) {
+            ErrorScreenCtrl.showError("Invalid Amount: Must be a number.");
             return;
         }
 
@@ -194,32 +231,15 @@ public class AddIngredientScreenCtrl {
                 ErrorScreenCtrl.showError("Please enter a name for the new ingredient.");
                 return;
             }
-            finalIngredient = new Ingredient(newName);
-            if (serverIngredients != null) {
-                serverIngredients.send(ServerSockets.setDestination("/app/ingredients/create"),
-                      finalIngredient);
-            }
+            serverIngredients.send(ServerSockets.setDestination("/app/ingredients/create"),
+                  new Ingredient(newName));
 
         } else {
-            finalIngredient = selected;
-        }
-
-        if (amountStr.isEmpty() || "Unit".equals(unit)) {
-            ErrorScreenCtrl.showError("Invalid input: Please fill "
-                  + "in Amount, Unit, and Ingredient.");
-            return;
-        }
-
-        try {
-            float amount = Float.parseFloat(amountStr);
-            this.result = new RecipeIngredient(finalIngredient, amount, unit);
+            this.result = new RecipeIngredient(selected, amount, unit);
 
             if (stage != null) {
                 stage.close();
             }
-
-        } catch (NumberFormatException e) {
-            ErrorScreenCtrl.showError("Invalid Amount: Must be a number.");
         }
     }
 
