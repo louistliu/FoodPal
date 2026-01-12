@@ -30,7 +30,8 @@ import java.net.URISyntaxException;
 import javafx.application.Application;
 import javafx.stage.Stage;
 
-/** Application entry point. Sets up configuration and dependency injection
+/**
+ * Application entry point. Sets up configuration and dependency injection
  * before JavaFX starts, and provides access to the injector-backed FXML helper.
  */
 public class Main extends Application {
@@ -45,7 +46,7 @@ public class Main extends Application {
      *
      * @param args command-line arguments (supports -cfg <path>)
      * @throws URISyntaxException when config path resolution fails
-     * @throws IOException if config file cannot be read
+     * @throws IOException        if config file cannot be read
      */
     public static void main(String[] args) throws URISyntaxException, IOException {
         config = ConfigService.loadConfig(args);
@@ -71,7 +72,8 @@ public class Main extends Application {
 
         var serverUtils = INJECTOR.getInstance(ServerUtils.class);
         if (!serverUtils.isServerAvailable()) {
-            var msg = "Server needs to be started before the client," + " but it does not seem to be available. Shutting down.";
+            var msg = "Server needs to be started before the client,"
+                    + " but it does not seem to be available. Shutting down.";
             System.err.println(msg);
             return;
         }
