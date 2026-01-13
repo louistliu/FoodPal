@@ -1,6 +1,7 @@
 package server.controllers;
 
 import commons.Ingredient;
+import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -8,10 +9,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.stereotype.Controller;
 import server.database.IngredientRepository;
+import server.utils.DummyData;
 
 /**
  * API endpoint responsible for handling ingredient manipulation.
@@ -24,25 +27,52 @@ public class IngredientController {
     @Autowired
     public IngredientController(IngredientRepository ingredientDB) {
         this.ingredientDB = ingredientDB;
+
+        List<Ingredient> ingredients = DummyData.getDefaultIngredients();
+        ingredientDB.saveAllAndFlush(ingredients);
     }
 
     /**
-     * Creates a new ingredient in the database if it is not already present,
-     * and is valid, then broadcasts it, otherwise returns an error.
+     * Create a new ingredient. Clients should send a {@link commons.Ingredient}
+     * payload to the application destination (for example:
+     * {@code /app/ingredient/create}). On success the saved ingredient object is
+     * returned so subscribers can broadcast or process the new ingredient.
      *
-     * @param ingredient the basic ingredient object automatically validated
-     * @return returns the new to all subscribed sockets or nothing,
-     *       from client side {@code /topic/ingredients/create}
-     * @throws Exception STOMP exception
+     * @param ingredient the ingredient object (validated) to create
+     * @return the saved {@link commons.Ingredient}
+     * @throws Exception when processing fails
      */
     @MessageMapping("/ingredients/create")
+    @SendTo("/topic/ingredients/create")
+    @SendToUser("/queue/ingredients/create")
     @Valid
     public Ingredient create(@Payload Ingredient ingredient) throws Exception {
-        var saved = ingredientDB.save(ingredient);
-        // TODO: process ingredient here
-        return saved;
+        if (!ingredientDB.findByName(ingredient.getName()).isEmpty()) {
+            throw new EntityExistsException(
+                  "Ingredient with name: " + ingredient.getName() + " is already in the database");
+        }
+        return ingredientDB.save(ingredient);
     }
 
+    /**
+     * Delete an existing ingredient. The provided {@link commons.Ingredient} object
+     * must contain a valid id; if the ingredient does not exist an
+     * {@link jakarta.persistence.EntityNotFoundException} is thrown.
+     *
+     * @param ingredient ingredient (with id) to update
+     * @return the updated {@link commons.Ingredient}
+     * @throws Exception when update fails or the ingredient is not found
+     */
+    @MessageMapping("/ingredients/update")
+    @Valid
+    public Ingredient update(@Payload Ingredient ingredient) throws Exception {
+        if (!ingredientDB.existsById(ingredient.getId())) {
+            throw new EntityNotFoundException(
+                  "No ingredient with id " + ingredient.getId() + " in the database");
+        }
+
+        return ingredientDB.save(ingredient);
+    }
 
     /**
      * Get all ingredients when subscribing to {@code /user/queue/ingredients/create}.

@@ -238,7 +238,8 @@ public class MainScreenCtrl {
             ingredientListView.getItems().clear();
             if (recipe.getIngredients() != null) {
                 for (RecipeIngredient ri : recipe.getIngredients()) {
-                    ingredientListView.getItems().add("Ingredient Item (Placeholder)");
+                    ingredientListView.getItems().add(ri.getAmount()
+                          + " " + ri.getUnit() + " " + ri.getIngredient().getName());
                 }
             }
         }
