@@ -11,27 +11,14 @@ import java.util.List;
 public class DummyData {
 
     /**
-     * Get recipes to use as content.
+     * Get ingredients to use as content.
      *
-     * @return a list of recipes
+     * @return a list of ingredients
      */
     public static List<Ingredient> getDefaultIngredients() {
         List<Ingredient> ingredients = new ArrayList<>();
         ingredients.add(new Ingredient("Otto"));
         ingredients.add(new Ingredient("Andy"));
-        return ingredients;
-    }
-
-    /**
-     * Get recipes to use as content.
-     *
-     * @return a list of recipes
-     */
-    public static List<Ingredient> getDefaultIngredients() {
-        List<Ingredient> ingredients = new ArrayList<>();
-        ingredients.add(new Ingredient("Otto"));
-        ingredients.add(new Ingredient("Andy"));
-        ingredients.add(new Ingredient("INGREDIENTS ACTUALLY WORK!!!!!!!!!!"));
         return ingredients;
     }
 
