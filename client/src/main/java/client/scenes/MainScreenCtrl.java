@@ -37,13 +37,14 @@ public class MainScreenCtrl {
     private final ServerSockets serverRecipes;
     RecipeList listOfRecipes = new RecipeList();
     private ObservableList<Recipe> observableRecipes;
+    private ObservableList<RecipeIngredient> observableIngredients;
     private Recipe selectedRecipe;
     @FXML
     private AnchorPane rightPane;
     @FXML
     private ListView<Recipe> recipeListView;
     @FXML
-    private ListView<String> ingredientListView;
+    private ListView<RecipeIngredient> ingredientListView;
     @FXML
     private ListView<String> instructionListView;
     @FXML
@@ -106,6 +107,18 @@ public class MainScreenCtrl {
             }
         });
 
+        ingredientListView.setCellFactory(lv -> new ListCell<>() {
+            @Override
+            protected void updateItem(RecipeIngredient item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty ? null
+                        : item != null
+                                ? item.getIngredient().getName() + " " + item.getAmount() + " "
+                                        + item.getUnit()
+                                : null);
+            }
+        });
+
         // This listener will fire immediately if data is bound, triggering
         // showRecipeDetails
         recipeListView.getSelectionModel().selectedItemProperty()
@@ -118,6 +131,8 @@ public class MainScreenCtrl {
 
         observableRecipes = FXCollections.observableList(new ArrayList<>());
         recipeListView.setItems(observableRecipes);
+        observableIngredients = FXCollections.observableArrayList();
+        ingredientListView.setItems(observableIngredients);
 
         serverRecipes.subscribe(ServerSockets.setDestination("/app/recipes/fetch"),
               new ResponseHandler<List<Recipe>>(this::onUpdateRecipeList) {
@@ -237,10 +252,7 @@ public class MainScreenCtrl {
         if (ingredientListView != null) {
             ingredientListView.getItems().clear();
             if (recipe.getIngredients() != null) {
-                for (RecipeIngredient ri : recipe.getIngredients()) {
-                    ingredientListView.getItems().add(ri.getAmount()
-                          + " " + ri.getUnit() + " " + ri.getIngredient().getName());
-                }
+                observableIngredients.addAll(recipe.getIngredients());
             }
         }
     }
@@ -422,7 +434,8 @@ public class MainScreenCtrl {
                 System.out.println("Ingredient added: " + newIngredient.getIngredient().getName());
 
                 selectedRecipe.getIngredients().add(newIngredient);
-                showRecipeDetails(selectedRecipe);
+                observableIngredients.add(newIngredient);
+                ingredientListView.refresh();
             }
         }
     }
@@ -455,8 +468,9 @@ public class MainScreenCtrl {
      * Deletes an ingredient.
      */
     public void deleteIngredient() {
-        String selected = ingredientListView.getSelectionModel().getSelectedItem();
+        RecipeIngredient selected = ingredientListView.getSelectionModel().getSelectedItem();
         if (selected != null) {
+            selectedRecipe.removeIngredient(selected);
             ingredientListView.getItems().remove(selected);
         }
     }

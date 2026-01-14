@@ -21,7 +21,9 @@ public class RecipeIngredient {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
 
-    @ManyToOne(optional = false) // One Ingredient can be included in multiple RecipeIngredients
+    @ManyToOne(optional = false)
+    // One Ingredient can be included in multiple
+    // RecipeIngredients
     private Ingredient ingredient;
     @NotNull
     private float amount;
