@@ -1,6 +1,7 @@
 package client.scenes;
 
 import client.Main;
+import client.utils.Endpoint;
 import client.utils.PrintRecipe;
 import client.utils.ResponseHandler;
 import client.utils.ServerSockets;
@@ -95,8 +96,7 @@ public class MainScreenCtrl {
      * language options, and adds selection listeners.
      */
     public void initialize() {
-        languageChoiceBox.setItems(FXCollections.observableArrayList(
-              "English", "Dutch", "German"));
+        languageChoiceBox.setItems(FXCollections.observableArrayList("English", "Dutch", "German"));
         languageChoiceBox.getSelectionModel().selectFirst();
 
         // --- Cell Factory and Listeners ---
@@ -134,20 +134,29 @@ public class MainScreenCtrl {
         observableIngredients = FXCollections.observableArrayList();
         ingredientListView.setItems(observableIngredients);
 
-        serverRecipes.subscribe(ServerSockets.setDestination("/app/recipes/fetch"),
+        serverRecipes.subscribe(Endpoint.RECIPE_FETCH,
               new ResponseHandler<List<Recipe>>(this::onUpdateRecipeList) {
               });
 
-        serverRecipes.subscribe(ServerSockets.setDestination("/topic/recipes/create"),
+        serverRecipes.subscribe(Endpoint.RECIPE_CREATE,
               new ResponseHandler<Recipe>(this::onAddRecipe) {
               });
-        serverRecipes.subscribe(ServerSockets.setDestination("/topic/recipes/update"),
+        serverRecipes.subscribe(Endpoint.RECIPE_USER_CREATE,
+              new ResponseHandler<Recipe>(this::onCreateUserRecipe) {
+              });
+        serverRecipes.subscribe(Endpoint.RECIPE_UPDATE,
               new ResponseHandler<Recipe>(this::onUpdateRecipe) {
               });
-        serverRecipes.subscribe(ServerSockets.setDestination("/topic/recipes/delete"),
+        serverRecipes.subscribe(Endpoint.RECIPE_DELETE,
               new ResponseHandler<Recipe>(this::onDeleteRecipe) {
               });
 
+    }
+
+    private void onCreateUserRecipe(Recipe recipe) {
+        Platform.runLater(() -> {
+            selectRecipe(recipe);
+        });
     }
 
     private void onUpdateRecipeList(List<Recipe> recipes) {
@@ -162,14 +171,12 @@ public class MainScreenCtrl {
 
     private void onAddRecipe(Recipe recipe) {
         Platform.runLater(() -> {
-            observableRecipes.add(recipe);
-            recipeListView.refresh();
-            if (selectedRecipe == null || !selectedRecipe.equalsNoId(recipe)) {
+            if (observableRecipes.contains(recipe)) {
                 return;
             }
-            selectRecipe(recipe);
+            observableRecipes.add(recipe);
+            recipeListView.refresh();
         });
-
     }
 
     private void onDeleteRecipe(Recipe recipe) {
@@ -188,18 +195,24 @@ public class MainScreenCtrl {
             if (recipes.isEmpty()) {
                 observableRecipes.add(recipe);
                 recipeListView.refresh();
+                System.err.println(
+                      "Recipe does not exist in recipe list"
+                            + " even though it is being updated and not created");
                 return;
             }
             int ind = observableRecipes.indexOf(recipes.getLast());
 
+
+            if (recipe.getId() != selectedRecipe.getId()) {
+                observableRecipes.remove(ind);
+                observableRecipes.add(ind, recipe);
+                recipeListView.refresh();
+                return;
+            }
             observableRecipes.remove(ind);
             observableRecipes.add(ind, recipe);
             recipeListView.refresh();
 
-            var isCurrSelected = ind == observableRecipes.indexOf(selectedRecipe);
-            if (!isCurrSelected) {
-                return;
-            }
 
             selectRecipe(recipe);
         });
@@ -207,9 +220,12 @@ public class MainScreenCtrl {
 
     private void selectRecipe(Recipe recipe) {
         if (!observableRecipes.contains(recipe)) {
-            return;
+            observableRecipes.add(recipe);
+            recipeListView.refresh();
         }
+
         recipeListView.getSelectionModel().select(recipe);
+        selectedRecipe = recipe;
     }
 
     private void setupInstructionDragAndDrop() {
@@ -280,9 +296,9 @@ public class MainScreenCtrl {
         // if recipe is already created - update recipe otherwise save recipe,
         // update the list of recipes once server sends response
         if (observableRecipes.contains(selectedRecipe)) {
-            serverRecipes.send(ServerSockets.setDestination("/app/recipes/update"), selectedRecipe);
+            serverRecipes.send(Endpoint.RECIPE_UPDATE, selectedRecipe);
         } else {
-            serverRecipes.send(ServerSockets.setDestination("/app/recipes/create"), selectedRecipe);
+            serverRecipes.send(Endpoint.RECIPE_CREATE, selectedRecipe);
         }
 
         System.out.println("Saved changes for: " + newName);
@@ -322,14 +338,6 @@ public class MainScreenCtrl {
         String newName = "Recipe " + findNextId("Recipe ");
         showRecipeDetails(new Recipe(newName));
 
-        // List<commons.RecipeIngredient> emptyIngredients = new ArrayList<>();
-        // List<String> emptyInstructions = new ArrayList<>();
-        // Recipe newRecipe = new Recipe(newName, "", emptyIngredients,
-        // emptyInstructions);
-        //
-        // observableRecipes.add(newRecipe);
-        // recipeListView.getSelectionModel().select(newRecipe);
-        //
         System.out.println("Added new recipe: " + newName);
     }
 
@@ -343,7 +351,7 @@ public class MainScreenCtrl {
             System.out.println("No recipe selected!");
             return;
         }
-        serverRecipes.send(ServerSockets.setDestination("/app/recipes/delete"), selected);
+        serverRecipes.send(Endpoint.RECIPE_DELETE, selected);
         System.out.println("Deleted recipe: " + selected.getName());
     }
 
@@ -365,19 +373,13 @@ public class MainScreenCtrl {
         }
 
         String recipeName = selectedRecipe.getName();
-
         System.out.println("RECIPE: " + recipeName);
-        // int index = getMaxId(observableRecipes.stream().map(r ->
-        // r.getName()).toList(), recipeName);
-        // System.out.println("INDEX: " + index);
 
-        Recipe newRecipe = new Recipe(selectedRecipe.getName() + " Clone "
-              + findNextId(recipeName) + " Clone",
-              selectedRecipe.getDescription(),
-              clonedIngredients,
-              clonedInstructions);
+        Recipe newRecipe =
+              new Recipe(selectedRecipe.getName() + " Clone " + findNextId(recipeName + " Clone"),
+                    selectedRecipe.getDescription(), clonedIngredients, clonedInstructions);
 
-        serverRecipes.send(ServerSockets.setDestination("/app/recipes/create"), newRecipe);
+        serverRecipes.send(Endpoint.RECIPE_CREATE, newRecipe);
 
         System.out.println("Added new recipe: " + newRecipe.getName());
     }
@@ -495,9 +497,7 @@ public class MainScreenCtrl {
             return;
         }
 
-        PrintRecipe.exportRecipe(
-              printButton.getScene().getWindow(),
-              selectedRecipe);
+        PrintRecipe.exportRecipe(printButton.getScene().getWindow(), selectedRecipe);
 
         System.out.println("Exported recipe: " + selectedRecipe.getName());
     }

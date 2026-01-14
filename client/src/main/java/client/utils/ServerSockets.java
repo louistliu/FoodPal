@@ -1,6 +1,7 @@
 package client.utils;
 
 import client.interfaces.IResponseHandler;
+import client.interfaces.IStompHeaders;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import commons.Ingredient;
@@ -79,6 +80,17 @@ public class ServerSockets {
     }
 
     /**
+     * Add a listener for a server endpoint.
+     *
+     * @param headers metadata to be sent to the server upon subscription
+     * @param handler interface specifying how to deal with objects set from the
+     *                server
+     */
+    public void subscribe(IStompHeaders headers, IResponseHandler<?> handler) {
+        subscribe(headers.getSubscribeHeaders(), handler);
+    }
+
+    /**
      * Adds an ingredient on the server.
      *
      * @param ingredient ingredient to add.
@@ -115,5 +127,15 @@ public class ServerSockets {
      */
     public void send(StompHeaders headers, Object payload) {
         sessionHandler.send(headers, payload);
+    }
+
+    /**
+     * Send payload to the server with the specified {@link StompHeaders}.
+     *
+     * @param headers headers to be sent with the payload
+     * @param payload the payload
+     */
+    public void send(IStompHeaders headers, Object payload) {
+        send(headers.getRequestHeaders(), payload);
     }
 }
