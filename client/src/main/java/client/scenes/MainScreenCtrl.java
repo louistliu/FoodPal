@@ -434,7 +434,8 @@ public class MainScreenCtrl {
                 System.out.println("Ingredient added: " + newIngredient.getIngredient().getName());
 
                 selectedRecipe.getIngredients().add(newIngredient);
-                showRecipeDetails(selectedRecipe);
+                observableIngredients.add(newIngredient);
+                ingredientListView.refresh();
             }
         }
     }
