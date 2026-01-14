@@ -1,6 +1,10 @@
 package client.scenes;
 
+import com.google.inject.Inject;
+import java.util.Optional;
+import java.util.function.Function;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.MenuItem;
@@ -21,7 +25,8 @@ public class InstructionListCell extends ListCell<String> {
      * Constructs a new InstructionListCell and initializes the drag-and-drop event handlers.
      * Also creates menu for manually moving instructions with right-clicking.
      */
-    public InstructionListCell() {
+    @Inject
+    public InstructionListCell(Function<String, Optional<String>> editInstruction) {
         setOnDragDetected(this::handleDragDetected);
         setOnDragOver(this::handleDragOver);
         setOnDragEntered(this::handleDragEntered);
@@ -33,8 +38,26 @@ public class InstructionListCell extends ListCell<String> {
         moveUp.setOnAction(event -> moveInstruction(-1));
         MenuItem moveDown = new MenuItem("Move Down");
         moveDown.setOnAction(event -> moveInstruction(1));
-        contextMenu.getItems().addAll(moveUp, moveDown);
+
+        MenuItem edit = new MenuItem("Edit");
+        edit.setOnAction(event -> this.handleEdit(event, editInstruction));
+
+
+        contextMenu.getItems().addAll(moveUp, moveDown, edit);
     }
+
+    private void handleEdit(ActionEvent event, Function<String, Optional<String>> editInstruction) {
+        int index = getIndex();
+        ObservableList<String> items = getListView().getItems();
+
+        String item = items.remove(index);
+        editInstruction.apply(item)
+              .ifPresentOrElse(s -> {
+                  items.add(index, s);
+                  getListView().getSelectionModel().select(index);
+              }, () -> ErrorScreenCtrl.showError("Failed to edit instruction"));
+    }
+
 
     /**
      * Updates the item number and adds a number prefix to the instruction text.
@@ -44,6 +67,7 @@ public class InstructionListCell extends ListCell<String> {
      */
     @Override
     protected void updateItem(String item, boolean empty) {
+        System.out.println(item);
         super.updateItem(item, empty);
         if (empty || item == null) {
             setText(null);

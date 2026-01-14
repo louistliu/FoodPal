@@ -12,6 +12,7 @@ import commons.RecipeList;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -112,10 +113,10 @@ public class MainScreenCtrl {
             protected void updateItem(RecipeIngredient item, boolean empty) {
                 super.updateItem(item, empty);
                 setText(empty ? null
-                        : item != null
-                                ? item.getIngredient().getName() + " " + item.getAmount() + " "
-                                        + item.getUnit()
-                                : null);
+                      : item != null
+                      ? item.getIngredient().getName() + " " + item.getAmount() + " "
+                      + item.getUnit()
+                      : null);
             }
         });
 
@@ -229,7 +230,19 @@ public class MainScreenCtrl {
     }
 
     private void setupInstructionDragAndDrop() {
-        instructionListView.setCellFactory(param -> new InstructionListCell());
+        instructionListView.setCellFactory(
+              param -> new InstructionListCell(this::editInstructionHandler));
+    }
+
+    private Optional<String> editInstructionHandler(String instruction) {
+        AddInstructionScreenCtrl control =
+              launchModal(AddInstructionScreenCtrl.class, "AddInstructionScreen.fxml",
+                    "Edit Instruction", instruction);
+
+        if (control == null) {
+            return Optional.of(instruction);
+        }
+        return Optional.of(control.getResult());
     }
 
     /**
@@ -386,8 +399,12 @@ public class MainScreenCtrl {
 
     /**
      * Helper method to launch a modal window.
+     *
+     * @param defaultParams parameters that should be passed to the screen every time it launches.
      */
-    private <T> T launchModal(Class<T> controllerClass, String fxmlFileName, String title) {
+    private <T extends ScreenControl> T launchModal(Class<T> controllerClass, String fxmlFileName,
+                                                    String title,
+                                                    Object... defaultParams) {
         try {
             Stage modalStage = new Stage();
 
@@ -403,11 +420,8 @@ public class MainScreenCtrl {
             modalStage.setScene(new Scene(pair.getValue()));
 
             // Pass the stage to the controller so it can close itself
-            if (pair.getKey() instanceof AddIngredientScreenCtrl) {
-                ((AddIngredientScreenCtrl) pair.getKey()).setStage(modalStage);
-            } else if (pair.getKey() instanceof AddInstructionScreenCtrl) {
-                ((AddInstructionScreenCtrl) pair.getKey()).setStage(modalStage);
-            }
+            pair.getKey().setStage(modalStage);
+            pair.getKey().init(defaultParams);
 
             modalStage.showAndWait();
             return pair.getKey();
