@@ -6,6 +6,7 @@ import client.utils.PrintRecipe;
 import client.utils.ResponseHandler;
 import client.utils.ServerSockets;
 import com.google.inject.Inject;
+import commons.Ingredient;
 import commons.Recipe;
 import commons.RecipeIngredient;
 import commons.RecipeList;
@@ -447,13 +448,27 @@ public class MainScreenCtrl {
         if (controller != null) {
             RecipeIngredient newIngredient = controller.getResult();
             if (newIngredient != null) {
-                System.out.println("Ingredient added: " + newIngredient.getIngredient().getName());
+                if (containsIngredient(selectedRecipe, newIngredient.getIngredient())) {
+                    ErrorScreenCtrl.showError(
+                          "Ingredient " + newIngredient.getIngredient().getName()
+                                + " is already in the recipe.\n "
+                                + "Please edit the existing ingredient (right click option)");
+                    System.out.println("Ingredient already contained");
+                    return;
+                }
+                System.out.println(
+                      "Ingredient added: " + newIngredient.getIngredient().getName());
 
                 selectedRecipe.getIngredients().add(newIngredient);
                 observableIngredients.add(newIngredient);
                 ingredientListView.refresh();
             }
         }
+    }
+
+    private boolean containsIngredient(Recipe recipe, Ingredient ingredient) {
+        return recipe.getIngredients().stream()
+              .anyMatch(i -> i.getIngredient().getName().equals(ingredient.getName()));
     }
 
     /**
