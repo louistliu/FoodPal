@@ -17,38 +17,29 @@ import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.stage.Stage;
 import javafx.util.StringConverter;
 
 /**
  * Class, which handles logic for adding ingredients.
  */
-public class AddIngredientScreenCtrl {
-
-    @FXML
-    private TextArea inputTextArea; // Visible only when "Other" is selected
-
-    @FXML
-    private ChoiceBox<Ingredient> ingredientChoiceBox; // Dropdown for ingredients
-
-    @FXML
-    private TextField amountTextField;
-
-    @FXML
-    private MenuButton unitMenuButton;
-
-    @FXML
-    private Button okButton;
-
-    @FXML
-    private Button cancelButton;
-
-    private Stage stage;
-    private RecipeIngredient result = null;
+public class AddIngredientScreenCtrl extends ScreenControl {
 
     private final ServerSockets serverIngredients;
-    private ObservableList<Ingredient> observableIngredients;
     private final Ingredient otherOption = new Ingredient("Other");
+    @FXML
+    private TextArea inputTextArea; // Visible only when "Other" is selected
+    @FXML
+    private ChoiceBox<Ingredient> ingredientChoiceBox; // Dropdown for ingredients
+    @FXML
+    private TextField amountTextField;
+    @FXML
+    private MenuButton unitMenuButton;
+    @FXML
+    private Button okButton;
+    @FXML
+    private Button cancelButton;
+    private RecipeIngredient result = null;
+    private ObservableList<Ingredient> observableIngredients;
 
     /**
      * Constructs the MainScreenCtrl, injecting the scene controller.
@@ -98,19 +89,24 @@ public class AddIngredientScreenCtrl {
               });
 
         serverIngredients.subscribe(ServerSockets.setDestination("/app/ingredients/fetch"),
-              new ResponseHandler<List<Ingredient>>(this::onUpdateIngredientList) {});
+              new ResponseHandler<List<Ingredient>>(this::onUpdateIngredientList) {
+              });
 
         serverIngredients.subscribe(ServerSockets.setDestination("/topic/ingredients/create"),
-              new ResponseHandler<Ingredient>(this::onAddIngredient) {});
+              new ResponseHandler<Ingredient>(this::onAddIngredient) {
+              });
 
         serverIngredients.subscribe(ServerSockets.setDestination("/user/queue/ingredients/create"),
-              new ResponseHandler<Ingredient>(this::onIngredientCreatedCallback) {});
+              new ResponseHandler<Ingredient>(this::onIngredientCreatedCallback) {
+              });
 
         serverIngredients.subscribe(ServerSockets.setDestination("/topic/ingredients/update"),
-              new ResponseHandler<Ingredient>(this::onUpdateIngredient) {});
+              new ResponseHandler<Ingredient>(this::onUpdateIngredient) {
+              });
 
         serverIngredients.subscribe(ServerSockets.setDestination("/topic/ingredients/delete"),
-              new ResponseHandler<Ingredient>(this::onDeleteIngredient) {});
+              new ResponseHandler<Ingredient>(this::onDeleteIngredient) {
+              });
     }
 
     // WebSocket callbacks.
@@ -173,15 +169,6 @@ public class AddIngredientScreenCtrl {
     }
 
     /**
-     * Sets the stage for this scene, necessary for closing the window.
-     *
-     * @param stage The modal stage.
-     */
-    public void setStage(Stage stage) {
-        this.stage = stage;
-    }
-
-    /**
      * Handles unit selection from the MenuButton items.
      * Updates the MenuButton text to show the selected unit.
      */
@@ -237,8 +224,8 @@ public class AddIngredientScreenCtrl {
         } else {
             this.result = new RecipeIngredient(selected, amount, unit);
 
-            if (stage != null) {
-                stage.close();
+            if (super.stage != null) {
+                super.stage.close();
             }
         }
     }
@@ -250,8 +237,8 @@ public class AddIngredientScreenCtrl {
     @FXML
     public void handleCancel() {
         this.result = null;
-        if (stage != null) {
-            stage.close();
+        if (super.stage != null) {
+            super.stage.close();
         }
     }
 

@@ -8,7 +8,7 @@ import javafx.stage.Stage;
 /**
  * Class, which handles logic for adding instructions.
  */
-public class AddInstructionScreenCtrl {
+public class AddInstructionScreenCtrl extends ScreenControl {
 
     @FXML
     private TextArea inputTextArea;
@@ -19,7 +19,6 @@ public class AddInstructionScreenCtrl {
     @FXML
     private Button cancelButton;
 
-    private Stage stage;
     private String result = null;
 
     /**
@@ -32,6 +31,26 @@ public class AddInstructionScreenCtrl {
     }
 
     /**
+     * If contains no params then is a normal add screen.
+     * If contains one param, and it is a string then
+     * sets the text field to have the string for editing the instruction.
+     *
+     * @param params Parameters passed in during init
+     */
+    @Override
+    public void init(Object... params) {
+        if (params.length == 0) {
+            return;
+        }
+
+        if (params.length == 1 && params[0] instanceof String str) {
+            inputTextArea.setText(str);
+            return;
+        }
+        ErrorScreenCtrl.showError("Failed to load instruction for editing");
+    }
+
+    /**
      * Handles the OK button click.
      * Saves the text input and closes the window.
      */
@@ -41,8 +60,8 @@ public class AddInstructionScreenCtrl {
 
         if (!input.isEmpty()) {
             this.result = input;
-            if (stage != null) {
-                stage.close();
+            if (super.stage != null) {
+                super.stage.close();
             }
         } else {
             System.out.println("Instruction cannot be empty");
@@ -56,8 +75,8 @@ public class AddInstructionScreenCtrl {
     @FXML
     public void handleCancel() {
         this.result = null;
-        if (stage != null) {
-            stage.close();
+        if (super.stage != null) {
+            super.stage.close();
         }
     }
 
@@ -69,4 +88,5 @@ public class AddInstructionScreenCtrl {
     public String getResult() {
         return result;
     }
+
 }
