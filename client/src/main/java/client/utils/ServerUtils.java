@@ -18,18 +18,9 @@ package client.utils;
 
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 
-import commons.Quote;
 import jakarta.ws.rs.ProcessingException;
 import jakarta.ws.rs.client.ClientBuilder;
-import jakarta.ws.rs.client.Entity;
-import jakarta.ws.rs.core.GenericType;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.ConnectException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.List;
 import org.glassfish.jersey.client.ClientConfig;
 
 /**
@@ -40,44 +31,6 @@ public class ServerUtils {
     private static final String SERVER = "http://localhost:8080/";
 
     /**
-     * Gets all quotes from the database from a stream and prints them in the terminal.
-     * This method uses basic functionality provide by java.
-     *
-     * @throws IOException if the quote data stream is not read successfully
-     * @throws URISyntaxException if the {@link URI} is invalid
-     */
-    public void getQuotesTheHardWay() throws IOException, URISyntaxException {
-        var url = new URI("http://localhost:8080/api/quotes").toURL();
-        var is = url.openConnection().getInputStream();
-        var br = new BufferedReader(new InputStreamReader(is));
-        String line;
-        while ((line = br.readLine()) != null) {
-            System.out.println(line);
-        }
-    }
-
-    public List<Quote> getQuotes() {
-        return ClientBuilder.newClient(new ClientConfig()) //
-              .target(SERVER).path("api/quotes") //
-              .request(APPLICATION_JSON) //
-              .get(new GenericType<List<Quote>>() {
-              });
-    }
-
-    /**
-     * Add a {@link Quote} to existing quotes.
-     *
-     * @param quote quote to add to the database
-     * @return returns the newly added quote, does not handle failure logic
-     */
-    public Quote addQuote(Quote quote) {
-        return ClientBuilder.newClient(new ClientConfig()) //
-              .target(SERVER).path("api/quotes") //
-              .request(APPLICATION_JSON) //
-              .post(Entity.entity(quote, APPLICATION_JSON), Quote.class);
-    }
-
-    /**
      * Check if a server for this client is reachable.
      *
      * @return returns {@code true} if the server can be reached via a get method,
@@ -85,9 +38,9 @@ public class ServerUtils {
      */
     public boolean isServerAvailable() {
         try {
-            ClientBuilder.newClient(new ClientConfig()) //
-                  .target(SERVER) //
-                  .request(APPLICATION_JSON) //
+            ClientBuilder.newClient(new ClientConfig())
+                  .target(SERVER)
+                  .request(APPLICATION_JSON)
                   .get();
         } catch (ProcessingException e) {
             if (e.getCause() instanceof ConnectException) {

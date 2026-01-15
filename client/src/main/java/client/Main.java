@@ -16,10 +16,8 @@
 
 package client;
 
-import client.scenes.AddQuoteCtrl;
 import client.scenes.MainCtrl;
 import client.scenes.MainScreenCtrl;
-import client.scenes.QuoteOverviewCtrl;
 import client.utils.Config;
 import client.utils.ConfigService;
 import client.utils.ServerUtils;
@@ -78,14 +76,12 @@ public class Main extends Application {
             return;
         }
 
-        var overview = FXML.load(QuoteOverviewCtrl.class, "client", "scenes", "QuoteOverview.fxml");
-        var add = FXML.load(AddQuoteCtrl.class, "client", "scenes", "AddQuote.fxml");
         var mainScreen = FXML.load(MainScreenCtrl.class, "client", "scenes", "MainScreen.fxml");
 
         var mainCtrl = INJECTOR.getInstance(MainCtrl.class);
 
         // Pass the mainScreen Pair to initialize
-        mainCtrl.initialize(primaryStage, overview, add, mainScreen);
+        mainCtrl.initialize(primaryStage, mainScreen);
     }
 
     /**
