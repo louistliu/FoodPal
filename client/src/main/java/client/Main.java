@@ -20,7 +20,7 @@ import client.scenes.MainCtrl;
 import client.scenes.MainScreenCtrl;
 import client.utils.Config;
 import client.utils.ConfigService;
-import client.utils.ServerUtils;
+import client.utils.ServerSockets;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import java.io.IOException;
@@ -68,11 +68,12 @@ public class Main extends Application {
         // Ensure config is saved on exit
         primaryStage.setOnCloseRequest(e -> ConfigService.persistConfig());
 
-        var serverUtils = INJECTOR.getInstance(ServerUtils.class);
-        if (!serverUtils.isServerAvailable()) {
+        var serverSockets = INJECTOR.getInstance(ServerSockets.class);
+        if (!serverSockets.isServerAvailable()) {
             var msg = "Server needs to be started before the client,"
                     + " but it does not seem to be available. Shutting down.";
             System.err.println(msg);
+            System.exit(1);
             return;
         }
 
