@@ -48,7 +48,7 @@ public class Config {
 
     /**
      * Set the UI language name.
-     *    public List<Long> getFavoriteRecipeIds() { return favoriteRecipeIds; }
+     *
      * @param language language name
      */
     public void setLanguage(String language) {
@@ -83,8 +83,8 @@ public class Config {
         }
         Config config = (Config) o;
         return Objects.equals(serverUrl, config.serverUrl)
-              && Objects.equals(language, config.language)
-              && Objects.equals(favoriteRecipeIds, config.favoriteRecipeIds);
+                && Objects.equals(language, config.language)
+                && Objects.equals(favoriteRecipeIds, config.favoriteRecipeIds);
     }
 
     @Override

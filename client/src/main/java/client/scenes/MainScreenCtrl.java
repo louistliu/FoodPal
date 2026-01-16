@@ -1,8 +1,8 @@
 package client.scenes;
 
+import client.Main;
 import client.utils.Config;
 import client.utils.ConfigService;
-import client.Main;
 import client.utils.Endpoint;
 import client.utils.PrintRecipe;
 import client.utils.ResponseHandler;
@@ -123,17 +123,17 @@ public class MainScreenCtrl {
             protected void updateItem(RecipeIngredient item, boolean empty) {
                 super.updateItem(item, empty);
                 setText(empty ? null
-                      : item != null
-                      ? item.getIngredient().getName() + " " + item.getAmount() + " "
-                      + item.getUnit()
-                      : null);
+                        : item != null
+                        ? item.getIngredient().getName() + " " + item.getAmount() + " "
+                        + item.getUnit()
+                        : null);
             }
         });
 
         // This listener will fire immediately if data is bound, triggering
         // showRecipeDetails
         recipeListView.getSelectionModel().selectedItemProperty()
-              .addListener((obs, oldRecipe, newRecipe) -> showRecipeDetails(newRecipe));
+                .addListener((obs, oldRecipe, newRecipe) -> showRecipeDetails(newRecipe));
 
         setupInstructionDragAndDrop();
 
@@ -146,21 +146,21 @@ public class MainScreenCtrl {
         ingredientListView.setItems(observableIngredients);
 
         serverRecipes.subscribe(Endpoint.RECIPE_FETCH,
-              new ResponseHandler<List<Recipe>>(this::onUpdateRecipeList) {
-              });
+                new ResponseHandler<List<Recipe>>(this::onUpdateRecipeList) {
+                });
 
         serverRecipes.subscribe(Endpoint.RECIPE_CREATE,
-              new ResponseHandler<Recipe>(this::onAddRecipe) {
-              });
+                new ResponseHandler<Recipe>(this::onAddRecipe) {
+                });
         serverRecipes.subscribe(Endpoint.RECIPE_USER_CREATE,
-              new ResponseHandler<Recipe>(this::onCreateUserRecipe) {
-              });
+                new ResponseHandler<Recipe>(this::onCreateUserRecipe) {
+                });
         serverRecipes.subscribe(Endpoint.RECIPE_UPDATE,
-              new ResponseHandler<Recipe>(this::onUpdateRecipe) {
-              });
+                new ResponseHandler<Recipe>(this::onUpdateRecipe) {
+                });
         serverRecipes.subscribe(Endpoint.RECIPE_DELETE,
-              new ResponseHandler<Recipe>(this::onDeleteRecipe) {
-              });
+                new ResponseHandler<Recipe>(this::onDeleteRecipe) {
+                });
 
         searchRecipesField.textProperty().addListener((obs, oldVal, newVal) -> {
             this.currentSearchQuery = newVal.trim().toLowerCase();
@@ -227,14 +227,14 @@ public class MainScreenCtrl {
         System.out.println(recipe);
         Platform.runLater(() -> {
             var recipes =
-                  observableRecipes.stream().filter(x -> x.getId() == recipe.getId()).toList();
+                    observableRecipes.stream().filter(x -> x.getId() == recipe.getId()).toList();
 
             if (recipes.isEmpty()) {
                 observableRecipes.add(recipe);
                 recipeListView.refresh();
                 System.err.println(
-                      "Recipe does not exist in recipe list"
-                            + " even though it is being updated and not created");
+                        "Recipe does not exist in recipe list"
+                                + " even though it is being updated and not created");
                 return;
             }
             int ind = observableRecipes.indexOf(recipes.getLast());
@@ -267,13 +267,13 @@ public class MainScreenCtrl {
 
     private void setupInstructionDragAndDrop() {
         instructionListView.setCellFactory(
-              param -> new InstructionListCell(this::editInstructionHandler));
+                param -> new InstructionListCell(this::editInstructionHandler));
     }
 
     private Optional<String> editInstructionHandler(String instruction) {
         AddInstructionScreenCtrl control =
-              launchModal(AddInstructionScreenCtrl.class, "AddInstructionScreen.fxml",
-                    "Edit Instruction", instruction);
+                launchModal(AddInstructionScreenCtrl.class, "AddInstructionScreen.fxml",
+                        "Edit Instruction", instruction);
 
         if (control == null) {
             return Optional.of(instruction);
@@ -427,8 +427,8 @@ public class MainScreenCtrl {
         System.out.println("RECIPE: " + recipeName);
 
         Recipe newRecipe =
-              new Recipe(selectedRecipe.getName() + " Clone " + findNextId(recipeName + " Clone"),
-                    selectedRecipe.getDescription(), clonedIngredients, clonedInstructions);
+                new Recipe(selectedRecipe.getName() + " Clone " + findNextId(recipeName + " Clone"),
+                        selectedRecipe.getDescription(), clonedIngredients, clonedInstructions);
 
         serverRecipes.send(Endpoint.RECIPE_CREATE, newRecipe);
 
@@ -441,7 +441,9 @@ public class MainScreenCtrl {
      */
     @FXML
     public void toggleFavorite() {
-        if (selectedRecipe == null) return;
+        if (selectedRecipe == null) {
+            return;
+        }
 
         Config config = ConfigService.getConfig();
         List<Long> favoriteIds = config.getFavoriteRecipeIds();
@@ -464,15 +466,14 @@ public class MainScreenCtrl {
      * Updates the text of the singular favoriteButton.
      */
     private void updateFavoriteButtonText(Recipe recipe) {
-        if (recipe == null) return;
+        if (recipe == null) {
+            return;
+        }
         boolean isFavorite = ConfigService.getConfig()
                 .getFavoriteRecipeIds().contains(recipe.getId());
         favoriteButton.setText(isFavorite ? "Unfavorite" : "Favorite");
     }
 
-    /**
-     * Refreshes the list using local favorites and the AND search logic.
-     */
     /**
      * Refreshes the list view by applying filters across names,
      * descriptions, ingredients, and instructions.
@@ -482,17 +483,22 @@ public class MainScreenCtrl {
 
         List<Recipe> filteredList = allRecipesMaster.stream()
                 .filter(recipe -> {
-                    boolean matchesFavorite = !showingFavoritesOnly || favoriteIds.contains(recipe.getId());
-                    if (!matchesFavorite) return false;
+                    boolean matchesFavorite = !showingFavoritesOnly
+                            || favoriteIds.contains(recipe.getId());
+                    if (!matchesFavorite) {
+                        return false;
+                    }
 
-                    if (currentSearchQuery.isEmpty()) return true;
-
-                    String[] keywords = currentSearchQuery.split("\\s+");
+                    if (currentSearchQuery.isEmpty()) {
+                        return true;
+                    }
 
                     // Aggregating all searchable content for this recipe
                     StringBuilder searchableContent = new StringBuilder();
                     searchableContent.append(recipe.getName()).append(" ");
                     searchableContent.append(recipe.getDescription()).append(" ");
+
+                    String[] keywords = currentSearchQuery.split("\\s+");
 
                     // Append ingredient names
                     for (RecipeIngredient ri : recipe.getIngredients()) {
@@ -538,7 +544,7 @@ public class MainScreenCtrl {
             modalStage.initModality(Modality.WINDOW_MODAL);
             modalStage.setTitle(title);
             Pair<T, Parent> pair =
-                  Main.getFxml().load(controllerClass, "client", "scenes", fxmlFileName);
+                    Main.getFxml().load(controllerClass, "client", "scenes", fxmlFileName);
             modalStage.setScene(new Scene(pair.getValue()));
 
             // Pass the stage to the controller so it can close itself
@@ -563,22 +569,22 @@ public class MainScreenCtrl {
         }
 
         AddIngredientScreenCtrl controller =
-              launchModal(AddIngredientScreenCtrl.class, "AddIngredientScreen.fxml",
-                    "Add New Ingredient");
+                launchModal(AddIngredientScreenCtrl.class, "AddIngredientScreen.fxml",
+                        "Add New Ingredient");
 
         if (controller != null) {
             RecipeIngredient newIngredient = controller.getResult();
             if (newIngredient != null) {
                 if (containsIngredient(selectedRecipe, newIngredient.getIngredient())) {
                     ErrorScreenCtrl.showError(
-                          "Ingredient " + newIngredient.getIngredient().getName()
-                                + " is already in the recipe.\n "
-                                + "Please edit the existing ingredient (right click option)");
+                            "Ingredient " + newIngredient.getIngredient().getName()
+                                    + " is already in the recipe.\n "
+                                    + "Please edit the existing ingredient (right click option)");
                     System.out.println("Ingredient already contained");
                     return;
                 }
                 System.out.println(
-                      "Ingredient added: " + newIngredient.getIngredient().getName());
+                        "Ingredient added: " + newIngredient.getIngredient().getName());
 
                 selectedRecipe.getIngredients().add(newIngredient);
                 observableIngredients.add(newIngredient);
@@ -589,7 +595,7 @@ public class MainScreenCtrl {
 
     private boolean containsIngredient(Recipe recipe, Ingredient ingredient) {
         return recipe.getIngredients().stream()
-              .anyMatch(i -> i.getIngredient().getName().equals(ingredient.getName()));
+                .anyMatch(i -> i.getIngredient().getName().equals(ingredient.getName()));
     }
 
     /**
@@ -602,8 +608,8 @@ public class MainScreenCtrl {
         }
 
         AddInstructionScreenCtrl controller =
-              launchModal(AddInstructionScreenCtrl.class, "AddInstructionScreen.fxml",
-                    "Add Instruction");
+                launchModal(AddInstructionScreenCtrl.class, "AddInstructionScreen.fxml",
+                        "Add Instruction");
 
         if (controller != null) {
             String instructionText = controller.getResult();
