@@ -48,7 +48,6 @@ public class MainCtrl {
         primaryStage.show();
     }
 
-
     public LanguageController getLanguageController() {
         return languageController;
     }
@@ -60,7 +59,5 @@ public class MainCtrl {
         primaryStage.setTitle("FoodPal: Recipe Organizer");
         primaryStage.setScene(mainScreen);
     }
-
-
 
 }
