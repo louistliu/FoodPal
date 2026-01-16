@@ -68,9 +68,9 @@ public class InstructionListCell extends ListCell<String> {
                       items.add(s);
                       return;
                   }
-                  items.remove(index);
-                  items.add(index, s);
-                  getListView().getSelectionModel().select(index);
+                  items.remove(newIndex);
+                  items.add(newIndex, s);
+                  getListView().getSelectionModel().select(newIndex);
               }, () -> {
               });
     }
