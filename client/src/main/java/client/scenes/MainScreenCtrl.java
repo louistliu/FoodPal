@@ -492,6 +492,16 @@ public class MainScreenCtrl {
         if (controller != null && controller.getResult() != null) {
             RecipeIngredient updatedItem = controller.getResult();
 
+            if (!item.getIngredient().getName().equals(updatedItem.getIngredient().getName())
+                  && containsIngredient(selectedRecipe, updatedItem.getIngredient())) {
+                ErrorScreenCtrl.showError(
+                      "Ingredient " + updatedItem.getIngredient().getName()
+                            + " is already in the recipe.\n "
+                            + "Please edit the existing ingredient (right click option)");
+                System.out.println("Ingredient already contained");
+                return;
+            }
+
             int index = selectedRecipe.getIngredients().indexOf(item);
             if (index != -1) {
                 selectedRecipe.getIngredients().set(index, updatedItem);
