@@ -1,5 +1,7 @@
 package client.scenes;
 
+import client.utils.Config;
+import client.utils.ConfigService;
 import client.Main;
 import client.utils.Endpoint;
 import client.utils.PrintRecipe;
@@ -42,6 +44,11 @@ public class MainScreenCtrl {
     private ObservableList<Recipe> observableRecipes;
     private ObservableList<RecipeIngredient> observableIngredients;
     private Recipe selectedRecipe;
+
+    private List<Recipe> allRecipesMaster = new ArrayList<>();
+    private String currentSearchQuery = "";
+    private boolean showingFavoritesOnly = false;
+
     @FXML
     private AnchorPane rightPane;
     @FXML
@@ -82,6 +89,8 @@ public class MainScreenCtrl {
     private Button allButton;
     @FXML
     private Button printButton;
+    @FXML
+    private Button favoriteButton;
 
     /**
      * Constructs the MainScreenCtrl, injecting the scene controller.
@@ -153,6 +162,17 @@ public class MainScreenCtrl {
               new ResponseHandler<Recipe>(this::onDeleteRecipe) {
               });
 
+        searchRecipesField.textProperty().addListener((obs, oldVal, newVal) -> {
+            this.currentSearchQuery = newVal.trim().toLowerCase();
+            refreshListView();
+        });
+
+        searchRecipesField.setOnKeyPressed(event -> {
+            if (event.getCode() == javafx.scene.input.KeyCode.ESCAPE) {
+                searchRecipesField.clear();
+                recipeListView.requestFocus();
+            }
+        });
     }
 
     private void onCreateUserRecipe(Recipe recipe) {
@@ -162,12 +182,27 @@ public class MainScreenCtrl {
     }
 
     private void onUpdateRecipeList(List<Recipe> recipes) {
-
-        System.out.print("RECIPES ARRIVED");
         Platform.runLater(() -> {
-            // Load the actual list from the RecipeList singleton.
-            observableRecipes.addAll(recipes);
-            recipeListView.refresh();
+            allRecipesMaster.clear();
+            allRecipesMaster.addAll(recipes);
+            refreshListView();
+        });
+    }
+
+    /**
+     * Handles real-time search field updates and the Escape key shortcut.
+     */
+    public void setupSearchField() {
+        searchRecipesField.textProperty().addListener((obs, oldVal, newVal) -> {
+            this.currentSearchQuery = newVal.trim().toLowerCase();
+            refreshListView();
+        });
+
+        searchRecipesField.setOnKeyPressed(event -> {
+            if (event.getCode() == javafx.scene.input.KeyCode.ESCAPE) {
+                searchRecipesField.clear();
+                recipeListView.requestFocus();
+            }
         });
     }
 
@@ -269,6 +304,8 @@ public class MainScreenCtrl {
 
         recipeNameField.setText(recipe.getName());
         recipeDescriptionField.setText(recipe.getDescription());
+
+        updateFavoriteButtonText(recipe);
 
         // Refresh Instructions View
         if (instructionListView != null) {
@@ -396,6 +433,90 @@ public class MainScreenCtrl {
         serverRecipes.send(Endpoint.RECIPE_CREATE, newRecipe);
 
         System.out.println("Added new recipe: " + newRecipe.getName());
+    }
+
+    /**
+     * Toggles the favorite status of the selected recipe locally.
+     * Does not send an update to the server.
+     */
+    @FXML
+    public void toggleFavorite() {
+        if (selectedRecipe == null) return;
+
+        Config config = ConfigService.getConfig();
+        List<Long> favoriteIds = config.getFavoriteRecipeIds();
+        long currentId = selectedRecipe.getId();
+
+        if (favoriteIds.contains(currentId)) {
+            favoriteIds.remove(currentId);
+            System.out.println("Recipe '" + selectedRecipe.getName() + "' removed from favorites.");
+        } else {
+            favoriteIds.add(currentId);
+            System.out.println("Recipe '" + selectedRecipe.getName() + "' added to favorites.");
+        }
+
+        ConfigService.persistConfig();
+        updateFavoriteButtonText(selectedRecipe);
+        refreshListView();
+    }
+
+    /**
+     * Updates the text of the singular favoriteButton.
+     */
+    private void updateFavoriteButtonText(Recipe recipe) {
+        if (recipe == null) return;
+        boolean isFavorite = ConfigService.getConfig()
+                .getFavoriteRecipeIds().contains(recipe.getId());
+        favoriteButton.setText(isFavorite ? "Unfavorite" : "Favorite");
+    }
+
+    /**
+     * Refreshes the list using local favorites and the AND search logic.
+     */
+    /**
+     * Refreshes the list view by applying filters across names,
+     * descriptions, ingredients, and instructions.
+     */
+    private void refreshListView() {
+        List<Long> favoriteIds = ConfigService.getConfig().getFavoriteRecipeIds();
+
+        List<Recipe> filteredList = allRecipesMaster.stream()
+                .filter(recipe -> {
+                    boolean matchesFavorite = !showingFavoritesOnly || favoriteIds.contains(recipe.getId());
+                    if (!matchesFavorite) return false;
+
+                    if (currentSearchQuery.isEmpty()) return true;
+
+                    String[] keywords = currentSearchQuery.split("\\s+");
+
+                    // Aggregating all searchable content for this recipe
+                    StringBuilder searchableContent = new StringBuilder();
+                    searchableContent.append(recipe.getName()).append(" ");
+                    searchableContent.append(recipe.getDescription()).append(" ");
+
+                    // Append ingredient names
+                    for (RecipeIngredient ri : recipe.getIngredients()) {
+                        searchableContent.append(ri.getIngredient().getName()).append(" ");
+                    }
+
+                    // Append instruction steps
+                    for (String instruction : recipe.getInstructions()) {
+                        searchableContent.append(instruction).append(" ");
+                    }
+
+                    String finalSearchString = searchableContent.toString().toLowerCase();
+
+                    for (String keyword : keywords) {
+                        if (!finalSearchString.contains(keyword.toLowerCase())) {
+                            return false;
+                        }
+                    }
+                    return true;
+                })
+                .toList();
+
+        observableRecipes.setAll(filteredList);
+        recipeListView.refresh();
     }
 
     /**
@@ -534,16 +655,22 @@ public class MainScreenCtrl {
     /**
      * Handles switching the recipe list view to show only favorite recipes.
      */
+    @FXML
     public void showFavorites() {
         System.out.println("Switching view to show only favorite recipes.");
+        this.showingFavoritesOnly = true;
+        refreshListView();
     }
 
     /**
      * Handles switching the recipe list view to show all recipes available on the
      * server.
      */
+    @FXML
     public void showAllRecipes() {
         System.out.println("Switching view to show all recipes.");
+        this.showingFavoritesOnly = false;
+        refreshListView();
     }
 
     /**

@@ -48,7 +48,7 @@ public class Config {
 
     /**
      * Set the UI language name.
-     *
+     *    public List<Long> getFavoriteRecipeIds() { return favoriteRecipeIds; }
      * @param language language name
      */
     public void setLanguage(String language) {
