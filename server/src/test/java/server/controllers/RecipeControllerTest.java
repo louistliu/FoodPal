@@ -12,6 +12,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.messaging.converter.JacksonJsonMessageConverter;
@@ -19,7 +20,6 @@ import org.springframework.messaging.simp.stomp.StompFrameHandler;
 import org.springframework.messaging.simp.stomp.StompHeaders;
 import org.springframework.messaging.simp.stomp.StompSession;
 import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
@@ -71,13 +71,12 @@ class RecipeControllerTest {
                       blockingQueue.add((Recipe) payload);
                   }
               });
-
-          Recipe payload = new Recipe(
-              "test-recipe",
+        Recipe payload = new Recipe(
+                "test-recipe",
               "a test recipe",
               new ArrayList<>(),
               new ArrayList<>()
-          );
+        );
 
         session.send("/app/recipes/create", payload);
         await()
@@ -87,13 +86,14 @@ class RecipeControllerTest {
                   assertEquals(payload.getName(), result != null ? result.getName() : null);
               });
     }
-    
+
     @Test
     void fetchRecipesEndpoint() {
         try {
             // Create a unique recipe directly via controller to avoid relying on DummyData
             String uniqueName = "fetch-test-" + System.currentTimeMillis();
-            Recipe toCreate = new Recipe(uniqueName, "created for fetch test", new ArrayList<>(), new ArrayList<>());
+            Recipe toCreate = new Recipe(uniqueName, "created for fetch test", new ArrayList<>(),
+                  new ArrayList<>());
             recipeController.create(toCreate);
 
             var list = recipeController.fetchIngredients();
