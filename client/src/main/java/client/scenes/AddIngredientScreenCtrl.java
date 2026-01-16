@@ -40,6 +40,7 @@ public class AddIngredientScreenCtrl extends ScreenControl {
     private Button cancelButton;
     private RecipeIngredient result = null;
     private ObservableList<Ingredient> observableIngredients;
+    private Ingredient ingredientToSelect;
 
     /**
      * Constructs the MainScreenCtrl, injecting the scene controller.
@@ -133,7 +134,18 @@ public class AddIngredientScreenCtrl extends ScreenControl {
             observableIngredients.clear();
             observableIngredients.addAll(ingredients);
             observableIngredients.add(otherOption);
-            ingredientChoiceBox.getSelectionModel().selectFirst();
+
+            if (ingredientToSelect != null) {
+                for (Ingredient i : observableIngredients) {
+                    if (i.getId() == ingredientToSelect.getId()) {
+                        ingredientChoiceBox.getSelectionModel().select(i);
+                        break;
+                    }
+                }
+                ingredientToSelect = null;
+            } else {
+                ingredientChoiceBox.getSelectionModel().selectFirst();
+            }
         });
     }
 
@@ -249,5 +261,22 @@ public class AddIngredientScreenCtrl extends ScreenControl {
      */
     public RecipeIngredient getResult() {
         return result;
+    }
+
+    /**
+     * Override init to handle passed parameters.
+     *
+     * @param params param[0] is the recipe ingredient from which the information
+     *               should be extracted and put into the screen fields.
+     */
+    @Override
+    public void init(Object... params) {
+        super.init(params);
+
+        if (params.length > 0 && params[0] instanceof RecipeIngredient item) {
+            amountTextField.setText(String.valueOf(item.getAmount()));
+            unitMenuButton.setText(item.getUnit());
+            this.ingredientToSelect = item.getIngredient();
+        }
     }
 }

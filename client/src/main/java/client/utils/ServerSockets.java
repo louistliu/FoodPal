@@ -26,6 +26,7 @@ public class ServerSockets {
     private static final String INITIAL_ENDPOINT = "food-pal";
     private final WebSocketStompClient client;
     private final StompSessionHandler sessionHandler;
+    private final boolean isAvailable;
 
     /**
      * Create a new STOMP client, and configure session.
@@ -42,11 +43,23 @@ public class ServerSockets {
 
         this.sessionHandler = new StompSessionHandler();
         try {
-            client.connectAsync(URL + INITIAL_ENDPOINT, sessionHandler)
-                  .get(5, TimeUnit.SECONDS);
+            client.connectAsync(URL + INITIAL_ENDPOINT, sessionHandler).get(5, TimeUnit.SECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            throw new RuntimeException(e);
+            System.err.println("FAILED to CONNECT to " + URL + INITIAL_ENDPOINT);
+            isAvailable = false;
+            return;
         }
+        isAvailable = true;
+    }
+
+    /**
+     * Check if a server for this client is reachable.
+     *
+     * @return returns {@code true} if the server can be reached via a get method,
+     *      otherwise returns {@code false}
+     */
+    public boolean isServerAvailable() {
+        return isAvailable;
     }
 
     /**

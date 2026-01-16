@@ -25,8 +25,10 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.AnchorPane;
@@ -122,11 +124,19 @@ public class MainScreenCtrl {
             @Override
             protected void updateItem(RecipeIngredient item, boolean empty) {
                 super.updateItem(item, empty);
-                setText(empty ? null
-                        : item != null
-                        ? item.getIngredient().getName() + " " + item.getAmount() + " "
-                        + item.getUnit()
-                        : null);
+                if (empty || item == null) {
+                    setText(null);
+                    setContextMenu(null);
+                } else {
+                    setText(item.getIngredient().getName() + " " + item.getAmount() + " "
+                          + item.getUnit());
+
+                    ContextMenu cm = new ContextMenu();
+                    MenuItem editItem = new MenuItem("Edit");
+                    editItem.setOnAction(event -> editIngredient(item));
+                    cm.getItems().add(editItem);
+                    setContextMenu(cm);
+                }
             }
         });
 
@@ -276,9 +286,11 @@ public class MainScreenCtrl {
                         "Edit Instruction", instruction);
 
         if (control == null) {
-            return Optional.of(instruction);
+            ErrorScreenCtrl.showError("Failed to edit instruction");
+            return Optional.empty();
         }
-        return Optional.of(control.getResult());
+        return control.getResult() == null ? Optional.empty() :
+              Optional.of(control.getResult());
     }
 
     /**
@@ -572,22 +584,62 @@ public class MainScreenCtrl {
                 launchModal(AddIngredientScreenCtrl.class, "AddIngredientScreen.fxml",
                         "Add New Ingredient");
 
-        if (controller != null) {
+        if (controller != null && controller.getResult() != null) {
             RecipeIngredient newIngredient = controller.getResult();
-            if (newIngredient != null) {
-                if (containsIngredient(selectedRecipe, newIngredient.getIngredient())) {
-                    ErrorScreenCtrl.showError(
-                            "Ingredient " + newIngredient.getIngredient().getName()
-                                    + " is already in the recipe.\n "
-                                    + "Please edit the existing ingredient (right click option)");
-                    System.out.println("Ingredient already contained");
-                    return;
-                }
-                System.out.println(
-                        "Ingredient added: " + newIngredient.getIngredient().getName());
+            if (containsIngredient(selectedRecipe, newIngredient.getIngredient())) {
+                ErrorScreenCtrl.showError(
+                      "Ingredient " + newIngredient.getIngredient().getName()
+                            + " is already in the recipe.\n "
+                            + "Please edit the existing ingredient (right click option)");
+                System.out.println("Ingredient already contained");
+                return;
+            }
+            System.out.println("Ingredient added: " + newIngredient.getIngredient().getName());
+            selectedRecipe.getIngredients().add(newIngredient);
+            observableIngredients.add(newIngredient);
+            ingredientListView.refresh();
+        }
+    }
 
-                selectedRecipe.getIngredients().add(newIngredient);
-                observableIngredients.add(newIngredient);
+    /**
+     * Handles the edit ingredient function.
+     *
+     * @param item - The recipe ingredient to be edited.
+     */
+    private void editIngredient(RecipeIngredient item) {
+        if (selectedRecipe == null || item == null) {
+            return;
+        }
+
+        AddIngredientScreenCtrl controller = launchModal(
+              AddIngredientScreenCtrl.class,
+              "AddIngredientScreen.fxml",
+              "Edit Ingredient",
+              item
+        );
+
+        if (controller != null && controller.getResult() != null) {
+            RecipeIngredient updatedItem = controller.getResult();
+
+            if (!item.getIngredient().getName().equals(updatedItem.getIngredient().getName())
+                  && containsIngredient(selectedRecipe, updatedItem.getIngredient())) {
+                ErrorScreenCtrl.showError(
+                      "Ingredient " + updatedItem.getIngredient().getName()
+                            + " is already in the recipe.\n "
+                            + "Please edit the existing ingredient (right click option)");
+                System.out.println("Ingredient already contained");
+                return;
+            }
+
+            int index = selectedRecipe.getIngredients().indexOf(item);
+            if (index != -1) {
+                selectedRecipe.getIngredients().set(index, updatedItem);
+                int obsIndex = observableIngredients.indexOf(item);
+                if (obsIndex != -1) {
+                    observableIngredients.set(obsIndex, updatedItem);
+                } else {
+                    observableIngredients.setAll(selectedRecipe.getIngredients());
+                }
                 ingredientListView.refresh();
             }
         }
