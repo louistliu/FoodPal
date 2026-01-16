@@ -46,16 +46,33 @@ public class InstructionListCell extends ListCell<String> {
         contextMenu.getItems().addAll(moveUp, moveDown, edit);
     }
 
+    /**
+     * Handles instruction editing.
+     * If the updated instruction is not null, updates instruction text,
+     * however if that instruction has been removed by another client adds the new one instead.
+     * Otherwise, does nothing.
+     *
+     * @param event event that triggered this method data.
+     * @param editInstruction function to call to get the new content of instruction.
+     */
     private void handleEdit(ActionEvent event, Function<String, Optional<String>> editInstruction) {
         int index = getIndex();
         ObservableList<String> items = getListView().getItems();
 
-        String item = items.remove(index);
+        String item = items.get(index);
         editInstruction.apply(item)
               .ifPresentOrElse(s -> {
-                  items.add(index, s);
-                  getListView().getSelectionModel().select(index);
-              }, () -> ErrorScreenCtrl.showError("Failed to edit instruction"));
+                  int newIndex = items.indexOf(item);
+
+                  if (newIndex == -1) {
+                      items.add(s);
+                      return;
+                  }
+                  items.remove(newIndex);
+                  items.add(newIndex, s);
+                  getListView().getSelectionModel().select(newIndex);
+              }, () -> {
+              });
     }
 
 
@@ -67,7 +84,6 @@ public class InstructionListCell extends ListCell<String> {
      */
     @Override
     protected void updateItem(String item, boolean empty) {
-        System.out.println(item);
         super.updateItem(item, empty);
         if (empty || item == null) {
             setText(null);

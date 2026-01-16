@@ -241,9 +241,11 @@ public class MainScreenCtrl {
                     "Edit Instruction", instruction);
 
         if (control == null) {
-            return Optional.of(instruction);
+            ErrorScreenCtrl.showError("Failed to edit instruction");
+            return Optional.empty();
         }
-        return Optional.of(control.getResult());
+        return control.getResult() == null ? Optional.empty() :
+              Optional.of(control.getResult());
     }
 
     /**
