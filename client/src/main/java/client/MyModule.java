@@ -18,10 +18,8 @@ package client;
 
 import client.scenes.AddIngredientScreenCtrl;
 import client.scenes.AddInstructionScreenCtrl;
-import client.scenes.AddQuoteCtrl;
 import client.scenes.MainCtrl;
 import client.scenes.MainScreenCtrl;
-import client.scenes.QuoteOverviewCtrl;
 import client.utils.Config;
 import client.utils.ServerRecipeUtils;
 import client.utils.ServerSockets;
@@ -54,8 +52,6 @@ public class MyModule implements Module {
     public void configure(Binder binder) {
         binder.bind(Config.class).toInstance(config);
         binder.bind(MainCtrl.class).in(Scopes.SINGLETON);
-        binder.bind(AddQuoteCtrl.class).in(Scopes.SINGLETON);
-        binder.bind(QuoteOverviewCtrl.class).in(Scopes.SINGLETON);
 
         // Bind the FoodPal Main Screen controller
         binder.bind(MainScreenCtrl.class).in(Scopes.SINGLETON);

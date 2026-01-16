@@ -16,13 +16,11 @@
 
 package client;
 
-import client.scenes.AddQuoteCtrl;
 import client.scenes.MainCtrl;
 import client.scenes.MainScreenCtrl;
-import client.scenes.QuoteOverviewCtrl;
 import client.utils.Config;
 import client.utils.ConfigService;
-import client.utils.ServerUtils;
+import client.utils.ServerSockets;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import java.io.IOException;
@@ -70,22 +68,21 @@ public class Main extends Application {
         // Ensure config is saved on exit
         primaryStage.setOnCloseRequest(e -> ConfigService.persistConfig());
 
-        var serverUtils = INJECTOR.getInstance(ServerUtils.class);
-        if (!serverUtils.isServerAvailable()) {
+        var serverSockets = INJECTOR.getInstance(ServerSockets.class);
+        if (!serverSockets.isServerAvailable()) {
             var msg = "Server needs to be started before the client,"
                     + " but it does not seem to be available. Shutting down.";
             System.err.println(msg);
+            System.exit(1);
             return;
         }
 
-        var overview = FXML.load(QuoteOverviewCtrl.class, "client", "scenes", "QuoteOverview.fxml");
-        var add = FXML.load(AddQuoteCtrl.class, "client", "scenes", "AddQuote.fxml");
         var mainScreen = FXML.load(MainScreenCtrl.class, "client", "scenes", "MainScreen.fxml");
 
         var mainCtrl = INJECTOR.getInstance(MainCtrl.class);
 
         // Pass the mainScreen Pair to initialize
-        mainCtrl.initialize(primaryStage, overview, add, mainScreen);
+        mainCtrl.initialize(primaryStage, mainScreen);
     }
 
     /**
