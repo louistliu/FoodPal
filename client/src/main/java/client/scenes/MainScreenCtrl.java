@@ -932,6 +932,10 @@ public class MainScreenCtrl {
         favoritesButton.setText(languageController.get("button.favorites"));
         allButton.setText(languageController.get("button.allRecipes"));
 
+        recipeNameField.setPromptText(languageController.get("label.recipeNamePrompt"));
+        recipeDescriptionField.setPromptText(languageController.get("label.descriptionPrompt"));
+        searchRecipesField.setPromptText(languageController.get("label.searchPrompt"));
+
         recipeListView.refresh();
 
     }
