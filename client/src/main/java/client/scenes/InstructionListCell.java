@@ -20,18 +20,22 @@ import javafx.scene.input.TransferMode;
 public class InstructionListCell extends ListCell<String> {
 
     private final ContextMenu contextMenu;
+    private final Runnable save;
 
     /**
      * Constructs a new InstructionListCell and initializes the drag-and-drop event handlers.
      * Also creates menu for manually moving instructions with right-clicking.
      */
     @Inject
-    public InstructionListCell(Function<String, Optional<String>> editInstruction) {
+    public InstructionListCell(Runnable saveFunc,
+                               Function<String, Optional<String>> editInstruction) {
         setOnDragDetected(this::handleDragDetected);
         setOnDragOver(this::handleDragOver);
         setOnDragEntered(this::handleDragEntered);
         setOnDragExited(this::handleDragExited);
         setOnDragDropped(this::handleDragDropped);
+
+        this.save = saveFunc;
 
         contextMenu = new ContextMenu();
         MenuItem moveUp = new MenuItem("Move Up");
@@ -52,7 +56,7 @@ public class InstructionListCell extends ListCell<String> {
      * however if that instruction has been removed by another client adds the new one instead.
      * Otherwise, does nothing.
      *
-     * @param event event that triggered this method data.
+     * @param event           event that triggered this method data.
      * @param editInstruction function to call to get the new content of instruction.
      */
     private void handleEdit(ActionEvent event, Function<String, Optional<String>> editInstruction) {
@@ -71,6 +75,7 @@ public class InstructionListCell extends ListCell<String> {
                   items.remove(newIndex);
                   items.add(newIndex, s);
                   getListView().getSelectionModel().select(newIndex);
+                  save.run();
               }, () -> {
               });
     }
@@ -108,6 +113,7 @@ public class InstructionListCell extends ListCell<String> {
             String item = items.remove(index);
             items.add(newIndex, item);
             getListView().getSelectionModel().select(newIndex);
+            save.run();
         }
     }
 
@@ -188,6 +194,7 @@ public class InstructionListCell extends ListCell<String> {
                 items.add(thisIdx, itemToMove);
                 getListView().getSelectionModel().select(thisIdx);
                 success = true;
+                save.run();
             }
         }
         event.setDropCompleted(success);

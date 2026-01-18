@@ -150,7 +150,7 @@ public class MainScreenCtrl {
         // This listener will fire immediately if data is bound, triggering
         // showRecipeDetails
         recipeListView.getSelectionModel().selectedItemProperty()
-                .addListener((obs, oldRecipe, newRecipe) -> showRecipeDetails(newRecipe));
+              .addListener((obs, oldRecipe, newRecipe) -> showRecipeDetails(newRecipe));
 
         setupInstructionDragAndDrop();
 
@@ -163,21 +163,21 @@ public class MainScreenCtrl {
         ingredientListView.setItems(observableIngredients);
 
         serverRecipes.subscribe(Endpoint.RECIPE_FETCH,
-                new ResponseHandler<List<Recipe>>(this::onUpdateRecipeList) {
-                });
+              new ResponseHandler<List<Recipe>>(this::onUpdateRecipeList) {
+              });
 
         serverRecipes.subscribe(Endpoint.RECIPE_CREATE,
-                new ResponseHandler<Recipe>(this::onAddRecipe) {
-                });
+              new ResponseHandler<Recipe>(this::onAddRecipe) {
+              });
         serverRecipes.subscribe(Endpoint.RECIPE_USER_CREATE,
-                new ResponseHandler<Recipe>(this::onCreateUserRecipe) {
-                });
+              new ResponseHandler<Recipe>(this::onCreateUserRecipe) {
+              });
         serverRecipes.subscribe(Endpoint.RECIPE_UPDATE,
-                new ResponseHandler<Recipe>(this::onUpdateRecipe) {
-                });
+              new ResponseHandler<Recipe>(this::onUpdateRecipe) {
+              });
         serverRecipes.subscribe(Endpoint.RECIPE_DELETE,
-                new ResponseHandler<Recipe>(this::onDeleteRecipe) {
-                });
+              new ResponseHandler<Recipe>(this::onDeleteRecipe) {
+              });
 
         searchRecipesField.textProperty().addListener((obs, oldVal, newVal) -> {
             this.currentSearchQuery = newVal.trim().toLowerCase();
@@ -211,6 +211,8 @@ public class MainScreenCtrl {
      * @param recipes The full list of recipes from the server.
      */
     private void onUpdateRecipeList(List<Recipe> recipes) {
+
+        System.out.print("RECIPES ARRIVED");
         Platform.runLater(() -> {
             allRecipes.clear();
             allRecipes.addAll(recipes);
@@ -441,12 +443,11 @@ public class MainScreenCtrl {
     }
 
     /**
-     * Handles the addition of a new recipe placeholder.
+     * Creates a new recipe with a unique name, and sends it to the server.
      */
     public void addRecipe() {
-
         String newName = "Recipe " + findNextId("Recipe ");
-        showRecipeDetails(new Recipe(newName));
+        serverRecipes.send(Endpoint.RECIPE_CREATE, new Recipe(newName));
 
         System.out.println("Added new recipe: " + newName);
     }
@@ -486,8 +487,8 @@ public class MainScreenCtrl {
         System.out.println("RECIPE: " + recipeName);
 
         Recipe newRecipe =
-                new Recipe(selectedRecipe.getName() + " Clone " + findNextId(recipeName + " Clone"),
-                        selectedRecipe.getDescription(), clonedIngredients, clonedInstructions);
+              new Recipe(selectedRecipe.getName() + " Clone " + findNextId(recipeName + " Clone"),
+                    selectedRecipe.getDescription(), clonedIngredients, clonedInstructions);
 
         serverRecipes.send(Endpoint.RECIPE_CREATE, newRecipe);
 
@@ -602,7 +603,7 @@ public class MainScreenCtrl {
             modalStage.initModality(Modality.WINDOW_MODAL);
             modalStage.setTitle(title);
             Pair<T, Parent> pair =
-                    Main.getFxml().load(controllerClass, "client", "scenes", fxmlFileName);
+                  Main.getFxml().load(controllerClass, "client", "scenes", fxmlFileName);
             modalStage.setScene(new Scene(pair.getValue()));
 
             // Pass the stage to the controller so it can close itself
@@ -627,8 +628,8 @@ public class MainScreenCtrl {
         }
 
         AddIngredientScreenCtrl controller =
-                launchModal(AddIngredientScreenCtrl.class, "AddIngredientScreen.fxml",
-                        "Add New Ingredient");
+              launchModal(AddIngredientScreenCtrl.class, "AddIngredientScreen.fxml",
+                    "Add New Ingredient");
 
         if (controller != null && controller.getResult() != null) {
             RecipeIngredient newIngredient = controller.getResult();
@@ -642,8 +643,7 @@ public class MainScreenCtrl {
             }
             System.out.println("Ingredient added: " + newIngredient.getIngredient().getName());
             selectedRecipe.getIngredients().add(newIngredient);
-            observableIngredients.add(newIngredient);
-            ingredientListView.refresh();
+            serverRecipes.send(Endpoint.RECIPE_UPDATE, selectedRecipe);
         }
     }
 
@@ -683,6 +683,7 @@ public class MainScreenCtrl {
                 int obsIndex = observableIngredients.indexOf(item);
                 if (obsIndex != -1) {
                     observableIngredients.set(obsIndex, updatedItem);
+                    saveRecipe();
                 } else {
                     observableIngredients.setAll(selectedRecipe.getIngredients());
                 }
@@ -700,7 +701,7 @@ public class MainScreenCtrl {
      */
     private boolean containsIngredient(Recipe recipe, Ingredient ingredient) {
         return recipe.getIngredients().stream()
-                .anyMatch(i -> i.getIngredient().getName().equals(ingredient.getName()));
+              .anyMatch(i -> i.getIngredient().getName().equals(ingredient.getName()));
     }
 
     /**
@@ -713,8 +714,8 @@ public class MainScreenCtrl {
         }
 
         AddInstructionScreenCtrl controller =
-                launchModal(AddInstructionScreenCtrl.class, "AddInstructionScreen.fxml",
-                        "Add Instruction");
+              launchModal(AddInstructionScreenCtrl.class, "AddInstructionScreen.fxml",
+                    "Add Instruction");
 
         if (controller != null) {
             String instructionText = controller.getResult();
@@ -723,6 +724,7 @@ public class MainScreenCtrl {
                 System.out.println("Instruction added: " + instructionText);
 
                 instructionListView.getItems().add(instructionText);
+                saveRecipe();
             }
         }
     }
@@ -735,6 +737,7 @@ public class MainScreenCtrl {
         if (selected != null) {
             selectedRecipe.removeIngredient(selected);
             ingredientListView.getItems().remove(selected);
+            saveRecipe();
         }
     }
 
@@ -746,6 +749,7 @@ public class MainScreenCtrl {
         if (selected != null) {
             instructionListView.getItems().remove(selected);
             selectedRecipe.getInstructions().remove(selected);
+            saveRecipe();
         }
     }
 
