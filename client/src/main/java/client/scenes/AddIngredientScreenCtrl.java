@@ -1,5 +1,6 @@
 package client.scenes;
 
+import client.utils.Endpoint;
 import client.utils.ResponseHandler;
 import client.utils.ServerSockets;
 import commons.Ingredient;
@@ -89,23 +90,23 @@ public class AddIngredientScreenCtrl extends ScreenControl {
                   }
               });
 
-        serverIngredients.subscribe(ServerSockets.setDestination("/app/ingredients/fetch"),
+        serverIngredients.subscribe(Endpoint.INGREDIENT_FETCH,
               new ResponseHandler<List<Ingredient>>(this::onUpdateIngredientList) {
               });
 
-        serverIngredients.subscribe(ServerSockets.setDestination("/topic/ingredients/create"),
+        serverIngredients.subscribe(Endpoint.INGREDIENT_CREATE,
               new ResponseHandler<Ingredient>(this::onAddIngredient) {
               });
 
-        serverIngredients.subscribe(ServerSockets.setDestination("/user/queue/ingredients/create"),
+        serverIngredients.subscribe(Endpoint.INGREDIENT_USER_CREATE,
               new ResponseHandler<Ingredient>(this::onIngredientCreatedCallback) {
               });
 
-        serverIngredients.subscribe(ServerSockets.setDestination("/topic/ingredients/update"),
+        serverIngredients.subscribe(Endpoint.INGREDIENT_UPDATE,
               new ResponseHandler<Ingredient>(this::onUpdateIngredient) {
               });
 
-        serverIngredients.subscribe(ServerSockets.setDestination("/topic/ingredients/delete"),
+        serverIngredients.subscribe(Endpoint.INGREDIENT_DELETE,
               new ResponseHandler<Ingredient>(this::onDeleteIngredient) {
               });
     }
@@ -230,7 +231,7 @@ public class AddIngredientScreenCtrl extends ScreenControl {
                 ErrorScreenCtrl.showError("Please enter a name for the new ingredient.");
                 return;
             }
-            serverIngredients.send(ServerSockets.setDestination("/app/ingredients/create"),
+            serverIngredients.send(Endpoint.INGREDIENT_CREATE,
                   new Ingredient(newName));
 
         } else {
