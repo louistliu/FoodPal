@@ -150,9 +150,27 @@ public class MainScreenCtrl {
         // This listener will fire immediately if data is bound, triggering
         // showRecipeDetails
         recipeListView.getSelectionModel().selectedItemProperty()
-              .addListener((obs, oldRecipe, newRecipe) -> showRecipeDetails(newRecipe));
+              .addListener((obs, oldRecipe, newRecipe) -> {
+                  saveRecipeTitle();
+                  saveRecipeDescription();
+                  showRecipeDetails(newRecipe);
+              });
 
         setupInstructionDragAndDrop();
+
+        recipeNameField.setOnMouseExited(e -> saveRecipeTitle());
+        recipeNameField.focusedProperty().addListener((observable, oldValue, newValue) -> {
+            if (oldValue) {
+                saveRecipeTitle();
+            }
+        });
+        recipeDescriptionField.setOnMouseExited(e -> saveRecipeDescription());
+        recipeDescriptionField.focusedProperty().addListener((observable, oldValue, newValue) -> {
+            if (oldValue) {
+                saveRecipeDescription();
+            }
+        });
+
 
         System.out.println("FoodPal Main Screen UI initialized.");
         rightPane.setVisible(false);
@@ -289,12 +307,19 @@ public class MainScreenCtrl {
             }
 
             int ind = observableRecipes.indexOf(recipes.getLast());
-            observableRecipes.set(ind, recipe);
 
-            if (selectedRecipe != null && recipe.getId() == selectedRecipe.getId()) {
-                selectRecipe(recipe);
+            if (selectedRecipe == null || recipe.getId() != selectedRecipe.getId()) {
+                observableRecipes.remove(ind);
+                observableRecipes.add(ind, recipe);
+                recipeListView.refresh();
+                return;
             }
+            observableRecipes.remove(ind);
+            observableRecipes.add(ind, recipe);
             recipeListView.refresh();
+
+
+            selectRecipe(recipe);
         });
     }
 
@@ -314,13 +339,33 @@ public class MainScreenCtrl {
         selectedRecipe = recipe;
     }
 
+    private void saveRecipeTitle() {
+        if (selectedRecipe == null || recipeNameField.getText().trim().isEmpty()) {
+            return;
+        }
+        if (recipeNameField.getText().equals(selectedRecipe.getName())) {
+            return;
+        }
+        saveRecipe();
+    }
+
+    private void saveRecipeDescription() {
+        if (selectedRecipe == null || recipeDescriptionField.getText().trim().isEmpty()) {
+            return;
+        }
+        if (recipeDescriptionField.getText().equals(selectedRecipe.getDescription())) {
+            return;
+        }
+        saveRecipe();
+    }
+
     /**
      * Configures the cell factory for the instruction list view to enable
      * custom rendering and edit handling.
      */
     private void setupInstructionDragAndDrop() {
         instructionListView.setCellFactory(
-                param -> new InstructionListCell(this::editInstructionHandler));
+              param -> new InstructionListCell(this::saveRecipe, this::editInstructionHandler));
     }
 
     /**
@@ -331,8 +376,8 @@ public class MainScreenCtrl {
      */
     private Optional<String> editInstructionHandler(String instruction) {
         AddInstructionScreenCtrl control =
-                launchModal(AddInstructionScreenCtrl.class, "AddInstructionScreen.fxml",
-                        "Edit Instruction", instruction);
+              launchModal(AddInstructionScreenCtrl.class, "AddInstructionScreen.fxml",
+                    "Edit Instruction", instruction);
 
         if (control == null) {
             ErrorScreenCtrl.showError("Failed to edit instruction");

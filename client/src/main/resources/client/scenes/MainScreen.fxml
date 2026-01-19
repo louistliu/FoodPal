@@ -55,8 +55,9 @@
                 <Button fx:id="addInstructionButton" layoutX="522.0" layoutY="534.0" mnemonicParsing="false" onAction="#addInstruction" text="+" />
                 <Button fx:id="deleteIngredientButton" layoutX="187.0" layoutY="535.0" mnemonicParsing="false" onAction="#deleteIngredient" text="-" />
                 <Button fx:id="deleteInstructionButton" layoutX="557.0" layoutY="534.0" mnemonicParsing="false" onAction="#deleteInstruction" text="-" />
-                <Button fx:id="saveButton" layoutX="14.0" layoutY="14.0" mnemonicParsing="false" onAction="#saveRecipe" text="Save" />
                 <Button fx:id="favoriteButton" layoutX="267.0" layoutY="14.0" mnemonicParsing="false" onAction="#toggleFavorite" text="Favorite" />
+                <Button fx:id="saveButton" layoutX="14.0" layoutY="14.0" mnemonicParsing="false" onAction="#saveRecipe" text="Save" visible="false" />
+
             </children>
         </AnchorPane>
     </items>
