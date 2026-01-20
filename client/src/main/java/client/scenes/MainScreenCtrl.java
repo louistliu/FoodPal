@@ -27,6 +27,7 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.AnchorPane;
@@ -59,7 +60,7 @@ public class MainScreenCtrl {
     @FXML
     private TextField recipeNameField;
     @FXML
-    private TextField recipeDescriptionField;
+    private TextArea recipeDescriptionField;
     @FXML
     private ToggleButton switchMenuButton;
     @FXML
@@ -102,6 +103,10 @@ public class MainScreenCtrl {
     public void initialize() {
         languageChoiceBox.setItems(FXCollections.observableArrayList("English", "Dutch", "German"));
         languageChoiceBox.getSelectionModel().selectFirst();
+
+        if (recipeDescriptionField != null) {
+            recipeDescriptionField.setWrapText(true);
+        }
 
         // --- Cell Factory and Listeners ---
         recipeListView.setCellFactory(lv -> new ListCell<>() {
