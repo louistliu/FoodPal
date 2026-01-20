@@ -5,6 +5,7 @@ import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -109,8 +110,15 @@ public class RecipeController {
             throw new EntityNotFoundException(
                     "No recipe with id " + recipe.getId() + " in the database");
         }
-
-        System.out.println("Recipe updated");
+        Optional<Recipe> serverRecipe = recipeDB.findById(recipe.getId());
+        if (serverRecipe.isEmpty()) {
+            throw new EntityNotFoundException("Server has not saved this recipe");
+        }
+        if (!recipeDB.findBy(recipe.getName()).isEmpty()
+                && !recipe.getName().equals(serverRecipe.get().getName())) {
+            throw new EntityNotFoundException(
+                    "Recipe with name " + recipe.getName() + " already exists");
+        }
         return recipeDB.save(recipe);
     }
 
