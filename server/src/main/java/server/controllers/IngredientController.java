@@ -47,6 +47,10 @@ public class IngredientController {
     @SendToUser("/queue/ingredients/create")
     @Valid
     public Ingredient create(@Payload Ingredient ingredient) throws Exception {
+        if (ingredient == null || ingredient.getName() == null
+              || ingredient.getName().trim().isEmpty()) {
+            throw new IllegalArgumentException("Ingredient name cannot be empty");
+        }
         if (!ingredientDB.findByName(ingredient.getName()).isEmpty()) {
             throw new EntityExistsException(
                   "Ingredient with name: " + ingredient.getName() + " is already in the database");
@@ -64,6 +68,7 @@ public class IngredientController {
      * @throws Exception when update fails or the ingredient is not found
      */
     @MessageMapping("/ingredients/update")
+    @SendTo("/topic/ingredients/update")
     @Valid
     public Ingredient update(@Payload Ingredient ingredient) throws Exception {
         if (!ingredientDB.existsById(ingredient.getId())) {
@@ -83,7 +88,9 @@ public class IngredientController {
     @SubscribeMapping("/ingredients/fetch")
     public List<Ingredient> fetchIngredients() throws Exception {
         System.out.println("SUBSCRIBED");
-        return ingredientDB.findAll();
+        return ingredientDB.findAll().stream()
+              .filter(i -> i.getName() != null && !i.getName().trim().isEmpty())
+              .toList();
     }
 
     /**
@@ -95,6 +102,7 @@ public class IngredientController {
      * @throws Exception STOMP exception
      */
     @MessageMapping("/ingredients/delete")
+    @SendTo("/topic/ingredients/delete")
     @Valid
     public Ingredient delete(@Payload Ingredient ingredient) throws Exception {
         if (!ingredientDB.existsById(ingredient.getId())) {
