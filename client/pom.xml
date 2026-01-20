@@ -161,7 +161,7 @@
                     <excludes>**/target/**</excludes>
                     <consoleOutput>true</consoleOutput>
                     <violationSeverity>warning</violationSeverity>
-                    <failOnViolation>false</failOnViolation>
+                    <failOnViolation>true</failOnViolation>
                 </configuration>
                 <executions>
                     <execution>
