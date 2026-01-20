@@ -269,19 +269,19 @@ public class MainScreenCtrl {
             allRecipes.removeIf(r -> r.getId() == recipe.getId());
             allRecipes.add(recipe);
 
-            var recipes = observableRecipes.stream()
-                    .filter(x -> x.getId() == recipe.getId()).toList();
+            Optional<Recipe> existingRecipe = observableRecipes.stream()
+                    .filter(x -> x.getId() == recipe.getId())
+                    .findFirst();
 
-            if (recipes.isEmpty()) {
+            if (existingRecipe.isPresent()) {
+                int index = observableRecipes.indexOf(existingRecipe.get());
+                observableRecipes.set(index, recipe);
+
+                if (selectedRecipe != null && recipe.getId() == selectedRecipe.getId()) {
+                    showRecipeDetails(recipe);
+                }
+            } else {
                 refreshListView();
-                return;
-            }
-
-            int ind = observableRecipes.indexOf(recipes.getLast());
-            observableRecipes.set(ind, recipe);
-
-            if (selectedRecipe != null && recipe.getId() == selectedRecipe.getId()) {
-                selectRecipe(recipe);
             }
             recipeListView.refresh();
         });
