@@ -313,12 +313,10 @@ public class MainScreenCtrl {
     }
 
     /**
-     * Handles the logic for editing an existing instruction by launching
-     * the instruction editor modal.
+     * Handles the logic for editing an existing instruction.
      *
      * @param instruction The original instruction text.
-     * @return An Optional containing the updated instruction text if edited,
-     * or the original text if canceled.
+     * @return An Optional containing the updated instruction text if edited
      */
     private Optional<String> editInstructionHandler(String instruction) {
         AddInstructionScreenCtrl control =
