@@ -64,6 +64,7 @@ public class IngredientController {
      * @throws Exception when update fails or the ingredient is not found
      */
     @MessageMapping("/ingredients/update")
+    @SendTo("/topic/ingredients/update")
     @Valid
     public Ingredient update(@Payload Ingredient ingredient) throws Exception {
         if (!ingredientDB.existsById(ingredient.getId())) {
@@ -95,6 +96,7 @@ public class IngredientController {
      * @throws Exception STOMP exception
      */
     @MessageMapping("/ingredients/delete")
+    @SendTo("/topic/ingredients/delete")
     @Valid
     public Ingredient delete(@Payload Ingredient ingredient) throws Exception {
         if (!ingredientDB.existsById(ingredient.getId())) {

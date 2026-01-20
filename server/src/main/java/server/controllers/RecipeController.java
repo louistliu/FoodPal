@@ -110,7 +110,7 @@ public class RecipeController {
                     "No recipe with id " + recipe.getId() + " in the database");
         }
 
-        System.out.println("REcipe updated");
+        System.out.println("Recipe updated");
         return recipeDB.save(recipe);
     }
 
