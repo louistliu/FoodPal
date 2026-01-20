@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import javafx.application.Platform;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -150,11 +151,7 @@ public class MainScreenCtrl {
         // This listener will fire immediately if data is bound, triggering
         // showRecipeDetails
         recipeListView.getSelectionModel().selectedItemProperty()
-              .addListener((obs, oldRecipe, newRecipe) -> {
-                  saveRecipeTitle();
-                  saveRecipeDescription();
-                  showRecipeDetails(newRecipe);
-              });
+              .addListener(this::onSelectedRecipeChanged);
 
         setupInstructionDragAndDrop();
 
@@ -289,7 +286,6 @@ public class MainScreenCtrl {
      * @param recipe The updated recipe data.
      */
     private void onUpdateRecipe(Recipe recipe) {
-        System.out.println(recipe);
         Platform.runLater(() -> {
             for (int i = 0; i < allRecipes.size(); i++) {
                 if (allRecipes.get(i).getId() == recipe.getId()) {
@@ -314,13 +310,33 @@ public class MainScreenCtrl {
                 recipeListView.refresh();
                 return;
             }
-            observableRecipes.remove(ind);
-            observableRecipes.add(ind, recipe);
-            recipeListView.refresh();
 
+            safeSwapRecipe(ind, recipe);
 
             selectRecipe(recipe);
         });
+    }
+
+    /**
+     * Swaps the recipe with the new one without triggering onSelectedRecipeChanged.
+     *
+     * @param index  index of recipe in observable Recipes
+     * @param recipe recipe to swap to
+     */
+    private void safeSwapRecipe(int index, Recipe recipe) {
+        recipeListView.getSelectionModel().selectedItemProperty()
+              .removeListener(this::onSelectedRecipeChanged);
+        observableRecipes.set(index, recipe);
+        recipeListView.refresh();
+        recipeListView.getSelectionModel().selectedItemProperty()
+              .addListener(this::onSelectedRecipeChanged);
+    }
+
+    private void onSelectedRecipeChanged(ObservableValue<? extends Recipe> obs, Recipe oldRecipe,
+                                         Recipe newRecipe) {
+        saveRecipeTitle();
+        saveRecipeDescription();
+        showRecipeDetails(newRecipe);
     }
 
     /**
@@ -408,8 +424,12 @@ public class MainScreenCtrl {
         }
         rightPane.setVisible(true);
 
-        recipeNameField.setText(recipe.getName());
-        recipeDescriptionField.setText(recipe.getDescription());
+        if (!recipeNameField.getText().equals(recipe.getName())) {
+            recipeNameField.setText(recipe.getName());
+        }
+        if (!recipeDescriptionField.getText().equals(recipe.getDescription())) {
+            recipeDescriptionField.setText(recipe.getDescription());
+        }
 
         updateFavoriteButtonText(recipe);
 
