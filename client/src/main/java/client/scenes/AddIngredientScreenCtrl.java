@@ -26,7 +26,7 @@ import javafx.util.StringConverter;
 public class AddIngredientScreenCtrl extends ScreenControl {
 
     private final ServerSockets serverIngredients;
-    private final Ingredient otherOption = new Ingredient("Other");
+    private final Ingredient otherOption;
     @FXML
     private TextArea inputTextArea; // Visible only when "Other" is selected
     @FXML
@@ -55,6 +55,7 @@ public class AddIngredientScreenCtrl extends ScreenControl {
                                    LanguageController languageController) {
         this.serverIngredients = serverIngredients;
         this.languageController = languageController;
+        this.otherOption = new Ingredient(languageController.get("ingredient.other"));
     }
 
     /**
@@ -68,6 +69,8 @@ public class AddIngredientScreenCtrl extends ScreenControl {
         cancelButton.setText(languageController.get("button.cancel1"));
         amountTextField.setPromptText(languageController.get("label.amountPrompt"));
         unitMenuButton.setText(languageController.get("label.unit"));
+        otherOption.setName(languageController.get("ingredient.other"));
+        inputTextArea.setPromptText(languageController.get("prompt.newIngredient"));
 
         // Reset UI fields
         amountTextField.clear();
@@ -88,7 +91,7 @@ public class AddIngredientScreenCtrl extends ScreenControl {
         // Add listener to show/hide the inputTextArea based on selection
         ingredientChoiceBox.getSelectionModel().selectedItemProperty()
               .addListener((obs, oldVal, newVal) -> {
-                  if ("Other".equals(newVal.getName())) {
+                  if (newVal != null && newVal.equals(otherOption)) {
                       inputTextArea.setVisible(true);
                       inputTextArea.clear();
                       inputTextArea.requestFocus();
