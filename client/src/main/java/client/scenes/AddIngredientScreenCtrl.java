@@ -271,6 +271,7 @@ public class AddIngredientScreenCtrl extends ScreenControl {
      */
     @Override
     public void init(Object... params) {
+        this.result = null;
         super.init(params);
 
         if (params.length > 0 && params[0] instanceof RecipeIngredient item) {
