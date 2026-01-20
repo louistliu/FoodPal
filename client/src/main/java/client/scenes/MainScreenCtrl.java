@@ -1,6 +1,8 @@
 package client.scenes;
 
 import client.Main;
+import client.utils.Config;
+import client.utils.ConfigService;
 import client.utils.Endpoint;
 import client.utils.PrintRecipe;
 import client.utils.ResponseHandler;
@@ -41,10 +43,16 @@ import javafx.util.Pair;
 public class MainScreenCtrl {
 
     private final ServerSockets serverRecipes;
+    private final Config config;
     RecipeList listOfRecipes = new RecipeList();
     private ObservableList<Recipe> observableRecipes;
     private ObservableList<RecipeIngredient> observableIngredients;
     private Recipe selectedRecipe;
+
+    private List<Recipe> allRecipes = new ArrayList<>();
+    private String currentSearchQuery = "";
+    private boolean showingFavoritesOnly = false;
+
     @FXML
     private AnchorPane rightPane;
     @FXML
@@ -85,6 +93,8 @@ public class MainScreenCtrl {
     private Button allButton;
     @FXML
     private Button printButton;
+    @FXML
+    private Button favoriteButton;
 
     /**
      * Constructs the MainScreenCtrl, injecting the scene controller.
@@ -92,8 +102,9 @@ public class MainScreenCtrl {
      * @param m The main application controller for scene transitions.
      */
     @Inject
-    public MainScreenCtrl(MainCtrl m, ServerSockets server) {
+    public MainScreenCtrl(MainCtrl m, ServerSockets server, Config config) {
         this.serverRecipes = server;
+        this.config = config;
     }
 
     /**
@@ -139,7 +150,7 @@ public class MainScreenCtrl {
         // This listener will fire immediately if data is bound, triggering
         // showRecipeDetails
         recipeListView.getSelectionModel().selectedItemProperty()
-              .addListener((obs, oldRecipe, newRecipe) -> showRecipeDetails(newRecipe));
+                .addListener((obs, oldRecipe, newRecipe) -> showRecipeDetails(newRecipe));
 
         setupInstructionDragAndDrop();
 
@@ -152,89 +163,145 @@ public class MainScreenCtrl {
         ingredientListView.setItems(observableIngredients);
 
         serverRecipes.subscribe(Endpoint.RECIPE_FETCH,
-              new ResponseHandler<List<Recipe>>(this::onUpdateRecipeList) {
-              });
+                new ResponseHandler<List<Recipe>>(this::onUpdateRecipeList) {
+                });
 
         serverRecipes.subscribe(Endpoint.RECIPE_CREATE,
-              new ResponseHandler<Recipe>(this::onAddRecipe) {
-              });
+                new ResponseHandler<Recipe>(this::onAddRecipe) {
+                });
         serverRecipes.subscribe(Endpoint.RECIPE_USER_CREATE,
-              new ResponseHandler<Recipe>(this::onCreateUserRecipe) {
-              });
+                new ResponseHandler<Recipe>(this::onCreateUserRecipe) {
+                });
         serverRecipes.subscribe(Endpoint.RECIPE_UPDATE,
-              new ResponseHandler<Recipe>(this::onUpdateRecipe) {
-              });
+                new ResponseHandler<Recipe>(this::onUpdateRecipe) {
+                });
         serverRecipes.subscribe(Endpoint.RECIPE_DELETE,
-              new ResponseHandler<Recipe>(this::onDeleteRecipe) {
-              });
+                new ResponseHandler<Recipe>(this::onDeleteRecipe) {
+                });
 
+        searchRecipesField.textProperty().addListener((obs, oldVal, newVal) -> {
+            this.currentSearchQuery = newVal.trim().toLowerCase();
+            refreshListView();
+        });
+
+        searchRecipesField.setOnKeyPressed(event -> {
+            if (event.getCode() == javafx.scene.input.KeyCode.ESCAPE) {
+                searchRecipesField.clear();
+                recipeListView.requestFocus();
+            }
+        });
     }
 
+    /**
+     * Callback method triggered when the server broadcasts a newly created
+     * user-specific recipe.
+     *
+     * @param recipe The newly created recipe.
+     */
     private void onCreateUserRecipe(Recipe recipe) {
         Platform.runLater(() -> {
             selectRecipe(recipe);
         });
     }
 
+    /**
+     * Callback method triggered when the full recipe list is received from the server.
+     * Updates the master list and refreshes the current UI view.
+     *
+     * @param recipes The full list of recipes from the server.
+     */
     private void onUpdateRecipeList(List<Recipe> recipes) {
-
-        System.out.print("RECIPES ARRIVED");
         Platform.runLater(() -> {
-            // Load the actual list from the RecipeList singleton.
-            observableRecipes.addAll(recipes);
-            recipeListView.refresh();
+            allRecipes.clear();
+            allRecipes.addAll(recipes);
+            refreshListView();
+        });
+    }
+
+    /**
+     * Handles real-time search field updates and the Escape key shortcut.
+     */
+    public void setupSearchField() {
+        searchRecipesField.textProperty().addListener((obs, oldVal, newVal) -> {
+            this.currentSearchQuery = newVal.trim().toLowerCase();
+            refreshListView();
+        });
+
+        searchRecipesField.setOnKeyPressed(event -> {
+            if (event.getCode() == javafx.scene.input.KeyCode.ESCAPE) {
+                searchRecipesField.clear();
+                recipeListView.requestFocus();
+            }
         });
     }
 
     private void onAddRecipe(Recipe recipe) {
         Platform.runLater(() -> {
+            if (!allRecipes.contains(recipe)) {
+                allRecipes.add(recipe);
+            }
             if (observableRecipes.contains(recipe)) {
                 return;
             }
-            observableRecipes.add(recipe);
-            recipeListView.refresh();
+            refreshListView();
         });
     }
 
+    /**
+     * Callback method triggered when a recipe is deleted from the server.
+     * Removes the recipe from both the master list and the UI list.
+     *
+     * @param recipe The recipe to be removed.
+     */
     private void onDeleteRecipe(Recipe recipe) {
         Platform.runLater(() -> {
+            allRecipes.removeIf(r -> r.getId() == recipe.getId());
+
             observableRecipes.remove(recipe);
             recipeListView.refresh();
         });
     }
 
+    /**
+     * Callback method triggered when an existing recipe is updated on the server.
+     * Synchronizes the master list and updates the UI if the recipe is currently visible.
+     *
+     * @param recipe The updated recipe data.
+     */
     private void onUpdateRecipe(Recipe recipe) {
         System.out.println(recipe);
         Platform.runLater(() -> {
-            var recipes =
-                  observableRecipes.stream().filter(x -> x.getId() == recipe.getId()).toList();
+            for (int i = 0; i < allRecipes.size(); i++) {
+                if (allRecipes.get(i).getId() == recipe.getId()) {
+                    allRecipes.set(i, recipe);
+                    break;
+                }
+            }
+
+            var recipes = observableRecipes.stream()
+                    .filter(x -> x.getId() == recipe.getId()).toList();
 
             if (recipes.isEmpty()) {
-                observableRecipes.add(recipe);
-                recipeListView.refresh();
-                System.err.println(
-                      "Recipe does not exist in recipe list"
-                            + " even though it is being updated and not created");
+                refreshListView();
                 return;
             }
+
             int ind = observableRecipes.indexOf(recipes.getLast());
+            observableRecipes.set(ind, recipe);
 
-
-            if (recipe.getId() != selectedRecipe.getId()) {
-                observableRecipes.remove(ind);
-                observableRecipes.add(ind, recipe);
-                recipeListView.refresh();
-                return;
+            if (selectedRecipe != null && recipe.getId() == selectedRecipe.getId()) {
+                selectRecipe(recipe);
             }
-            observableRecipes.remove(ind);
-            observableRecipes.add(ind, recipe);
             recipeListView.refresh();
-
-
-            selectRecipe(recipe);
         });
     }
 
+    /**
+     * Selects a recipe in the list view and sets it as the currently selected recipe.
+     * If the recipe is not in the current observable list, it is added before selection.
+     *
+     * @param recipe The recipe to be selected.
+     */
     private void selectRecipe(Recipe recipe) {
         if (!observableRecipes.contains(recipe)) {
             observableRecipes.add(recipe);
@@ -245,15 +312,25 @@ public class MainScreenCtrl {
         selectedRecipe = recipe;
     }
 
+    /**
+     * Configures the cell factory for the instruction list view to enable
+     * custom rendering and edit handling.
+     */
     private void setupInstructionDragAndDrop() {
         instructionListView.setCellFactory(
-              param -> new InstructionListCell(this::editInstructionHandler));
+                param -> new InstructionListCell(this::editInstructionHandler));
     }
 
+    /**
+     * Handles the logic for editing an existing instruction.
+     *
+     * @param instruction The original instruction text.
+     * @return An Optional containing the updated instruction text if edited
+     */
     private Optional<String> editInstructionHandler(String instruction) {
         AddInstructionScreenCtrl control =
-              launchModal(AddInstructionScreenCtrl.class, "AddInstructionScreen.fxml",
-                    "Edit Instruction", instruction);
+                launchModal(AddInstructionScreenCtrl.class, "AddInstructionScreen.fxml",
+                        "Edit Instruction", instruction);
 
         if (control == null) {
             ErrorScreenCtrl.showError("Failed to edit instruction");
@@ -286,6 +363,8 @@ public class MainScreenCtrl {
 
         recipeNameField.setText(recipe.getName());
         recipeDescriptionField.setText(recipe.getDescription());
+
+        updateFavoriteButtonText(recipe);
 
         // Refresh Instructions View
         if (instructionListView != null) {
@@ -407,12 +486,101 @@ public class MainScreenCtrl {
         System.out.println("RECIPE: " + recipeName);
 
         Recipe newRecipe =
-              new Recipe(selectedRecipe.getName() + " Clone " + findNextId(recipeName + " Clone"),
-                    selectedRecipe.getDescription(), clonedIngredients, clonedInstructions);
+                new Recipe(selectedRecipe.getName() + " Clone " + findNextId(recipeName + " Clone"),
+                        selectedRecipe.getDescription(), clonedIngredients, clonedInstructions);
 
         serverRecipes.send(Endpoint.RECIPE_CREATE, newRecipe);
 
         System.out.println("Added new recipe: " + newRecipe.getName());
+    }
+
+    /**
+     * Toggles the favorite status of the selected recipe locally.
+     * Does not send an update to the server.
+     */
+    @FXML
+    public void toggleFavorite() {
+        if (selectedRecipe == null) {
+            return;
+        }
+
+        List<Long> favoriteIds = config.getFavoriteRecipeIds();
+        long currentId = selectedRecipe.getId();
+
+        if (favoriteIds.contains(currentId)) {
+            favoriteIds.remove(currentId);
+            System.out.println("Recipe '" + selectedRecipe.getName() + "' removed from favorites.");
+        } else {
+            favoriteIds.add(currentId);
+            System.out.println("Recipe '" + selectedRecipe.getName() + "' added to favorites.");
+        }
+
+        ConfigService.persistConfig();
+        updateFavoriteButtonText(selectedRecipe);
+        refreshListView();
+
+    }
+
+    /**
+     * Updates the text of the singular favoriteButton.
+     */
+    private void updateFavoriteButtonText(Recipe recipe) {
+        if (recipe == null) {
+            return;
+        }
+        boolean isFavorite = config.getFavoriteRecipeIds().contains(recipe.getId());
+        favoriteButton.setText(isFavorite ? "Unfavorite" : "Favorite");
+    }
+
+    /**
+     * Refreshes the list view by applying filters across names,
+     * descriptions, ingredients, and instructions.
+     */
+    private void refreshListView() {
+        List<Long> favoriteIds = config.getFavoriteRecipeIds();
+
+        List<Recipe> filteredList = allRecipes.stream()
+                .filter(recipe -> {
+                    boolean matchesFavorite = !showingFavoritesOnly
+                            || favoriteIds.contains(recipe.getId());
+                    if (!matchesFavorite) {
+                        return false;
+                    }
+
+                    if (currentSearchQuery.isEmpty()) {
+                        return true;
+                    }
+
+                    // Aggregating all searchable content for this recipe
+                    StringBuilder searchableContent = new StringBuilder();
+                    searchableContent.append(recipe.getName()).append(" ");
+                    searchableContent.append(recipe.getDescription()).append(" ");
+
+                    String[] keywords = currentSearchQuery.split("\\s+");
+
+                    // Append ingredient names
+                    for (RecipeIngredient ri : recipe.getIngredients()) {
+                        searchableContent.append(ri.getIngredient().getName()).append(" ");
+                    }
+
+                    // Append instruction steps
+                    for (String instruction : recipe.getInstructions()) {
+                        searchableContent.append(instruction).append(" ");
+                    }
+
+                    String finalSearchString = searchableContent.toString().toLowerCase();
+
+                    for (String keyword : keywords) {
+                        if (!finalSearchString.contains(keyword.toLowerCase())) {
+                            return false;
+                        }
+                    }
+                    return true;
+                })
+                .toList();
+
+        observableRecipes.setAll(filteredList);
+        recipeListView.refresh();
     }
 
     /**
@@ -434,7 +602,7 @@ public class MainScreenCtrl {
             modalStage.initModality(Modality.WINDOW_MODAL);
             modalStage.setTitle(title);
             Pair<T, Parent> pair =
-                  Main.getFxml().load(controllerClass, "client", "scenes", fxmlFileName);
+                    Main.getFxml().load(controllerClass, "client", "scenes", fxmlFileName);
             modalStage.setScene(new Scene(pair.getValue()));
 
             // Pass the stage to the controller so it can close itself
@@ -459,8 +627,8 @@ public class MainScreenCtrl {
         }
 
         AddIngredientScreenCtrl controller =
-              launchModal(AddIngredientScreenCtrl.class, "AddIngredientScreen.fxml",
-                    "Add New Ingredient");
+                launchModal(AddIngredientScreenCtrl.class, "AddIngredientScreen.fxml",
+                        "Add New Ingredient");
 
         if (controller != null && controller.getResult() != null) {
             RecipeIngredient newIngredient = controller.getResult();
@@ -523,9 +691,16 @@ public class MainScreenCtrl {
         }
     }
 
+    /**
+     * Checks if a specific recipe already contains an ingredient with the same name.
+     *
+     * @param recipe The recipe to check.
+     * @param ingredient The ingredient to look for.
+     * @return True if an ingredient with the same name exists, false otherwise.
+     */
     private boolean containsIngredient(Recipe recipe, Ingredient ingredient) {
         return recipe.getIngredients().stream()
-              .anyMatch(i -> i.getIngredient().getName().equals(ingredient.getName()));
+                .anyMatch(i -> i.getIngredient().getName().equals(ingredient.getName()));
     }
 
     /**
@@ -538,8 +713,8 @@ public class MainScreenCtrl {
         }
 
         AddInstructionScreenCtrl controller =
-              launchModal(AddInstructionScreenCtrl.class, "AddInstructionScreen.fxml",
-                    "Add Instruction");
+                launchModal(AddInstructionScreenCtrl.class, "AddInstructionScreen.fxml",
+                        "Add Instruction");
 
         if (controller != null) {
             String instructionText = controller.getResult();
@@ -591,16 +766,22 @@ public class MainScreenCtrl {
     /**
      * Handles switching the recipe list view to show only favorite recipes.
      */
+    @FXML
     public void showFavorites() {
         System.out.println("Switching view to show only favorite recipes.");
+        this.showingFavoritesOnly = true;
+        refreshListView();
     }
 
     /**
      * Handles switching the recipe list view to show all recipes available on the
      * server.
      */
+    @FXML
     public void showAllRecipes() {
         System.out.println("Switching view to show all recipes.");
+        this.showingFavoritesOnly = false;
+        refreshListView();
     }
 
     /**

@@ -83,8 +83,8 @@ public class Config {
         }
         Config config = (Config) o;
         return Objects.equals(serverUrl, config.serverUrl)
-              && Objects.equals(language, config.language)
-              && Objects.equals(favoriteRecipeIds, config.favoriteRecipeIds);
+                && Objects.equals(language, config.language)
+                && Objects.equals(favoriteRecipeIds, config.favoriteRecipeIds);
     }
 
     @Override
