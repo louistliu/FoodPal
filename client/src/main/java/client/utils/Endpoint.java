@@ -13,7 +13,13 @@ public enum Endpoint implements IStompHeaders {
     RECIPE_UPDATE("/recipes/update"),
     RECIPE_USER_UPDATE("/recipes/update", SubscribePrefix.TO_USER),
     RECIPE_DELETE("/recipes/delete"),
-    RECIPE_FETCH("/recipes/fetch", SubscribePrefix.FETCH);
+    RECIPE_FETCH("/recipes/fetch", SubscribePrefix.FETCH),
+
+    INGREDIENT_CREATE("/ingredients/create"),
+    INGREDIENT_USER_CREATE("/ingredients/create", SubscribePrefix.TO_USER),
+    INGREDIENT_UPDATE("/ingredients/update"),
+    INGREDIENT_DELETE("/ingredients/delete"),
+    INGREDIENT_FETCH("/ingredients/fetch", SubscribePrefix.FETCH);
 
     public final String path;
     public final StompHeaders headers;
