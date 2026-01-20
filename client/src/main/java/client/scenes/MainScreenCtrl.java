@@ -40,12 +40,13 @@ import javafx.util.Pair;
 public class MainScreenCtrl {
 
     private final ServerSockets serverRecipes;
+    private final Config config;
     RecipeList listOfRecipes = new RecipeList();
     private ObservableList<Recipe> observableRecipes;
     private ObservableList<RecipeIngredient> observableIngredients;
     private Recipe selectedRecipe;
 
-    private List<Recipe> allRecipesMaster = new ArrayList<>();
+    private List<Recipe> allRecipes = new ArrayList<>();
     private String currentSearchQuery = "";
     private boolean showingFavoritesOnly = false;
 
@@ -98,8 +99,9 @@ public class MainScreenCtrl {
      * @param m The main application controller for scene transitions.
      */
     @Inject
-    public MainScreenCtrl(MainCtrl m, ServerSockets server) {
+    public MainScreenCtrl(MainCtrl m, ServerSockets server, Config config) {
         this.serverRecipes = server;
+        this.config = config;
     }
 
     /**
@@ -175,16 +177,28 @@ public class MainScreenCtrl {
         });
     }
 
+    /**
+     * Callback method triggered when the server broadcasts a newly created
+     * user-specific recipe.
+     *
+     * @param recipe The newly created recipe.
+     */
     private void onCreateUserRecipe(Recipe recipe) {
         Platform.runLater(() -> {
             selectRecipe(recipe);
         });
     }
 
+    /**
+     * Callback method triggered when the full recipe list is received from the server.
+     * Updates the master list and refreshes the current UI view.
+     *
+     * @param recipes The full list of recipes from the server.
+     */
     private void onUpdateRecipeList(List<Recipe> recipes) {
         Platform.runLater(() -> {
-            allRecipesMaster.clear();
-            allRecipesMaster.addAll(recipes);
+            allRecipes.clear();
+            allRecipes.addAll(recipes);
             refreshListView();
         });
     }
@@ -208,53 +222,67 @@ public class MainScreenCtrl {
 
     private void onAddRecipe(Recipe recipe) {
         Platform.runLater(() -> {
+            if (!allRecipes.contains(recipe)) {
+                allRecipes.add(recipe);
+            }
             if (observableRecipes.contains(recipe)) {
                 return;
             }
-            observableRecipes.add(recipe);
-            recipeListView.refresh();
+            refreshListView();
         });
     }
 
+    /**
+     * Callback method triggered when a recipe is deleted from the server.
+     * Removes the recipe from both the master list and the UI list.
+     *
+     * @param recipe The recipe to be removed.
+     */
     private void onDeleteRecipe(Recipe recipe) {
         Platform.runLater(() -> {
+            allRecipes.removeIf(r -> r.getId() == recipe.getId());
+
             observableRecipes.remove(recipe);
             recipeListView.refresh();
         });
     }
 
+    /**
+     * Callback method triggered when an existing recipe is updated on the server.
+     * Synchronizes the master list and updates the UI if the recipe is currently visible.
+     *
+     * @param recipe The updated recipe data.
+     */
     private void onUpdateRecipe(Recipe recipe) {
         System.out.println(recipe);
         Platform.runLater(() -> {
-            var recipes =
-                    observableRecipes.stream().filter(x -> x.getId() == recipe.getId()).toList();
+            allRecipes.removeIf(r -> r.getId() == recipe.getId());
+            allRecipes.add(recipe);
+
+            var recipes = observableRecipes.stream()
+                    .filter(x -> x.getId() == recipe.getId()).toList();
 
             if (recipes.isEmpty()) {
-                observableRecipes.add(recipe);
-                recipeListView.refresh();
-                System.err.println(
-                        "Recipe does not exist in recipe list"
-                                + " even though it is being updated and not created");
+                refreshListView();
                 return;
             }
+
             int ind = observableRecipes.indexOf(recipes.getLast());
+            observableRecipes.set(ind, recipe);
 
-
-            if (recipe.getId() != selectedRecipe.getId()) {
-                observableRecipes.remove(ind);
-                observableRecipes.add(ind, recipe);
-                recipeListView.refresh();
-                return;
+            if (selectedRecipe != null && recipe.getId() == selectedRecipe.getId()) {
+                selectRecipe(recipe);
             }
-            observableRecipes.remove(ind);
-            observableRecipes.add(ind, recipe);
             recipeListView.refresh();
-
-
-            selectRecipe(recipe);
         });
     }
 
+    /**
+     * Selects a recipe in the list view and sets it as the currently selected recipe.
+     * If the recipe is not in the current observable list, it is added before selection.
+     *
+     * @param recipe The recipe to be selected.
+     */
     private void selectRecipe(Recipe recipe) {
         if (!observableRecipes.contains(recipe)) {
             observableRecipes.add(recipe);
@@ -265,11 +293,23 @@ public class MainScreenCtrl {
         selectedRecipe = recipe;
     }
 
+    /**
+     * Configures the cell factory for the instruction list view to enable
+     * custom rendering and edit handling.
+     */
     private void setupInstructionDragAndDrop() {
         instructionListView.setCellFactory(
                 param -> new InstructionListCell(this::editInstructionHandler));
     }
 
+    /**
+     * Handles the logic for editing an existing instruction by launching
+     * the instruction editor modal.
+     *
+     * @param instruction The original instruction text.
+     * @return An Optional containing the updated instruction text if edited,
+     * or the original text if canceled.
+     */
     private Optional<String> editInstructionHandler(String instruction) {
         AddInstructionScreenCtrl control =
                 launchModal(AddInstructionScreenCtrl.class, "AddInstructionScreen.fxml",
@@ -445,7 +485,6 @@ public class MainScreenCtrl {
             return;
         }
 
-        Config config = ConfigService.getConfig();
         List<Long> favoriteIds = config.getFavoriteRecipeIds();
         long currentId = selectedRecipe.getId();
 
@@ -460,6 +499,7 @@ public class MainScreenCtrl {
         ConfigService.persistConfig();
         updateFavoriteButtonText(selectedRecipe);
         refreshListView();
+
     }
 
     /**
@@ -469,8 +509,7 @@ public class MainScreenCtrl {
         if (recipe == null) {
             return;
         }
-        boolean isFavorite = ConfigService.getConfig()
-                .getFavoriteRecipeIds().contains(recipe.getId());
+        boolean isFavorite = config.getFavoriteRecipeIds().contains(recipe.getId());
         favoriteButton.setText(isFavorite ? "Unfavorite" : "Favorite");
     }
 
@@ -479,9 +518,9 @@ public class MainScreenCtrl {
      * descriptions, ingredients, and instructions.
      */
     private void refreshListView() {
-        List<Long> favoriteIds = ConfigService.getConfig().getFavoriteRecipeIds();
+        List<Long> favoriteIds = config.getFavoriteRecipeIds();
 
-        List<Recipe> filteredList = allRecipesMaster.stream()
+        List<Recipe> filteredList = allRecipes.stream()
                 .filter(recipe -> {
                     boolean matchesFavorite = !showingFavoritesOnly
                             || favoriteIds.contains(recipe.getId());
@@ -593,6 +632,13 @@ public class MainScreenCtrl {
         }
     }
 
+    /**
+     * Checks if a specific recipe already contains an ingredient with the same name.
+     *
+     * @param recipe The recipe to check.
+     * @param ingredient The ingredient to look for.
+     * @return True if an ingredient with the same name exists, false otherwise.
+     */
     private boolean containsIngredient(Recipe recipe, Ingredient ingredient) {
         return recipe.getIngredients().stream()
                 .anyMatch(i -> i.getIngredient().getName().equals(ingredient.getName()));
