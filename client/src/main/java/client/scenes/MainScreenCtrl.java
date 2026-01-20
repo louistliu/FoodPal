@@ -271,22 +271,26 @@ public class MainScreenCtrl {
     private void onUpdateRecipe(Recipe recipe) {
         System.out.println(recipe);
         Platform.runLater(() -> {
-            allRecipes.removeIf(r -> r.getId() == recipe.getId());
-            allRecipes.add(recipe);
-
-            Optional<Recipe> existingRecipe = observableRecipes.stream()
-                    .filter(x -> x.getId() == recipe.getId())
-                    .findFirst();
-
-            if (existingRecipe.isPresent()) {
-                int index = observableRecipes.indexOf(existingRecipe.get());
-                observableRecipes.set(index, recipe);
-
-                if (selectedRecipe != null && recipe.getId() == selectedRecipe.getId()) {
-                    showRecipeDetails(recipe);
+            for (int i = 0; i < allRecipes.size(); i++) {
+                if (allRecipes.get(i).getId() == recipe.getId()) {
+                    allRecipes.set(i, recipe);
+                    break;
                 }
-            } else {
+            }
+
+            var recipes = observableRecipes.stream()
+                    .filter(x -> x.getId() == recipe.getId()).toList();
+
+            if (recipes.isEmpty()) {
                 refreshListView();
+                return;
+            }
+
+            int ind = observableRecipes.indexOf(recipes.getLast());
+            observableRecipes.set(ind, recipe);
+
+            if (selectedRecipe != null && recipe.getId() == selectedRecipe.getId()) {
+                selectRecipe(recipe);
             }
             recipeListView.refresh();
         });
