@@ -24,8 +24,6 @@ public class FlagUtils {
         return new Image(url.toExternalForm());
     }
 
-
-
     /**
      * method to load all the flags.
      *

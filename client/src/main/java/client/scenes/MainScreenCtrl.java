@@ -1,10 +1,10 @@
 package client.scenes;
 
-import client.utils.FlagUtils;
 import client.Main;
 import client.utils.Config;
 import client.utils.ConfigService;
 import client.utils.Endpoint;
+import client.utils.FlagUtils;
 import client.utils.PrintRecipe;
 import client.utils.ResponseHandler;
 import client.utils.ServerSockets;
@@ -866,7 +866,8 @@ public class MainScreenCtrl {
             return;
         }
 
-        PrintRecipe.exportRecipe(printButton.getScene().getWindow(), selectedRecipe, languageController);
+        PrintRecipe.exportRecipe(printButton.getScene().getWindow(),
+                selectedRecipe, languageController);
 
         System.out.println("Exported recipe: " + selectedRecipe.getName());
     }

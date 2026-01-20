@@ -22,7 +22,8 @@ public class PrintRecipe {
      * @param owner  The window needed for the FileChooser class
      * @param recipe The recipe that needs to be exported
      */
-    public static void exportRecipe(Window owner, Recipe recipe, LanguageController languageController) {
+    public static void exportRecipe(Window owner, Recipe recipe,
+                                    LanguageController languageController) {
         StringBuilder content = new StringBuilder();
         content.append("# ").append(recipe.getName()).append("\n\n");
         content.append(recipe.getDescription()).append("\n\n");
@@ -35,7 +36,8 @@ public class PrintRecipe {
                     .append(ing.getIngredient().getName()).append("\n");
         }
 
-        content.append("\n## ").append(languageController.get("label.instructions1")).append("\n\n");
+        content.append("\n## ").append(languageController
+                .get("label.instructions1")).append("\n\n");
         List<String> instructions = recipe.getInstructions();
         for (int i = 0; i < instructions.size(); i++) {
             content.append(i + 1).append(". ").append(instructions.get(i)).append("\n");
