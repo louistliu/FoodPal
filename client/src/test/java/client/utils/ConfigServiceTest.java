@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 public class ConfigServiceTest {
 
     private Path tempDir;
+    private ConfigService configService;
 
     @AfterEach
     void cleanup() throws IOException {
@@ -28,15 +29,15 @@ public class ConfigServiceTest {
                       });
             }
         }
+        configService = null;
     }
 
     @Test
     void loadDefaultsWhenFileMissing() throws IOException {
         tempDir = Files.createTempDirectory("cfgtest1");
         String cfgPath = tempDir.resolve("nonexistent-config.json").toString();
-
-        Config cfg = ConfigService.loadConfig(new String[] {"-cfg", cfgPath});
-
+        configService = new ConfigService(new com.fasterxml.jackson.databind.ObjectMapper());
+        Config cfg = configService.loadConfig(new String[] {"-cfg", cfgPath});
         assertEquals(new Config(), cfg);
     }
 
@@ -44,20 +45,18 @@ public class ConfigServiceTest {
     void persistAndReloadConfig() throws IOException {
         tempDir = Files.createTempDirectory("cfgtest2");
         String cfgPath = tempDir.resolve("app-config.json").toString();
-
+        configService = new ConfigService(new com.fasterxml.jackson.databind.ObjectMapper());
         // initial load (file missing) sets internal target file
-        Config modified = ConfigService.loadConfig(new String[] {"-cfg", cfgPath});
-
+        Config modified = configService.loadConfig(new String[] {"-cfg", cfgPath});
         // modify and persist
         modified.setServerUrl("ws://example:1234");
         modified.setLanguage("Dutch");
         modified.setFavoriteRecipeIds(Arrays.asList(1L, 2L, 3L));
-
-        ConfigService.persistConfig();
-
+        configService.persistConfig();
         // reload from the same path
-        Config reloaded = ConfigService.loadConfig(new String[] {"-cfg", cfgPath});
-
+        ConfigService configServiceReload = new ConfigService(
+              new com.fasterxml.jackson.databind.ObjectMapper());
+        Config reloaded = configServiceReload.loadConfig(new String[] {"-cfg", cfgPath});
         assertEquals(modified, reloaded);
     }
 }

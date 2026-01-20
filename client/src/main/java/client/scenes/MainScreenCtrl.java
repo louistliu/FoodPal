@@ -1,7 +1,6 @@
 package client.scenes;
 
 import client.Main;
-import client.utils.Config;
 import client.utils.ConfigService;
 import client.utils.Endpoint;
 import client.utils.PrintRecipe;
@@ -43,8 +42,10 @@ import javafx.util.Pair;
 public class MainScreenCtrl {
 
     private final ServerSockets serverRecipes;
-    private final Config config;
+    private final ConfigService configService;
     RecipeList listOfRecipes = new RecipeList();
+    private String selectedLanguage = "English";
+    private List<Long> favoriteRecipeIds = new ArrayList<>();
     private ObservableList<Recipe> observableRecipes;
     private ObservableList<RecipeIngredient> observableIngredients;
     private Recipe selectedRecipe;
@@ -102,9 +103,9 @@ public class MainScreenCtrl {
      * @param m The main application controller for scene transitions.
      */
     @Inject
-    public MainScreenCtrl(MainCtrl m, ServerSockets server, Config config) {
+    public MainScreenCtrl(MainCtrl m, ServerSockets server, ConfigService configService) {
         this.serverRecipes = server;
-        this.config = config;
+        this.configService = configService;
     }
 
     /**
@@ -112,8 +113,13 @@ public class MainScreenCtrl {
      * language options, and adds selection listeners.
      */
     public void initialize() {
+        favoriteRecipeIds = configService.getConfig().getFavoriteRecipeIds();
+
         languageChoiceBox.setItems(FXCollections.observableArrayList("English", "Dutch", "German"));
-        languageChoiceBox.getSelectionModel().selectFirst();
+        if (languageChoiceBox.getItems().contains(configService.getConfig().getLanguage())) {
+            selectedLanguage = configService.getConfig().getLanguage();
+        }
+        languageChoiceBox.getSelectionModel().select(selectedLanguage);
 
         if (recipeDescriptionField != null) {
             recipeDescriptionField.setWrapText(true);
@@ -788,6 +794,7 @@ public class MainScreenCtrl {
      * Handles the user changing the selected language in the choice box.
      */
     public void onLanguageChange() {
+        selectedLanguage = languageChoiceBox.getValue();
         System.out.println("Language switched to: " + languageChoiceBox.getValue());
     }
 }
