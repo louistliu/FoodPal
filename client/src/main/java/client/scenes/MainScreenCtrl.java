@@ -127,7 +127,16 @@ public class MainScreenCtrl {
         recipeListView.setCellFactory(lv -> new ListCell<>() {
             public void updateItem(Recipe recipe, boolean empty) {
                 super.updateItem(recipe, empty);
-                setText(empty ? null : recipe != null ? recipe.getName() : null);
+                if (empty || recipe == null) {
+                    setText(null);
+                } else {
+                    List<Long> favoriteIds = configService.getConfig().getFavoriteRecipeIds();
+                    if (favoriteIds.contains(recipe.getId())) {
+                        setText("★ " + recipe.getName());
+                    } else {
+                        setText(recipe.getName());
+                    }
+                }
             }
         });
 
@@ -235,6 +244,30 @@ public class MainScreenCtrl {
 
         System.out.print("RECIPES ARRIVED");
         Platform.runLater(() -> {
+            // Detect if any favorite was deleted
+            List<Long> favoriteIds = configService.getConfig().getFavoriteRecipeIds();
+            Set<Long> recipeIds = new HashSet<>();
+            for (Recipe r : recipes) {
+                recipeIds.add(r.getId());
+            }
+            List<Long> missingFavorites = new ArrayList<>();
+            List<Long> newFavorites = new ArrayList<>(favoriteIds);
+            for (Long favId : favoriteIds) {
+                if (!recipeIds.contains(favId)) {
+                    missingFavorites.add(favId);
+                    newFavorites.remove(favId);
+                }
+            }
+            if (!missingFavorites.isEmpty()) {
+                configService.getConfig().setFavoriteRecipeIds(newFavorites);
+                configService.persistConfig();
+                // Show warning for each missing favorite
+                for (Long lostId : missingFavorites) {
+                    ErrorScreenCtrl.showError(
+                          "A favorite recipe was deleted by someone else. (ID: " + lostId + ")");
+                }
+            }
+
             allRecipes.clear();
             allRecipes.addAll(recipes);
             refreshListView();
@@ -280,8 +313,18 @@ public class MainScreenCtrl {
     private void onDeleteRecipe(Recipe recipe) {
         Platform.runLater(() -> {
             allRecipes.removeIf(r -> r.getId() == recipe.getId());
-
             observableRecipes.remove(recipe);
+            // Remove from favorites if present
+            List<Long> favoriteIds = configService.getConfig().getFavoriteRecipeIds();
+            if (favoriteIds.contains(recipe.getId())) {
+                List<Long> newFavorites = new ArrayList<>(favoriteIds);
+                newFavorites.remove(recipe.getId());
+                configService.getConfig().setFavoriteRecipeIds(newFavorites);
+                configService.persistConfig();
+                // Show notification for deleted favorite
+                ErrorScreenCtrl.showError("A favorite recipe was deleted: '"
+                      + recipe.getName() + "'.");
+            }
             recipeListView.refresh();
         });
     }
@@ -579,15 +622,15 @@ public class MainScreenCtrl {
 
         List<Long> favoriteIds = configService.getConfig().getFavoriteRecipeIds();
         long currentId = selectedRecipe.getId();
-
+        List<Long> newFavorites = new ArrayList<>(favoriteIds);
         if (favoriteIds.contains(currentId)) {
-            favoriteIds.remove(currentId);
+            newFavorites.remove(currentId);
             System.out.println("Recipe '" + selectedRecipe.getName() + "' removed from favorites.");
         } else {
-            favoriteIds.add(currentId);
+            newFavorites.add(currentId);
             System.out.println("Recipe '" + selectedRecipe.getName() + "' added to favorites.");
         }
-
+        configService.getConfig().setFavoriteRecipeIds(newFavorites);
         configService.persistConfig();
         updateFavoriteButtonText(selectedRecipe);
         refreshListView();
