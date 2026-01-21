@@ -20,7 +20,7 @@ import client.scenes.MainCtrl;
 import client.scenes.MainScreenCtrl;
 import client.utils.Config;
 import client.utils.ConfigService;
-import client.utils.ServerSockets;
+import client.utils.communication.ServerSockets;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import java.io.IOException;
