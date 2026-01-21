@@ -220,6 +220,10 @@ public class AddIngredientScreenCtrl extends ScreenControl {
         float amount;
         try {
             amount = Float.parseFloat(amountStr);
+            if (amount <= 0) {
+                ErrorScreenCtrl.showError("Invalid Amount: Must be a positive number.");
+                return;
+            }
         } catch (NumberFormatException e) {
             ErrorScreenCtrl.showError("Invalid Amount: Must be a number.");
             return;
