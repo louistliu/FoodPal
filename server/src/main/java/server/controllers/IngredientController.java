@@ -1,8 +1,6 @@
 package server.controllers;
 
 import commons.Ingredient;
-import jakarta.persistence.EntityExistsException;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,8 +11,7 @@ import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.stereotype.Controller;
-import server.database.IngredientRepository;
-import server.utils.DummyData;
+import server.service.IIngredientService;
 
 /**
  * API endpoint responsible for handling ingredient manipulation.
@@ -22,15 +19,8 @@ import server.utils.DummyData;
 @Controller
 public class IngredientController {
 
-    private final IngredientRepository ingredientDB;
-
     @Autowired
-    public IngredientController(IngredientRepository ingredientDB) {
-        this.ingredientDB = ingredientDB;
-
-        List<Ingredient> ingredients = DummyData.getDefaultIngredients();
-        ingredientDB.saveAllAndFlush(ingredients);
-    }
+    private IIngredientService ingredientService;
 
     /**
      * Create a new ingredient. Clients should send a {@link commons.Ingredient}
@@ -47,15 +37,7 @@ public class IngredientController {
     @SendToUser("/queue/ingredients/create")
     @Valid
     public Ingredient create(@Payload Ingredient ingredient) throws Exception {
-        if (ingredient == null || ingredient.getName() == null
-              || ingredient.getName().trim().isEmpty()) {
-            throw new IllegalArgumentException("Ingredient name cannot be empty");
-        }
-        if (!ingredientDB.findByName(ingredient.getName()).isEmpty()) {
-            throw new EntityExistsException(
-                  "Ingredient with name: " + ingredient.getName() + " is already in the database");
-        }
-        return ingredientDB.save(ingredient);
+        return ingredientService.create(ingredient);
     }
 
     /**
@@ -71,12 +53,7 @@ public class IngredientController {
     @SendTo("/topic/ingredients/update")
     @Valid
     public Ingredient update(@Payload Ingredient ingredient) throws Exception {
-        if (!ingredientDB.existsById(ingredient.getId())) {
-            throw new EntityNotFoundException(
-                  "No ingredient with id " + ingredient.getId() + " in the database");
-        }
-
-        return ingredientDB.save(ingredient);
+        return ingredientService.update(ingredient);
     }
 
     /**
@@ -87,10 +64,7 @@ public class IngredientController {
      */
     @SubscribeMapping("/ingredients/fetch")
     public List<Ingredient> fetchIngredients() throws Exception {
-        System.out.println("SUBSCRIBED");
-        return ingredientDB.findAll().stream()
-              .filter(i -> i.getName() != null && !i.getName().trim().isEmpty())
-              .toList();
+        return ingredientService.fetchIngredients();
     }
 
     /**
@@ -105,12 +79,7 @@ public class IngredientController {
     @SendTo("/topic/ingredients/delete")
     @Valid
     public Ingredient delete(@Payload Ingredient ingredient) throws Exception {
-        if (!ingredientDB.existsById(ingredient.getId())) {
-            throw new EntityNotFoundException(
-                  "No ingredient with id " + ingredient.getId() + " in the database");
-        }
-        ingredientDB.deleteById(ingredient.getId());
-        return ingredient;
+        return ingredientService.delete(ingredient);
     }
 
 
@@ -124,6 +93,6 @@ public class IngredientController {
     @MessageExceptionHandler
     @SendToUser("/queue/errors")
     public Throwable handleException(Throwable exception) {
-        return exception;
+        return ingredientService.handleException(exception);
     }
 }
