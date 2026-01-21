@@ -45,7 +45,6 @@ public class MainScreenCtrl {
     private final ConfigService configService;
     RecipeList listOfRecipes = new RecipeList();
     private String selectedLanguage = "English";
-    private List<Long> favoriteRecipeIds = new ArrayList<>();
     private ObservableList<Recipe> observableRecipes;
     private ObservableList<RecipeIngredient> observableIngredients;
     private Recipe selectedRecipe;
@@ -113,8 +112,6 @@ public class MainScreenCtrl {
      * language options, and adds selection listeners.
      */
     public void initialize() {
-        favoriteRecipeIds = configService.getConfig().getFavoriteRecipeIds();
-
         languageChoiceBox.setItems(FXCollections.observableArrayList("English", "Dutch", "German"));
         if (languageChoiceBox.getItems().contains(configService.getConfig().getLanguage())) {
             selectedLanguage = configService.getConfig().getLanguage();
@@ -228,10 +225,11 @@ public class MainScreenCtrl {
      * Handles real-time search field updates and the Escape key shortcut.
      */
     public void setupSearchField() {
-        searchRecipesField.textProperty().addListener((obs, oldVal, newVal) -> {
-            this.currentSearchQuery = newVal.trim().toLowerCase();
-            refreshListView();
-        });
+        searchRecipesField.textProperty()
+              .addListener((obs, oldVal, newVal) -> {
+                  this.currentSearchQuery = newVal.trim().toLowerCase();
+                  refreshListView();
+              });
 
         searchRecipesField.setOnKeyPressed(event -> {
             if (event.getCode() == javafx.scene.input.KeyCode.ESCAPE) {
@@ -510,7 +508,7 @@ public class MainScreenCtrl {
             return;
         }
 
-        List<Long> favoriteIds = config.getFavoriteRecipeIds();
+        List<Long> favoriteIds = configService.getConfig().getFavoriteRecipeIds();
         long currentId = selectedRecipe.getId();
 
         if (favoriteIds.contains(currentId)) {
@@ -521,7 +519,7 @@ public class MainScreenCtrl {
             System.out.println("Recipe '" + selectedRecipe.getName() + "' added to favorites.");
         }
 
-        ConfigService.persistConfig();
+        configService.persistConfig();
         updateFavoriteButtonText(selectedRecipe);
         refreshListView();
 
@@ -534,7 +532,8 @@ public class MainScreenCtrl {
         if (recipe == null) {
             return;
         }
-        boolean isFavorite = config.getFavoriteRecipeIds().contains(recipe.getId());
+        boolean isFavorite = configService.getConfig().getFavoriteRecipeIds()
+              .contains(recipe.getId());
         favoriteButton.setText(isFavorite ? "Unfavorite" : "Favorite");
     }
 
@@ -543,7 +542,7 @@ public class MainScreenCtrl {
      * descriptions, ingredients, and instructions.
      */
     private void refreshListView() {
-        List<Long> favoriteIds = config.getFavoriteRecipeIds();
+        List<Long> favoriteIds = configService.getConfig().getFavoriteRecipeIds();
 
         List<Recipe> filteredList = allRecipes.stream()
                 .filter(recipe -> {
@@ -795,6 +794,7 @@ public class MainScreenCtrl {
      */
     public void onLanguageChange() {
         selectedLanguage = languageChoiceBox.getValue();
+        configService.persistConfig();
         System.out.println("Language switched to: " + languageChoiceBox.getValue());
     }
 }
