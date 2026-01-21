@@ -1,8 +1,6 @@
 package server.controllers;
 
 import commons.Recipe;
-import jakarta.persistence.EntityExistsException;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Optional;
@@ -14,8 +12,7 @@ import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.stereotype.Controller;
-import server.database.RecipeRepository;
-import server.utils.DummyData;
+import server.service.IRecipeService;
 
 /**
  * STOMP API endpoints responsible for creating, fetching and deleting
@@ -27,15 +24,8 @@ import server.utils.DummyData;
 @Controller
 public class RecipeController {
 
-    private final RecipeRepository recipeDB;
-
     @Autowired
-    public RecipeController(RecipeRepository recipeDB) {
-        this.recipeDB = recipeDB;
-
-        List<Recipe> recipes = DummyData.getDefaultRecipes();
-        recipeDB.saveAllAndFlush(recipes);
-    }
+    private IRecipeService recipeService;
 
     /**
      * Create a new recipe. Clients should send a {@link commons.Recipe}
@@ -52,11 +42,7 @@ public class RecipeController {
     @SendTo
     @Valid
     public Recipe create(@Payload Recipe recipe) throws Exception {
-        if (!recipeDB.findBy(recipe.getName()).isEmpty()) {
-            throw new EntityExistsException(
-                    "Recipe with name: " + recipe.getName() + " is already in the database");
-        }
-        return recipeDB.save(recipe);
+        return recipeService.create(recipe);
     }
 
     /**
@@ -69,7 +55,7 @@ public class RecipeController {
      */
     @SubscribeMapping("/recipes/fetch")
     public List<Recipe> fetchIngredients() throws Exception {
-        return recipeDB.findAll();
+        return recipeService.fetchIngredients();
     }
 
     /**
@@ -84,16 +70,11 @@ public class RecipeController {
     @MessageMapping("/recipes/delete")
     @Valid
     public Recipe delete(@Payload Recipe recipe) throws Exception {
-        if (!recipeDB.existsById(recipe.getId())) {
-            throw new EntityNotFoundException(
-                    "No recipe with id " + recipe.getId() + " in the database");
-        }
-        recipeDB.deleteById(recipe.getId());
-        return recipe;
+        return recipeService.delete(recipe);
     }
 
     /**
-     * Delete an existing recipe. The provided {@link commons.Recipe} object
+     * Update an existing recipe. The provided {@link commons.Recipe} object
      * must contain a valid id; if the recipe does not exist an
      * {@link jakarta.persistence.EntityNotFoundException} is thrown.
      *
@@ -106,20 +87,7 @@ public class RecipeController {
     @SendTo
     @Valid
     public Recipe update(@Payload Recipe recipe) throws Exception {
-        if (!recipeDB.existsById(recipe.getId())) {
-            throw new EntityNotFoundException(
-                    "No recipe with id " + recipe.getId() + " in the database");
-        }
-        Optional<Recipe> serverRecipe = recipeDB.findById(recipe.getId());
-        if (serverRecipe.isEmpty()) {
-            throw new EntityNotFoundException("Server has not saved this recipe");
-        }
-        if (!recipeDB.findBy(recipe.getName()).isEmpty()
-                && !recipe.getName().equals(serverRecipe.get().getName())) {
-            throw new EntityNotFoundException(
-                    "Recipe with name " + recipe.getName() + " already exists");
-        }
-        return recipeDB.save(recipe);
+        return recipeService.update(recipe);
     }
 
     /**
@@ -133,6 +101,6 @@ public class RecipeController {
     @MessageExceptionHandler
     @SendToUser("/queue/errors")
     public Throwable handleException(Throwable exception) {
-        return exception;
+        return recipeService.handleException(exception);
     }
 }
