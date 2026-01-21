@@ -17,13 +17,14 @@
             <children>
                 <Button fx:id="addButton" layoutX="14.0" layoutY="550.0" mnemonicParsing="false" onAction="#addRecipe" text="+" AnchorPane.bottomAnchor="22.0" />
                 <Button fx:id="deleteButton" layoutX="47.0" layoutY="551.0" mnemonicParsing="false" onAction="#deleteRecipe" prefHeight="25.0" prefWidth="25.0" text="-" AnchorPane.bottomAnchor="22.0" />
-                <Button fx:id="duplicateButton" layoutX="201.0" layoutY="551.0" mnemonicParsing="false" onAction="#duplicateRecipe" text="Duplicate" AnchorPane.bottomAnchor="22.0" />
+                <Button fx:id="duplicateButton" layoutX="86.0" layoutY="552.0" mnemonicParsing="false" onAction="#duplicateRecipe" text="Duplicate" AnchorPane.bottomAnchor="21.0" />
 
                 <TextField fx:id="searchRecipesField" layoutX="15.0" layoutY="45.0" promptText="Search Recipes..." AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" />
                 <Button fx:id="favoritesButton" layoutX="7.0" layoutY="16.0" mnemonicParsing="false" onAction="#showFavorites" text="Favorites" />
-                <Button fx:id="allButton" layoutX="171.0" layoutY="16.0" mnemonicParsing="false" onAction="#showAllRecipes" text="All" />
+                <Button fx:id="allButton" layoutX="201.0" layoutY="16.0" mnemonicParsing="false" onAction="#showAllRecipes" text="All" />
 
                 <ListView fx:id="recipeListView" layoutX="15.0" layoutY="78.0" AnchorPane.bottomAnchor="70.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="78.0" />
+                <ComboBox fx:id="languageComboBox" layoutX="160.0" layoutY="544.0" onAction="#onLanguageChange" prefHeight="40.0" prefWidth="113.0" AnchorPane.rightAnchor="17.0" />
             </children>
         </AnchorPane>
 
@@ -40,12 +41,12 @@
 
                 <ListView fx:id="instructionListView" layoutX="244.0" layoutY="242.0" prefHeight="286.0" prefWidth="344.0" />
 
-                <Label fx:id="ingredientsLabel"  layoutX="74.0" layoutY="199.0" text="Ingredients">
+                <Label fx:id="ingredientsLabel" layoutX="74.0" layoutY="199.0" text="Ingredients">
                     <font>
                         <Font size="18.0" />
                     </font>
                 </Label>
-                <Label fx:id="instructionsLabel"  layoutX="370.0" layoutY="199.0" text="Instructions">
+                <Label fx:id="instructionsLabel" layoutX="370.0" layoutY="199.0" text="Instructions">
                     <font>
                         <Font size="18.0" />
                     </font>
@@ -54,10 +55,9 @@
                 <Button fx:id="addInstructionButton" layoutX="522.0" layoutY="534.0" mnemonicParsing="false" onAction="#addInstruction" text="+" />
                 <Button fx:id="deleteIngredientButton" layoutX="187.0" layoutY="535.0" mnemonicParsing="false" onAction="#deleteIngredient" text="-" />
                 <Button fx:id="deleteInstructionButton" layoutX="557.0" layoutY="534.0" mnemonicParsing="false" onAction="#deleteInstruction" text="-" />
-                <Button fx:id="saveButton" layoutX="14.0" layoutY="14.0" mnemonicParsing="false" onAction="#saveRecipe" text="Save" visible="false" />
-                <ComboBox fx:id="languageComboBox" layoutX="370.0" layoutY="8.0" onAction="#onLanguageChange" prefHeight="37.0" prefWidth="130.0" AnchorPane.rightAnchor="102.0" />
-                <Button fx:id="favoriteButton" layoutX="267.0" layoutY="14.0" mnemonicParsing="false" onAction="#toggleFavorite" text="Favorite" />
+                <Button fx:id="saveButton" layoutX="14.0" layoutY="14.0" mnemonicParsing="false" onAction="#saveRecipe" text="Save" />
 
+                <Button fx:id="favoriteButton" layoutX="267.0" layoutY="14.0" mnemonicParsing="false" onAction="#toggleFavorite" text="Favorite" />
             </children>
         </AnchorPane>
     </items>
