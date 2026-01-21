@@ -40,12 +40,12 @@
 
                 <ListView fx:id="instructionListView" layoutX="244.0" layoutY="242.0" prefHeight="286.0" prefWidth="344.0" />
 
-                <Label layoutX="74.0" layoutY="199.0" text="Ingredients">
+                <Label fx:id="ingredientsLabel"  layoutX="74.0" layoutY="199.0" text="Ingredients">
                     <font>
                         <Font size="18.0" />
                     </font>
                 </Label>
-                <Label layoutX="370.0" layoutY="199.0" text="Instructions">
+                <Label fx:id="instructionsLabel"  layoutX="370.0" layoutY="199.0" text="Instructions">
                     <font>
                         <Font size="18.0" />
                     </font>

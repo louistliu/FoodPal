@@ -14,7 +14,7 @@
         <ChoiceBox fx:id="ingredientChoiceBox" layoutX="9.0" layoutY="14.0" prefHeight="40.0" prefWidth="213.0" />
         <Button fx:id="cancelButton" layoutX="284.0" layoutY="121.0" mnemonicParsing="false" text="Cancel" onAction="#handleCancel" />
         <Button fx:id="okButton" layoutX="84.0" layoutY="121.0" mnemonicParsing="false" text="    OK    " onAction="#handleOk" />
-        <MenuButton fx:id="unitMenuButton" layoutX="313.0" layoutY="14.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="78.0" text="Unit">
+        <MenuButton fx:id="unitMenuButton" layoutX="313.0" layoutY="14.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="78.0" >
             <items>
                 <MenuItem mnemonicParsing="false" text="g" onAction="#handleUnitSelect"/>
                 <MenuItem mnemonicParsing="false" text="ml" onAction="#handleUnitSelect"/>

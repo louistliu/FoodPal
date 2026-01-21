@@ -27,6 +27,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
@@ -73,6 +74,10 @@ public class MainScreenCtrl {
     private TextField recipeNameField;
     @FXML
     private TextArea recipeDescriptionField;
+    @FXML
+    private Label ingredientsLabel;
+    @FXML
+    private Label instructionsLabel;
     @FXML
     private ToggleButton switchMenuButton;
     @FXML
@@ -816,7 +821,7 @@ public class MainScreenCtrl {
 
         AddInstructionScreenCtrl controller =
               launchModal(AddInstructionScreenCtrl.class, "AddInstructionScreen.fxml",
-                    "Add Instruction");
+                      languageController.get("title.addInstruction"));
 
         if (controller != null) {
             String instructionText = controller.getResult();

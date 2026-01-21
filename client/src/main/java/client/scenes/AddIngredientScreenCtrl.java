@@ -64,12 +64,15 @@ public class AddIngredientScreenCtrl extends ScreenControl {
     public void initialize() {
         observableIngredients = FXCollections.observableArrayList();
         ingredientChoiceBox.setItems(observableIngredients);
+        okButton.setText(languageController.get("button.ok1"));
+        cancelButton.setText(languageController.get("button.cancel1"));
+        amountTextField.setPromptText(languageController.get("label.amountPrompt"));
+        unitMenuButton.setText(languageController.get("label.unit"));
 
         // Reset UI fields
         amountTextField.clear();
         inputTextArea.clear();
         inputTextArea.setVisible(false);
-        unitMenuButton.setText("Unit");
 
         ingredientChoiceBox.setConverter(new StringConverter<Ingredient>() {
             @Override

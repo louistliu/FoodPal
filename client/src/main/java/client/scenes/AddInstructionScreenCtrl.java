@@ -22,7 +22,7 @@ public class AddInstructionScreenCtrl extends ScreenControl {
 
     private String result = null;
 
-    private LanguageController languageController;
+    private final LanguageController languageController;
 
     /**
      * constructor.
@@ -61,6 +61,18 @@ public class AddInstructionScreenCtrl extends ScreenControl {
             return;
         }
         ErrorScreenCtrl.showError("Failed to load instruction for editing");
+    }
+
+
+    /**
+     * initializes the buttons, so they can be changed with the selected language.
+     */
+    @FXML
+    public void initialize() {
+        // These belong here because these variables are defined in THIS class
+        okButton.setText(languageController.get("button.ok"));
+        cancelButton.setText(languageController.get("button.cancel"));
+        inputTextArea.setPromptText(languageController.get("label.instructionPrompt"));
     }
 
     /**
