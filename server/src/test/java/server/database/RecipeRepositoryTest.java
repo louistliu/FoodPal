@@ -80,4 +80,13 @@ class RecipeRepositoryTest {
               recipeRepository.findByIngredient(recipe, testIngredients.get(1)).size()).isEqualTo(
               0);
     }
+
+    @Test
+    @Order(2)
+    void findByName() {
+        var recipe = new Recipe("unique-name", "a unique recipe", List.of(), List.of());
+        recipeRepository.saveAndFlush(recipe);
+        var found = recipeRepository.findBy("unique-name");
+        assertThat(found.get(0).getName()).isEqualTo("unique-name");
+    }
 }
