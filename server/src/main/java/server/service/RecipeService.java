@@ -5,7 +5,6 @@ import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import server.database.RecipeRepository;
@@ -39,7 +38,7 @@ public class RecipeService implements IRecipeService {
     public Recipe create(Recipe recipe) throws Exception {
         if (!repository.findBy(recipe.getName()).isEmpty()) {
             throw new EntityExistsException(
-                    "Recipe with name: " + recipe.getName() + " is already in the database");
+                  "Recipe with name: " + recipe.getName() + " is already in the database");
         }
         return repository.save(recipe);
     }
@@ -56,16 +55,16 @@ public class RecipeService implements IRecipeService {
     public Recipe update(Recipe recipe) throws Exception {
         if (!repository.existsById(recipe.getId())) {
             throw new EntityNotFoundException(
-                    "No recipe with id " + recipe.getId() + " in the database");
+                  "No recipe with id " + recipe.getId() + " in the database");
         }
         Optional<Recipe> serverRecipe = repository.findById(recipe.getId());
         if (serverRecipe.isEmpty()) {
             throw new EntityNotFoundException("Server has not saved this recipe");
         }
         if (!repository.findBy(recipe.getName()).isEmpty()
-                && !recipe.getName().equals(serverRecipe.get().getName())) {
+              && !recipe.getName().equals(serverRecipe.get().getName())) {
             throw new EntityNotFoundException(
-                    "Recipe with name " + recipe.getName() + " already exists");
+                  "Recipe with name " + recipe.getName() + " already exists");
         }
         return repository.save(recipe);
     }
@@ -82,7 +81,7 @@ public class RecipeService implements IRecipeService {
     public Recipe delete(Recipe recipe) throws Exception {
         if (!repository.existsById(recipe.getId())) {
             throw new EntityNotFoundException(
-                    "No recipe with id " + recipe.getId() + " in the database");
+                  "No recipe with id " + recipe.getId() + " in the database");
         }
         repository.deleteById(recipe.getId());
         return recipe;
