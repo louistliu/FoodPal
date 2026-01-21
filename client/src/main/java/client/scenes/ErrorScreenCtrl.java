@@ -1,6 +1,7 @@
 package client.scenes;
 
 import client.Main;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -46,6 +47,18 @@ public class ErrorScreenCtrl {
         } catch (Exception e) {
             System.err.println("Failed to show error screen: " + e.getMessage());
         }
+    }
+
+    /**
+     * Callback to launch on error.
+     * Supports cross-tread operations. {@link ErrorScreenCtrl}
+     *
+     * @param throwable error thrown.
+     */
+    public static void onError(Throwable throwable) {
+        Platform.runLater(() -> {
+            ErrorScreenCtrl.showError(throwable.getMessage());
+        });
     }
 
     /**

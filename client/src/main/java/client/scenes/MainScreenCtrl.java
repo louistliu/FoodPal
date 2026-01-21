@@ -193,6 +193,9 @@ public class MainScreenCtrl {
         serverRecipes.subscribe(Endpoint.RECIPE_DELETE,
               new ResponseHandler<Recipe>(this::onDeleteRecipe) {
               });
+        serverRecipes.subscribe(Endpoint.ERROR,
+              new ResponseHandler<Throwable>(ErrorScreenCtrl::onError) {
+              });
 
         searchRecipesField.textProperty().addListener((obs, oldVal, newVal) -> {
             this.currentSearchQuery = newVal.trim().toLowerCase();
