@@ -23,6 +23,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.geometry.NodeOrientation;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -173,7 +174,7 @@ public class MainScreenCtrl {
                             + item.getUnit());
 
                     ContextMenu cm = new ContextMenu();
-                    MenuItem editItem = new MenuItem("Edit");
+                    MenuItem editItem = new MenuItem(languageController.get("menu.edit"));
                     editItem.setOnAction(event -> editIngredient(item));
                     cm.getItems().add(editItem);
                     setContextMenu(cm);
@@ -561,7 +562,6 @@ public class MainScreenCtrl {
         Recipe selected = recipeListView.getSelectionModel().getSelectedItem();
 
         if (selected == null) {
-            System.out.println("DEBUG: " + languageController.get("error.noRecipeSelected"));
             ErrorScreenCtrl.showError(languageController.get("error.noRecipeSelected"));
             return;
         }
@@ -709,7 +709,7 @@ public class MainScreenCtrl {
             Pair<T, Parent> pair =
                   Main.getFxml().load(controllerClass, "client", "scenes", fxmlFileName);
             modalStage.setScene(new Scene(pair.getValue()));
-
+            Parent root = pair.getValue();
             // Pass the stage to the controller so it can close itself
             pair.getKey().setStage(modalStage);
             pair.getKey().init(defaultParams);
@@ -866,7 +866,7 @@ public class MainScreenCtrl {
             return;
         }
 
-        PrintRecipe.exportRecipe(printButton.getScene().getWindow(), selectedRecipe);
+        PrintRecipe.exportRecipe(printButton.getScene().getWindow(), selectedRecipe, languageController);
 
         System.out.println("Exported recipe: " + selectedRecipe.getName());
     }
@@ -919,6 +919,17 @@ public class MainScreenCtrl {
      */
     public void switchLanguage(String languageCode) {
         languageController.loadLanguage(languageCode);
+
+        // Get the root element of your current scene
+        Parent root = saveButton.getScene().getRoot();
+
+        if ("ar".equals(languageCode)) {
+            // Flip the entire UI for Arabic
+            root.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
+        } else {
+            // Keep it standard for English, Dutch, French
+            root.setNodeOrientation(NodeOrientation.LEFT_TO_RIGHT);
+        }
 
         refreshUIText();
     }

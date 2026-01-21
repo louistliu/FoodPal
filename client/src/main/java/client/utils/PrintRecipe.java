@@ -1,5 +1,6 @@
 package client.utils;
 
+import client.scenes.LanguageController;
 import commons.Recipe;
 import commons.RecipeIngredient;
 import java.io.BufferedWriter;
@@ -21,11 +22,11 @@ public class PrintRecipe {
      * @param owner  The window needed for the FileChooser class
      * @param recipe The recipe that needs to be exported
      */
-    public static void exportRecipe(Window owner, Recipe recipe) {
+    public static void exportRecipe(Window owner, Recipe recipe, LanguageController languageController) {
         StringBuilder content = new StringBuilder();
         content.append("# ").append(recipe.getName()).append("\n\n");
         content.append(recipe.getDescription()).append("\n\n");
-        content.append("## Ingredients\n\n");
+        content.append("## ").append(languageController.get("label.ingredients1")).append("\n\n");
 
         for (RecipeIngredient ing : recipe.getIngredients()) {
             content.append("- ")
@@ -34,14 +35,14 @@ public class PrintRecipe {
                     .append(ing.getIngredient().getName()).append("\n");
         }
 
-        content.append("\n## Preparation Steps\n\n");
+        content.append("\n## ").append(languageController.get("label.instructions1")).append("\n\n");
         List<String> instructions = recipe.getInstructions();
         for (int i = 0; i < instructions.size(); i++) {
             content.append(i + 1).append(". ").append(instructions.get(i)).append("\n");
         }
 
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Save recipe");
+        fileChooser.setTitle(languageController.get("title.saveRecipeFile"));
         fileChooser.getExtensionFilters().add(
                 new FileChooser.ExtensionFilter("Markdown file", "*.md"));
         fileChooser.setInitialFileName(recipe.getName() + ".md");

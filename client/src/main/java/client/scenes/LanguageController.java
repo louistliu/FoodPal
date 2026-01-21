@@ -42,4 +42,5 @@ public class LanguageController {
     public String getDeleteText() {
         return get("deleteButton.text");
     }
+
 }
