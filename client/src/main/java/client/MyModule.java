@@ -63,14 +63,14 @@ public class MyModule implements Module {
         binder.bind(MainCtrl.class).in(Scopes.SINGLETON);
 
         // Setup Providers
-        binder.bind(WebSocketStompClient.class).toProvider(StompClientProvider.class);
+        binder.bind(WebSocketStompClient.class).toProvider(StompClientProvider.class)
+              .in(Scopes.SINGLETON);
         binder.bind(StompSessionHandler.class);
 
         // Bind the FoodPal Main Screen controller
         binder.bind(MainScreenCtrl.class).in(Scopes.SINGLETON);
         binder.bind(AddIngredientScreenCtrl.class).in(Scopes.SINGLETON);
         binder.bind(AddInstructionScreenCtrl.class).in(Scopes.SINGLETON);
-        binder.bind(ServerSockets.class).in(Scopes.SINGLETON);
         binder.bind(client.utils.ConfigService.class).in(Scopes.SINGLETON);
         binder.bind(ServerSockets.class).in(Scopes.SINGLETON);
     }
