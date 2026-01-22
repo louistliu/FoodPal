@@ -394,6 +394,12 @@ public class MainScreenCtrl {
         if (recipeNameField.getText().equals(selectedRecipe.getName())) {
             return;
         }
+        for (Recipe recipe : allRecipes) {
+            if (recipe.getName().equals(recipeNameField.getText().trim())) {
+                recipeNameField.setText(selectedRecipe.getName());
+                return;
+            }
+        }
         saveRecipe();
     }
 
