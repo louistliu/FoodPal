@@ -1,17 +1,12 @@
-package client.utils;
+package client.utils.communication;
 
 import client.interfaces.IResponseHandler;
 import client.interfaces.IStompHeaders;
+import client.utils.ConfigService;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import commons.Ingredient;
 import java.util.concurrent.TimeUnit;
-import org.springframework.messaging.converter.JacksonJsonMessageConverter;
 import org.springframework.messaging.simp.stomp.StompHeaders;
-import org.springframework.scheduling.TaskScheduler;
-import org.springframework.scheduling.concurrent.DefaultManagedTaskScheduler;
-import org.springframework.web.socket.client.WebSocketClient;
-import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
 
 /**
@@ -20,32 +15,28 @@ import org.springframework.web.socket.messaging.WebSocketStompClient;
 @Singleton
 public class ServerSockets {
     public static final String OBJECT_TYPE_KEY = "ObjectType";
-    private static String URL = "ws://127.0.0.1:8080/";
     private static final String INITIAL_ENDPOINT = "food-pal";
+    private static String URL = "ws://127.0.0.1:8080/";
     private final WebSocketStompClient client;
     private final StompSessionHandler sessionHandler;
-    private final boolean isAvailable;
+    private boolean isAvailable;
 
     /**
      * Create a new STOMP client, and configure session.
      *
      */
     @Inject
-    public ServerSockets(ConfigService configservice) {
+    public ServerSockets(WebSocketStompClient client, StompSessionHandler sessionHandler,
+                         ConfigService configservice) {
         URL = configservice.getConfig().getServerUrl() != null
-                    ? configservice.getConfig().getServerUrl()
-                    : "ws://127.0.0.1:8080/";
-        WebSocketClient socketClient = new StandardWebSocketClient();
-        TaskScheduler scheduler = new DefaultManagedTaskScheduler();
+              ? configservice.getConfig().getServerUrl()
+              : "ws://127.0.0.1:8080/";
+        this.client = client;
+        this.sessionHandler = sessionHandler;
 
-        this.client = new WebSocketStompClient(socketClient);
-        client.setMessageConverter(new JacksonJsonMessageConverter());
-        client.setTaskScheduler(scheduler);
-
-        this.sessionHandler = new StompSessionHandler();
         try {
             System.out.println("Connecting to " + URL);
-            client.connectAsync(URL + INITIAL_ENDPOINT, sessionHandler)
+            this.client.connectAsync(URL + INITIAL_ENDPOINT, this.sessionHandler)
                   .get(5, TimeUnit.SECONDS);
         } catch (Exception e) {
             System.err.println("FAILED to CONNECT to " + URL + INITIAL_ENDPOINT);
@@ -53,16 +44,6 @@ public class ServerSockets {
             return;
         }
         isAvailable = true;
-    }
-
-    /**
-     * Check if a server for this client is reachable.
-     *
-     * @return returns {@code true} if the server can be reached via a get method,
-     *      otherwise returns {@code false}
-     */
-    public boolean isServerAvailable() {
-        return isAvailable;
     }
 
     /**
@@ -78,10 +59,21 @@ public class ServerSockets {
     }
 
     /**
+     * Check if a server for this client is reachable.
+     *
+     * @return returns {@code true} if the server can be reached via a get method,
+     *       otherwise returns {@code false}
+     */
+    public boolean isServerAvailable() {
+        return isAvailable;
+    }
+
+    /**
      * Disconnects from STOMP session, if connected.
      */
     public void disconnect() {
         sessionHandler.disconnect();
+        isAvailable = false;
     }
 
     /**
@@ -104,16 +96,6 @@ public class ServerSockets {
      */
     public void subscribe(IStompHeaders headers, IResponseHandler<?> handler) {
         subscribe(headers.getSubscribeHeaders(), handler);
-    }
-
-    /**
-     * Adds an ingredient on the server.
-     *
-     * @param ingredient ingredient to add.
-     */
-    public void addIngredient(Ingredient ingredient) {
-        StompHeaders headers = setDestination("/app/ingredients/create");
-        sessionHandler.send(headers, ingredient);
     }
 
     /**

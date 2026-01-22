@@ -57,51 +57,13 @@ public final class ConfigService {
         persistConfig();
     }
 
+    private final ObjectMapper mapper;
     private Config config;
     private File configFile;
-    private final ObjectMapper mapper;
 
     @Inject
     public ConfigService(ObjectMapper mapper) {
         this.mapper = mapper;
-    }
-
-    /** Get the loaded config.
-     *
-     * @return The loaded config
-     */
-    public Config getConfig() {
-        return config;
-    }
-
-    /**
-     * Load configuration from the given file using Jackson. If loading
-     * fails the method returns a new Config with default values.
-     *
-     * @param args The arguments to parse
-     * @return loaded Config or defaults
-     */
-    public Config loadConfig(String[] args) {
-        System.out.println("Program arguments: " + Arrays.toString(args));
-        String configPath = resolveConfigPath(args);
-        configFile = new File(configPath);
-        config = new Config();
-        var mapper = new ObjectMapper();
-        try {
-            if (configFile.exists()) {
-                config =  mapper.readValue(configFile, Config.class);
-                System.out.println("Config file found!");
-                System.out.println(config);
-                return config;
-            }
-        } catch (IOException e) {
-            System.err.println("WARNING: Could not load config file, "
-                  + "check the path and the permissions. "
-                  + "Using default values.");
-            System.out.println(e.getMessage());
-        }
-        System.out.println("Using default config values");
-        return config;
     }
 
     /**
@@ -123,10 +85,58 @@ public final class ConfigService {
     }
 
     /**
+     * Get the loaded config.
+     *
+     * @return The loaded config
+     */
+    public Config getConfig() {
+        return config;
+    }
+
+    /**
+     * Set config, mainly for testing.
+     *
+     * @param config config to set
+     */
+    public void setConfig(Config config) {
+        this.config = config;
+    }
+
+    /**
+     * Load configuration from the given file using Jackson. If loading
+     * fails the method returns a new Config with default values.
+     *
+     * @param args The arguments to parse
+     * @return loaded Config or defaults
+     */
+    public Config loadConfig(String[] args) {
+        System.out.println("Program arguments: " + Arrays.toString(args));
+        String configPath = resolveConfigPath(args);
+        configFile = new File(configPath);
+        config = new Config();
+        var mapper = new ObjectMapper();
+        try {
+            if (configFile.exists()) {
+                config = mapper.readValue(configFile, Config.class);
+                System.out.println("Config file found!");
+                System.out.println(config);
+                return config;
+            }
+        } catch (IOException e) {
+            System.err.println("WARNING: Could not load config file, "
+                  + "check the path and the permissions. "
+                  + "Using default values.");
+            System.out.println(e.getMessage());
+        }
+        System.out.println("Using default config values");
+        return config;
+    }
+
+    /**
      * Save the given configuration to disk using Jackson and Commons IO.
      * Errors are logged to stderr.
      *
-     * @param file destination file
+     * @param file   destination file
      * @param config configuration to persist
      */
     private void saveConfig(File file, Config config) {
