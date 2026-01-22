@@ -2,13 +2,10 @@ package client.utils.communication;
 
 import client.interfaces.IResponseHandler;
 import client.interfaces.IStompHeaders;
+import client.utils.ConfigService;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.util.concurrent.ExecutionException;
-import commons.Ingredient;
 import java.util.concurrent.TimeUnit;
-import org.springframework.messaging.converter.JacksonJsonMessageConverter;
-import java.util.concurrent.TimeoutException;
 import org.springframework.messaging.simp.stomp.StompHeaders;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
 
@@ -18,21 +15,22 @@ import org.springframework.web.socket.messaging.WebSocketStompClient;
 @Singleton
 public class ServerSockets {
     public static final String OBJECT_TYPE_KEY = "ObjectType";
-    private static String URL = "ws://127.0.0.1:8080/";
     private static final String INITIAL_ENDPOINT = "food-pal";
+    private static String URL = "ws://127.0.0.1:8080/";
     private final WebSocketStompClient client;
     private final StompSessionHandler sessionHandler;
-    private final boolean isAvailable;
+    private boolean isAvailable;
 
     /**
      * Create a new STOMP client, and configure session.
      *
      */
     @Inject
-    public ServerSockets(WebSocketStompClient client, StompSessionHandler sessionHandler ConfigService configservice) {
+    public ServerSockets(WebSocketStompClient client, StompSessionHandler sessionHandler,
+                         ConfigService configservice) {
         URL = configservice.getConfig().getServerUrl() != null
-                    ? configservice.getConfig().getServerUrl()
-                    : "ws://127.0.0.1:8080/";
+              ? configservice.getConfig().getServerUrl()
+              : "ws://127.0.0.1:8080/";
         this.client = client;
         this.sessionHandler = sessionHandler;
 
@@ -75,6 +73,7 @@ public class ServerSockets {
      */
     public void disconnect() {
         sessionHandler.disconnect();
+        isAvailable = false;
     }
 
     /**
