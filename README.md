@@ -23,7 +23,7 @@ To help you get started, you can find additional instructions in the correspondi
 
 ## Feature overview
 - All basic features
-  - Extra feature: Implementation tests for server (db and endpoints) and client sockets
+  - Extra feature: Integration tests for server (db and endpoints) and client sockets
 - Automated Change Synchronization
   - Extra feature: auto saves recipe on edit
 - Live Language Switch
