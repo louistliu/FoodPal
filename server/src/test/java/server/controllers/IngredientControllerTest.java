@@ -1,7 +1,9 @@
 package server.controllers;
 
 import static org.awaitility.Awaitility.await;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import commons.Ingredient;
 import java.lang.reflect.Type;
@@ -111,7 +113,8 @@ class IngredientControllerTest {
 
                     assertNotNull(ingredients, "The initial reply should not be null");
 
-                    assertTrue(ingredients.length > 0, "The initial reply should contain default ingredients");
+                    assertTrue(ingredients.length > 0,
+                            "The initial reply should contain default ingredients");
 
                     System.out.println("Received " + ingredients.length + " initial ingredients");
                 });
@@ -120,8 +123,6 @@ class IngredientControllerTest {
     @Test
     void testIngredientCreationAndFetch() throws InterruptedException {
         BlockingQueue<Ingredient> createdQueue = new ArrayBlockingQueue<>(1);
-        BlockingQueue<Ingredient[]> fetchedQueue = new ArrayBlockingQueue<>(1);
-
         Ingredient newIngredient = new Ingredient("Cucumber");
 
         session.subscribe("/topic/ingredients/create", new StompFrameHandler() {
@@ -143,6 +144,8 @@ class IngredientControllerTest {
             assertNotNull(created);
             assertEquals(newIngredient.getName(), created.getName());
         });
+
+        BlockingQueue<Ingredient[]> fetchedQueue = new ArrayBlockingQueue<>(1);
 
         session.subscribe("/app/ingredients/fetch", new StompFrameHandler() {
             @Override
@@ -166,18 +169,22 @@ class IngredientControllerTest {
                     break;
                 }
             }
-            assertTrue(found, "Newly created ingredient should appear in fetched list");
+
+            String msg = "Newly created ingredient should appear in fetched list";
+            assertTrue(found, msg);
         });
     }
 
     @Test
     void testIngredientLifecycle() throws InterruptedException {
         BlockingQueue<Ingredient> deleteQueue = new ArrayBlockingQueue<>(1);
-        BlockingQueue<Ingredient[]> fetchQueue = new ArrayBlockingQueue<>(1);
 
         session.subscribe("/topic/ingredients/delete", new StompFrameHandler() {
             @Override
-            public Type getPayloadType(StompHeaders headers) { return Ingredient.class; }
+            public Type getPayloadType(StompHeaders headers) {
+                return Ingredient.class;
+            }
+
             @Override
             public void handleFrame(StompHeaders headers, Object payload) {
                 deleteQueue.add((Ingredient) payload);
@@ -189,9 +196,14 @@ class IngredientControllerTest {
 
         Thread.sleep(500);
 
+        final BlockingQueue<Ingredient[]> fetchQueue = new ArrayBlockingQueue<>(1);
+
         session.subscribe("/app/ingredients/fetch", new StompFrameHandler() {
             @Override
-            public Type getPayloadType(StompHeaders headers) { return Ingredient[].class; }
+            public Type getPayloadType(StompHeaders headers) {
+                return Ingredient[].class;
+            }
+
             @Override
             public void handleFrame(StompHeaders headers, Object payload) {
                 fetchQueue.add((Ingredient[]) payload);
