@@ -431,7 +431,7 @@ public class MainScreenCtrl {
                     "Edit Instruction", instruction);
 
         if (control == null) {
-            ErrorScreenCtrl.showError("Failed to edit instruction");
+            ErrorScreenCtrl.showError(languageController.get("error.failedEditInstruction"));
             return Optional.empty();
         }
         return control.getResult() == null ? Optional.empty() :
@@ -559,7 +559,8 @@ public class MainScreenCtrl {
         Recipe selected = recipeListView.getSelectionModel().getSelectedItem();
 
         if (selected == null) {
-            System.out.println("No recipe selected!");
+            System.out.println("DEBUG: " + languageController.get("error.noRecipeSelected"));
+            ErrorScreenCtrl.showError(languageController.get("error.noRecipeSelected"));
             return;
         }
         serverRecipes.send(Endpoint.RECIPE_DELETE, selected);
@@ -724,7 +725,7 @@ public class MainScreenCtrl {
      */
     public void addIngredient() {
         if (selectedRecipe == null) {
-            System.out.println("Error: No recipe selected to add ingredient to.");
+            ErrorScreenCtrl.showError(languageController.get("error.noRecipeAddIngredient"));
             return;
         }
 
@@ -732,14 +733,14 @@ public class MainScreenCtrl {
               launchModal(AddIngredientScreenCtrl.class, "AddIngredientScreen.fxml",
                     "Add New Ingredient");
 
+
         if (controller != null && controller.getResult() != null) {
             RecipeIngredient newIngredient = controller.getResult();
             if (containsIngredient(selectedRecipe, newIngredient.getIngredient())) {
-                ErrorScreenCtrl.showError(
-                      "Ingredient " + newIngredient.getIngredient().getName()
-                            + " is already in the recipe.\n "
-                            + "Please edit the existing ingredient (right click option)");
-                System.out.println("Ingredient already contained");
+                String pattern = languageController.get("error.ingredientAlreadyExists");
+                String name = newIngredient.getIngredient().getName();
+
+                ErrorScreenCtrl.showError(String.format(pattern, name));
                 return;
             }
             System.out.println("Ingredient added: " + newIngredient.getIngredient().getName());
@@ -770,11 +771,10 @@ public class MainScreenCtrl {
 
             if (!item.getIngredient().getName().equals(updatedItem.getIngredient().getName())
                   && containsIngredient(selectedRecipe, updatedItem.getIngredient())) {
-                ErrorScreenCtrl.showError(
-                      "Ingredient " + updatedItem.getIngredient().getName()
-                            + " is already in the recipe.\n "
-                            + "Please edit the existing ingredient (right click option)");
-                System.out.println("Ingredient already contained");
+                String pattern = languageController.get("error.ingredientAlreadyExists");
+                String name = updatedItem.getIngredient().getName();
+
+                ErrorScreenCtrl.showError(String.format(pattern, name));
                 return;
             }
 
@@ -810,7 +810,7 @@ public class MainScreenCtrl {
      */
     public void addInstruction() {
         if (selectedRecipe == null) {
-            System.out.println("Error: No recipe selected to add instruction to.");
+            ErrorScreenCtrl.showError(languageController.get("error.noRecipeAddInstruction"));
             return;
         }
 
@@ -935,7 +935,10 @@ public class MainScreenCtrl {
         recipeNameField.setPromptText(languageController.get("label.recipeNamePrompt"));
         recipeDescriptionField.setPromptText(languageController.get("label.descriptionPrompt"));
         searchRecipesField.setPromptText(languageController.get("label.searchPrompt"));
-
+        if (saveButton != null && saveButton.getScene() != null) {
+            Stage stage = (Stage) saveButton.getScene().getWindow();
+            stage.setTitle(languageController.get("app.title"));
+        }
         recipeListView.refresh();
 
     }

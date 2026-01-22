@@ -18,6 +18,7 @@ package client;
 
 import client.scenes.AddIngredientScreenCtrl;
 import client.scenes.AddInstructionScreenCtrl;
+import client.scenes.LanguageController;
 import client.scenes.MainCtrl;
 import client.scenes.MainScreenCtrl;
 import client.utils.Config;
@@ -60,5 +61,6 @@ public class MyModule implements Module {
         binder.bind(ServerSockets.class).in(Scopes.SINGLETON);
         binder.bind(ServerRecipeUtils.class).in(Scopes.SINGLETON);
         binder.bind(client.utils.ConfigService.class).in(Scopes.SINGLETON);
+        binder.bind(LanguageController.class).in(Scopes.SINGLETON);
     }
 }

@@ -56,7 +56,9 @@ public class MainCtrl {
      * shows the main screen and sets window title.
      */
     public void showMainScreen() {
-        primaryStage.setTitle("FoodPal: Recipe Organizer");
+        if (primaryStage != null) {
+            primaryStage.setTitle(languageController.get("app.title"));
+        }
         primaryStage.setScene(mainScreen);
     }
 

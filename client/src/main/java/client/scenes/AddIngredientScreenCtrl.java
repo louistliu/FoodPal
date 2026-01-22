@@ -42,6 +42,8 @@ public class AddIngredientScreenCtrl extends ScreenControl {
     private RecipeIngredient result = null;
     private ObservableList<Ingredient> observableIngredients;
     private Ingredient ingredientToSelect;
+    private LanguageController languageController;
+
 
     /**
      * Constructs the MainScreenCtrl, injecting the scene controller.
@@ -49,8 +51,10 @@ public class AddIngredientScreenCtrl extends ScreenControl {
      * @param serverIngredients - The server sockets to be received by the controller.
      */
     @Inject
-    public AddIngredientScreenCtrl(ServerSockets serverIngredients) {
+    public AddIngredientScreenCtrl(ServerSockets serverIngredients,
+                                   LanguageController languageController) {
         this.serverIngredients = serverIngredients;
+        this.languageController = languageController;
     }
 
     /**
@@ -203,17 +207,17 @@ public class AddIngredientScreenCtrl extends ScreenControl {
         Ingredient selected = ingredientChoiceBox.getValue();
 
         if (selected == null) {
-            ErrorScreenCtrl.showError("Invalid input: Please select an ingredient.");
+            ErrorScreenCtrl.showError(languageController.get("error.missingIngredient"));
             return;
         }
 
         if (amountStr.isEmpty()) {
-            ErrorScreenCtrl.showError("Invalid input: Please fill in an amount.");
+            ErrorScreenCtrl.showError(languageController.get("error.invalidAmount"));;
             return;
         }
 
         if ("Unit".equals(unit)) {
-            ErrorScreenCtrl.showError("Invalid input: Please select an unit.");
+            ErrorScreenCtrl.showError(languageController.get("error.missingUnit"));
             return;
         }
 
@@ -225,14 +229,14 @@ public class AddIngredientScreenCtrl extends ScreenControl {
                 return;
             }
         } catch (NumberFormatException e) {
-            ErrorScreenCtrl.showError("Invalid Amount: Must be a number.");
+            ErrorScreenCtrl.showError(languageController.get("error.invalidAmount"));
             return;
         }
 
         if ("Other".equals(selected.getName())) {
             String newName = inputTextArea.getText().trim();
             if (newName.isEmpty()) {
-                ErrorScreenCtrl.showError("Please enter a name for the new ingredient.");
+                ErrorScreenCtrl.showError(languageController.get("error.missingIngredientName"));
                 return;
             }
             serverIngredients.send(Endpoint.INGREDIENT_CREATE,

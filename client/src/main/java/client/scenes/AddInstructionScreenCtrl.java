@@ -1,5 +1,6 @@
 package client.scenes;
 
+import com.google.inject.Inject;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
@@ -20,6 +21,18 @@ public class AddInstructionScreenCtrl extends ScreenControl {
     private Button cancelButton;
 
     private String result = null;
+
+    private LanguageController languageController;
+
+    /**
+     * constructor.
+     *
+     * @param languageController languageController for translating
+     */
+    @Inject
+    public AddInstructionScreenCtrl(LanguageController languageController) {
+        this.languageController = languageController;
+    }
 
     /**
      * Sets the stage for this scene, necessary for closing the window.
@@ -64,7 +77,7 @@ public class AddInstructionScreenCtrl extends ScreenControl {
                 super.stage.close();
             }
         } else {
-            System.out.println("Instruction cannot be empty");
+            ErrorScreenCtrl.showError(languageController.get("error.emptyInstruction"));
         }
     }
 
