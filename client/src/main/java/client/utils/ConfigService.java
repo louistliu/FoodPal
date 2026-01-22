@@ -1,6 +1,8 @@
 package client.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -9,19 +11,23 @@ import org.apache.commons.io.FileUtils;
 /**
  * Helper service for loading and saving the client configuration.
  */
+@Singleton
 public final class ConfigService {
 
-    private static Config config;
-    private static File configFile;
+    private Config config;
+    private File configFile;
+    private final ObjectMapper mapper;
 
-    private ConfigService() {
+    @Inject
+    public ConfigService(ObjectMapper mapper) {
+        this.mapper = mapper;
     }
 
     /** Get the loaded config.
      *
      * @return The loaded config
      */
-    public static Config getConfig() {
+    public Config getConfig() {
         return config;
     }
 
@@ -32,7 +38,7 @@ public final class ConfigService {
      * @param args The arguments to parse
      * @return loaded Config or defaults
      */
-    public static Config loadConfig(String[] args) {
+    public Config loadConfig(String[] args) {
         System.out.println("Program arguments: " + Arrays.toString(args));
         String configPath = resolveConfigPath(args);
         configFile = new File(configPath);
@@ -42,6 +48,7 @@ public final class ConfigService {
             if (configFile.exists()) {
                 config =  mapper.readValue(configFile, Config.class);
                 System.out.println("Config file found!");
+                System.out.println(config);
                 return config;
             }
         } catch (IOException e) {
@@ -79,7 +86,7 @@ public final class ConfigService {
      * @param file destination file
      * @param config configuration to persist
      */
-    private static void saveConfig(File file, Config config) {
+    private void saveConfig(File file, Config config) {
         var mapper = new ObjectMapper();
         try {
             String json = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(config);
@@ -94,7 +101,7 @@ public final class ConfigService {
      * for UI/controllers. If the configured file is not known this method
      * falls back to config.json in the working directory.
      */
-    public static void persistConfig() {
+    public void persistConfig() {
         if (configFile == null) {
             // fallback to working-directory config
             System.out.println("No config path provided, writing to project root!");

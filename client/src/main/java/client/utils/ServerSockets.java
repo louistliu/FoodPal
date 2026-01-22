@@ -5,9 +5,7 @@ import client.interfaces.IStompHeaders;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import commons.Ingredient;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import org.springframework.messaging.converter.JacksonJsonMessageConverter;
 import org.springframework.messaging.simp.stomp.StompHeaders;
 import org.springframework.scheduling.TaskScheduler;
@@ -22,7 +20,7 @@ import org.springframework.web.socket.messaging.WebSocketStompClient;
 @Singleton
 public class ServerSockets {
     public static final String OBJECT_TYPE_KEY = "ObjectType";
-    private static final String URL = "ws://127.0.0.1:8080/";
+    private static String URL = "ws://127.0.0.1:8080/";
     private static final String INITIAL_ENDPOINT = "food-pal";
     private final WebSocketStompClient client;
     private final StompSessionHandler sessionHandler;
@@ -33,7 +31,10 @@ public class ServerSockets {
      *
      */
     @Inject
-    public ServerSockets() {
+    public ServerSockets(ConfigService configservice) {
+        URL = configservice.getConfig().getServerUrl() != null
+                    ? configservice.getConfig().getServerUrl()
+                    : "ws://127.0.0.1:8080/";
         WebSocketClient socketClient = new StandardWebSocketClient();
         TaskScheduler scheduler = new DefaultManagedTaskScheduler();
 
@@ -43,8 +44,10 @@ public class ServerSockets {
 
         this.sessionHandler = new StompSessionHandler();
         try {
-            client.connectAsync(URL + INITIAL_ENDPOINT, sessionHandler).get(5, TimeUnit.SECONDS);
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            System.out.println("Connecting to " + URL);
+            client.connectAsync(URL + INITIAL_ENDPOINT, sessionHandler)
+                  .get(5, TimeUnit.SECONDS);
+        } catch (Exception e) {
             System.err.println("FAILED to CONNECT to " + URL + INITIAL_ENDPOINT);
             isAvailable = false;
             return;

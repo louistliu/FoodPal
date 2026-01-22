@@ -1,17 +1,22 @@
 package client.utils;
 
+import static org.apache.commons.lang3.builder.ToStringStyle.MULTI_LINE_STYLE;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import jakarta.inject.Singleton;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
  * Application configuration persisted to disk using jackson.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Singleton
 public class Config {
     // Default values
-    private String serverUrl = "ws://localhost:8080";
+    private String serverUrl = "ws://localhost:8080/";
     private String language = "English";
     private List<Long> favoriteRecipeIds = new ArrayList<>();
 
@@ -90,6 +95,11 @@ public class Config {
     @Override
     public int hashCode() {
         return Objects.hash(serverUrl, language, favoriteRecipeIds);
+    }
+
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this, MULTI_LINE_STYLE);
     }
 
 }

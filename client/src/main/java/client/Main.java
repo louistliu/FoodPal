@@ -36,7 +36,7 @@ public class Main extends Application {
 
     private static Injector INJECTOR;
     private static MyFXML FXML;
-    private static Config config;
+    private static ConfigService configService;
 
     /**
      * Application entry. Loads configuration, initializes Guice injector
@@ -47,8 +47,10 @@ public class Main extends Application {
      * @throws IOException        if config file cannot be read
      */
     public static void main(String[] args) throws URISyntaxException, IOException {
-        config = ConfigService.loadConfig(args);
-        INJECTOR = Guice.createInjector(new MyModule(config));
+        // Create a temporary injector to get ConfigService and load config
+        INJECTOR = Guice.createInjector(new MyModule(new Config()));
+        configService = INJECTOR.getInstance(ConfigService.class);
+        configService.loadConfig(args);
         launch(args);
     }
 
@@ -66,14 +68,15 @@ public class Main extends Application {
         FXML = new MyFXML(INJECTOR);
 
         // Ensure config is saved on exit
-        primaryStage.setOnCloseRequest(e -> ConfigService.persistConfig());
+        primaryStage.setOnCloseRequest(e -> configService.persistConfig());
 
         var serverSockets = INJECTOR.getInstance(ServerSockets.class);
         if (!serverSockets.isServerAvailable()) {
             var msg = "Server needs to be started before the client,"
                     + " but it does not seem to be available. Shutting down.";
             System.err.println(msg);
-            System.exit(1);
+            javafx.application.Platform.exit();
+            System.exit(0);  // prevent maven freaking out
             return;
         }
 

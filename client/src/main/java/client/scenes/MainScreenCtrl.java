@@ -1,7 +1,6 @@
 package client.scenes;
 
 import client.Main;
-import client.utils.Config;
 import client.utils.ConfigService;
 import client.utils.Endpoint;
 import client.utils.PrintRecipe;
@@ -44,8 +43,9 @@ import javafx.util.Pair;
 public class MainScreenCtrl {
 
     private final ServerSockets serverRecipes;
-    private final Config config;
+    private final ConfigService configService;
     RecipeList listOfRecipes = new RecipeList();
+    private String selectedLanguage = "English";
     private ObservableList<Recipe> observableRecipes;
     private ObservableList<RecipeIngredient> observableIngredients;
     private Recipe selectedRecipe;
@@ -103,9 +103,9 @@ public class MainScreenCtrl {
      * @param m The main application controller for scene transitions.
      */
     @Inject
-    public MainScreenCtrl(MainCtrl m, ServerSockets server, Config config) {
+    public MainScreenCtrl(MainCtrl m, ServerSockets server, ConfigService configService) {
         this.serverRecipes = server;
-        this.config = config;
+        this.configService = configService;
     }
 
     /**
@@ -114,7 +114,10 @@ public class MainScreenCtrl {
      */
     public void initialize() {
         languageChoiceBox.setItems(FXCollections.observableArrayList("English", "Dutch", "German"));
-        languageChoiceBox.getSelectionModel().selectFirst();
+        if (languageChoiceBox.getItems().contains(configService.getConfig().getLanguage())) {
+            selectedLanguage = configService.getConfig().getLanguage();
+        }
+        languageChoiceBox.getSelectionModel().select(selectedLanguage);
 
         if (recipeDescriptionField != null) {
             recipeDescriptionField.setWrapText(true);
@@ -242,10 +245,11 @@ public class MainScreenCtrl {
      * Handles real-time search field updates and the Escape key shortcut.
      */
     public void setupSearchField() {
-        searchRecipesField.textProperty().addListener((obs, oldVal, newVal) -> {
-            this.currentSearchQuery = newVal.trim().toLowerCase();
-            refreshListView();
-        });
+        searchRecipesField.textProperty()
+              .addListener((obs, oldVal, newVal) -> {
+                  this.currentSearchQuery = newVal.trim().toLowerCase();
+                  refreshListView();
+              });
 
         searchRecipesField.setOnKeyPressed(event -> {
             if (event.getCode() == javafx.scene.input.KeyCode.ESCAPE) {
@@ -573,7 +577,7 @@ public class MainScreenCtrl {
             return;
         }
 
-        List<Long> favoriteIds = config.getFavoriteRecipeIds();
+        List<Long> favoriteIds = configService.getConfig().getFavoriteRecipeIds();
         long currentId = selectedRecipe.getId();
 
         if (favoriteIds.contains(currentId)) {
@@ -584,7 +588,7 @@ public class MainScreenCtrl {
             System.out.println("Recipe '" + selectedRecipe.getName() + "' added to favorites.");
         }
 
-        ConfigService.persistConfig();
+        configService.persistConfig();
         updateFavoriteButtonText(selectedRecipe);
         refreshListView();
 
@@ -597,7 +601,8 @@ public class MainScreenCtrl {
         if (recipe == null) {
             return;
         }
-        boolean isFavorite = config.getFavoriteRecipeIds().contains(recipe.getId());
+        boolean isFavorite = configService.getConfig().getFavoriteRecipeIds()
+              .contains(recipe.getId());
         favoriteButton.setText(isFavorite ? "Unfavorite" : "Favorite");
     }
 
@@ -606,7 +611,7 @@ public class MainScreenCtrl {
      * descriptions, ingredients, and instructions.
      */
     private void refreshListView() {
-        List<Long> favoriteIds = config.getFavoriteRecipeIds();
+        List<Long> favoriteIds = configService.getConfig().getFavoriteRecipeIds();
 
         List<Recipe> filteredList = allRecipes.stream()
                 .filter(recipe -> {
@@ -860,6 +865,8 @@ public class MainScreenCtrl {
      * Handles the user changing the selected language in the choice box.
      */
     public void onLanguageChange() {
+        selectedLanguage = languageChoiceBox.getValue();
+        configService.persistConfig();
         System.out.println("Language switched to: " + languageChoiceBox.getValue());
     }
 }
