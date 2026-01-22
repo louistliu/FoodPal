@@ -494,10 +494,10 @@ public class MainScreenCtrl {
     public int findNextId(String prefix) {
         Set<Integer> takenNumbers = new HashSet<>();
 
-        for (Recipe r : observableRecipes) {
+        for (Recipe r : allRecipes) {
             String name = r.getName();
 
-            if (name.startsWith(prefix)) {
+            if (name != null && name.startsWith(prefix)) {
                 try {
                     String numberPart = name.substring(prefix.length()).trim();
                     int number = Integer.parseInt(numberPart);
