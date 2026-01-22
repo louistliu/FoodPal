@@ -26,7 +26,7 @@ import javafx.util.StringConverter;
 public class AddIngredientScreenCtrl extends ScreenControl {
 
     private final ServerSockets serverIngredients;
-    private final Ingredient otherOption = new Ingredient("Other");
+    private final Ingredient otherOption;
     @FXML
     private TextArea inputTextArea; // Visible only when "Other" is selected
     @FXML
@@ -42,6 +42,8 @@ public class AddIngredientScreenCtrl extends ScreenControl {
     private RecipeIngredient result = null;
     private ObservableList<Ingredient> observableIngredients;
     private Ingredient ingredientToSelect;
+    private final LanguageController languageController;
+
 
     /**
      * Constructs the MainScreenCtrl, injecting the scene controller.
@@ -49,8 +51,11 @@ public class AddIngredientScreenCtrl extends ScreenControl {
      * @param serverIngredients - The server sockets to be received by the controller.
      */
     @Inject
-    public AddIngredientScreenCtrl(ServerSockets serverIngredients) {
+    public AddIngredientScreenCtrl(ServerSockets serverIngredients,
+                                   LanguageController languageController) {
         this.serverIngredients = serverIngredients;
+        this.languageController = languageController;
+        this.otherOption = new Ingredient(languageController.get("ingredient.other"));
     }
 
     /**
@@ -60,12 +65,17 @@ public class AddIngredientScreenCtrl extends ScreenControl {
     public void initialize() {
         observableIngredients = FXCollections.observableArrayList();
         ingredientChoiceBox.setItems(observableIngredients);
+        okButton.setText(languageController.get("button.ok1"));
+        cancelButton.setText(languageController.get("button.cancel1"));
+        amountTextField.setPromptText(languageController.get("label.amountPrompt"));
+        unitMenuButton.setText(languageController.get("label.unit"));
+        otherOption.setName(languageController.get("ingredient.other"));
+        inputTextArea.setPromptText(languageController.get("prompt.newIngredient"));
 
         // Reset UI fields
         amountTextField.clear();
         inputTextArea.clear();
         inputTextArea.setVisible(false);
-        unitMenuButton.setText("Unit");
 
         ingredientChoiceBox.setConverter(new StringConverter<Ingredient>() {
             @Override
@@ -81,7 +91,7 @@ public class AddIngredientScreenCtrl extends ScreenControl {
         // Add listener to show/hide the inputTextArea based on selection
         ingredientChoiceBox.getSelectionModel().selectedItemProperty()
               .addListener((obs, oldVal, newVal) -> {
-                  if ("Other".equals(newVal.getName())) {
+                  if (newVal != null && newVal.equals(otherOption)) {
                       inputTextArea.setVisible(true);
                       inputTextArea.clear();
                       inputTextArea.requestFocus();
@@ -199,21 +209,22 @@ public class AddIngredientScreenCtrl extends ScreenControl {
     public void handleOk() {
         String amountStr = amountTextField.getText().trim();
         String unit = unitMenuButton.getText();
+        final String otherLabel = languageController.get("ingredient.other");
 
         Ingredient selected = ingredientChoiceBox.getValue();
 
         if (selected == null) {
-            ErrorScreenCtrl.showError("Invalid input: Please select an ingredient.");
+            ErrorScreenCtrl.showError(languageController.get("error.missingIngredient"));
             return;
         }
 
         if (amountStr.isEmpty()) {
-            ErrorScreenCtrl.showError("Invalid input: Please fill in an amount.");
+            ErrorScreenCtrl.showError(languageController.get("error.invalidAmount"));
             return;
         }
 
         if ("Unit".equals(unit)) {
-            ErrorScreenCtrl.showError("Invalid input: Please select an unit.");
+            ErrorScreenCtrl.showError(languageController.get("error.missingUnit"));
             return;
         }
 
@@ -225,14 +236,14 @@ public class AddIngredientScreenCtrl extends ScreenControl {
                 return;
             }
         } catch (NumberFormatException e) {
-            ErrorScreenCtrl.showError("Invalid Amount: Must be a number.");
+            ErrorScreenCtrl.showError(languageController.get("error.invalidAmount"));
             return;
         }
 
-        if ("Other".equals(selected.getName())) {
+        if (otherLabel.equals(selected.getName())) {
             String newName = inputTextArea.getText().trim();
             if (newName.isEmpty()) {
-                ErrorScreenCtrl.showError("Please enter a name for the new ingredient.");
+                ErrorScreenCtrl.showError(languageController.get("error.missingIngredientName"));
                 return;
             }
             serverIngredients.send(Endpoint.INGREDIENT_CREATE,
@@ -278,6 +289,7 @@ public class AddIngredientScreenCtrl extends ScreenControl {
     public void init(Object... params) {
         this.result = null;
         super.init(params);
+
 
         if (params.length > 0 && params[0] instanceof RecipeIngredient item) {
             amountTextField.setText(String.valueOf(item.getAmount()));
