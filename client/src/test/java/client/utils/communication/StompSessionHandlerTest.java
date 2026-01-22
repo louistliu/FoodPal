@@ -5,8 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import client.MyModule;
 import client.utils.Config;
-import client.utils.Endpoint;
-import client.utils.ResponseHandler;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
