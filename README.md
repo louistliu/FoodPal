@@ -27,7 +27,7 @@ To help you get started, you can find additional instructions in the correspondi
 - Automated Change Synchronization
   - Extra feature: auto saves recipe on edit
 - Live Language Switch
-  - Extra feature: a total of four languages: Dutch, English, French, Arabic (RTL)
+  - Extra feature: a total of five languages: Dutch, English, French, Turkish and Arabic (RTL)
 - Searching for Recipes
   - Extra feature: Search history
     - Click a search query in the history window to search it again. 
