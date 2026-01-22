@@ -21,14 +21,19 @@ public class InstructionListCell extends ListCell<String> {
 
     private final ContextMenu contextMenu;
     private final Runnable save;
+    private final LanguageController languageController;
+    private final MenuItem moveUp;
+    private final MenuItem moveDown;
+    private final MenuItem edit;
 
     /**
      * Constructs a new InstructionListCell and initializes the drag-and-drop event handlers.
      * Also creates menu for manually moving instructions with right-clicking.
      */
     @Inject
-    public InstructionListCell(Runnable saveFunc,
-                               Function<String, Optional<String>> editInstruction) {
+    public InstructionListCell(Runnable saveFunc, Function<String,
+            Optional<String>> editInstruction, LanguageController languageController) {
+        this.languageController = languageController;
         setOnDragDetected(this::handleDragDetected);
         setOnDragOver(this::handleDragOver);
         setOnDragEntered(this::handleDragEntered);
@@ -38,12 +43,12 @@ public class InstructionListCell extends ListCell<String> {
         this.save = saveFunc;
 
         contextMenu = new ContextMenu();
-        MenuItem moveUp = new MenuItem("Move Up");
+        moveUp = new MenuItem();
         moveUp.setOnAction(event -> moveInstruction(-1));
-        MenuItem moveDown = new MenuItem("Move Down");
+        moveDown = new MenuItem();
         moveDown.setOnAction(event -> moveInstruction(1));
 
-        MenuItem edit = new MenuItem("Edit");
+        edit = new MenuItem();
         edit.setOnAction(event -> this.handleEdit(event, editInstruction));
 
 
@@ -94,6 +99,10 @@ public class InstructionListCell extends ListCell<String> {
             setText(null);
             setGraphic(null);
         } else {
+            moveUp.setText(languageController.get("menu.moveUp"));
+            moveDown.setText(languageController.get("menu.moveDown"));
+            edit.setText(languageController.get("menu.edit"));
+
             setText((getIndex() + 1) + ". " + item);
             setContextMenu(contextMenu);
         }
