@@ -178,32 +178,41 @@ class IngredientControllerTest {
     @Test
     void testIngredientLifecycle() throws InterruptedException {
         BlockingQueue<Ingredient> deleteQueue = new ArrayBlockingQueue<>(1);
+        BlockingQueue<Ingredient> createQueue = new ArrayBlockingQueue<>(1);
 
         session.subscribe("/topic/ingredients/delete", new StompFrameHandler() {
             @Override
             public Type getPayloadType(StompHeaders headers) {
                 return Ingredient.class;
             }
-
             @Override
             public void handleFrame(StompHeaders headers, Object payload) {
                 deleteQueue.add((Ingredient) payload);
             }
         });
 
+        session.subscribe("/topic/ingredients/create", new StompFrameHandler() {
+            @Override
+            public Type getPayloadType(StompHeaders headers) {
+                return Ingredient.class;
+            }
+            @Override
+            public void handleFrame(StompHeaders headers, Object payload) {
+                createQueue.add((Ingredient) payload);
+            }
+        });
+
         Ingredient tempIng = new Ingredient("DeleteMe");
         session.send("/app/ingredients/create", tempIng);
 
-        Thread.sleep(500);
+        await().atMost(5, TimeUnit.SECONDS).until(() -> !createQueue.isEmpty());
 
         final BlockingQueue<Ingredient[]> fetchQueue = new ArrayBlockingQueue<>(1);
-
         session.subscribe("/app/ingredients/fetch", new StompFrameHandler() {
             @Override
             public Type getPayloadType(StompHeaders headers) {
                 return Ingredient[].class;
             }
-
             @Override
             public void handleFrame(StompHeaders headers, Object payload) {
                 fetchQueue.add((Ingredient[]) payload);
@@ -211,6 +220,8 @@ class IngredientControllerTest {
         });
 
         Ingredient[] list = fetchQueue.poll(2, TimeUnit.SECONDS);
+        assertNotNull(list);
+
         Ingredient target = null;
         for (Ingredient i : list) {
             if (i.getName().equals("DeleteMe")) {
