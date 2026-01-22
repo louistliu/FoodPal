@@ -33,30 +33,4 @@ class StompSessionHandlerTest {
     void notSingleton() {
         assertNotEquals(handler, otherHandler);
     }
-
-    @Test
-    void afterConnected() {
-        // TODO: mock server
-        // assertNotNull(handler.getSession());
-    }
-
-    @Test
-    void addHandler() {
-        // TODO: handle
-    }
-
-    @Test
-    void getSession() {
-        // TODO: handle
-    }
-
-    @Test
-    void disconnect() {
-        // TODO: handle
-    }
-
-    @Test
-    void send() {
-        // TODO: handle
-    }
 }
