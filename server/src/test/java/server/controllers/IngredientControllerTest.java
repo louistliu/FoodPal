@@ -185,6 +185,7 @@ class IngredientControllerTest {
             public Type getPayloadType(StompHeaders headers) {
                 return Ingredient.class;
             }
+
             @Override
             public void handleFrame(StompHeaders headers, Object payload) {
                 deleteQueue.add((Ingredient) payload);
@@ -196,6 +197,7 @@ class IngredientControllerTest {
             public Type getPayloadType(StompHeaders headers) {
                 return Ingredient.class;
             }
+
             @Override
             public void handleFrame(StompHeaders headers, Object payload) {
                 createQueue.add((Ingredient) payload);
@@ -213,6 +215,7 @@ class IngredientControllerTest {
             public Type getPayloadType(StompHeaders headers) {
                 return Ingredient[].class;
             }
+
             @Override
             public void handleFrame(StompHeaders headers, Object payload) {
                 fetchQueue.add((Ingredient[]) payload);
