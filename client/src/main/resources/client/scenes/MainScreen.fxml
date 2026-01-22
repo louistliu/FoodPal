@@ -33,6 +33,7 @@
                         <Button fx:id="deleteButton" minWidth="35.0" onAction="#deleteRecipe" text="-" />
                         <Button fx:id="allButton" minWidth="60.0" onAction="#showAllRecipes" text="All" />
                         <Button fx:id="favoritesButton" minWidth="80.0" onAction="#showFavorites" text="Favorites" />
+                        <Button fx:id="favoriteButton" minWidth="80.0" onAction="#showFavorites" text="Favorites" />
                     </children>
                 </HBox>
             </children>

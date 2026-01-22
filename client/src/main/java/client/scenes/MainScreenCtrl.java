@@ -123,10 +123,11 @@ public class MainScreenCtrl {
      * @param m The main application controller for scene transitions.
      */
     @Inject
-    public MainScreenCtrl(MainCtrl m, ServerSockets server, ConfigService configService) {
+    public MainScreenCtrl(MainCtrl m, ServerSockets server,
+                          ConfigService configService, LanguageController languageController) {
         this.serverRecipes = server;
         this.configService = configService;
-        this.languageController = m.getLanguageController();
+        this.languageController = languageController;
     }
 
     /**

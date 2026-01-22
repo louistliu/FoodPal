@@ -22,8 +22,8 @@ public class InstructionListCell extends ListCell<String> {
     private final ContextMenu contextMenu;
     private final Runnable save;
     private final LanguageController languageController;
-    private final MenuItem moveUp;   // Move these out of the constructor
-    private final MenuItem moveDown; // so they are class-level fields
+    private final MenuItem moveUp;
+    private final MenuItem moveDown;
     private final MenuItem edit;
 
     /**

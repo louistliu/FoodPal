@@ -42,7 +42,7 @@ public class AddIngredientScreenCtrl extends ScreenControl {
     private RecipeIngredient result = null;
     private ObservableList<Ingredient> observableIngredients;
     private Ingredient ingredientToSelect;
-    private LanguageController languageController;
+    private final LanguageController languageController;
 
 
     /**
@@ -218,7 +218,7 @@ public class AddIngredientScreenCtrl extends ScreenControl {
         }
 
         if (amountStr.isEmpty()) {
-            ErrorScreenCtrl.showError(languageController.get("error.invalidAmount"));;
+            ErrorScreenCtrl.showError(languageController.get("error.invalidAmount"));
             return;
         }
 
@@ -288,6 +288,7 @@ public class AddIngredientScreenCtrl extends ScreenControl {
     public void init(Object... params) {
         this.result = null;
         super.init(params);
+
 
         if (params.length > 0 && params[0] instanceof RecipeIngredient item) {
             amountTextField.setText(String.valueOf(item.getAmount()));

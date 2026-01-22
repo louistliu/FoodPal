@@ -69,7 +69,6 @@ public class AddInstructionScreenCtrl extends ScreenControl {
      */
     @FXML
     public void initialize() {
-        // These belong here because these variables are defined in THIS class
         okButton.setText(languageController.get("button.ok"));
         cancelButton.setText(languageController.get("button.cancel"));
         inputTextArea.setPromptText(languageController.get("label.instructionPrompt"));
