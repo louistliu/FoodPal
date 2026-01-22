@@ -1,5 +1,6 @@
 package client.scenes;
 
+import client.utils.FlagUtils;
 import client.Main;
 import client.utils.Config;
 import client.utils.ConfigService;
@@ -144,12 +145,8 @@ public class MainScreenCtrl {
                 "English", "Dutch", "French", "Arabic"));
         languageComboBox.getSelectionModel().selectFirst();
 
-        dutchFlag = new Image("flags/Dutch_Flag.png");
-        englishFlag = new Image("flags/English_Flag.png");
-        frenchFlag = new Image("flags/French_Flag.png");
-        arabicFlag = new Image("flags/Arabic_Flag.png");
         refreshUIText();
-        loadAllFlags(0);
+        FlagUtils.loadFlags(languageComboBox, 0);
 
 
         if (recipeDescriptionField != null) {
@@ -173,7 +170,7 @@ public class MainScreenCtrl {
                     setContextMenu(null);
                 } else {
                     setText(item.getIngredient().getName() + " " + item.getAmount() + " "
-                          + item.getUnit());
+                            + item.getUnit());
 
                     ContextMenu cm = new ContextMenu();
                     MenuItem editItem = new MenuItem("Edit");
@@ -735,8 +732,8 @@ public class MainScreenCtrl {
         }
 
         AddIngredientScreenCtrl controller =
-              launchModal(AddIngredientScreenCtrl.class, "AddIngredientScreen.fxml",
-                    "Add New Ingredient");
+                launchModal(AddIngredientScreenCtrl.class, "AddIngredientScreen.fxml",
+                        languageController.get("title.addIngredient"));
 
 
         if (controller != null && controller.getResult() != null) {
@@ -765,10 +762,10 @@ public class MainScreenCtrl {
         }
 
         AddIngredientScreenCtrl controller = launchModal(
-              AddIngredientScreenCtrl.class,
-              "AddIngredientScreen.fxml",
-              "Edit Ingredient",
-              item
+                AddIngredientScreenCtrl.class,
+                "AddIngredientScreen.fxml",
+                "Edit Ingredient",
+                item
         );
 
         if (controller != null && controller.getResult() != null) {
@@ -819,9 +816,10 @@ public class MainScreenCtrl {
             return;
         }
 
+
         AddInstructionScreenCtrl controller =
-              launchModal(AddInstructionScreenCtrl.class, "AddInstructionScreen.fxml",
-                      languageController.get("title.addInstruction"));
+                launchModal(AddInstructionScreenCtrl.class, "AddInstructionScreen.fxml",
+                        languageController.get("title.addInstruction"));
 
         if (controller != null) {
             String instructionText = controller.getResult();
@@ -930,6 +928,8 @@ public class MainScreenCtrl {
      */
     public void refreshUIText() {
 
+        ingredientsLabel.setText(languageController.get("label.ingredients"));
+        instructionsLabel.setText(languageController.get("label.instructions"));
         saveButton.setText(languageController.get("button.save"));
         duplicateButton.setText(languageController.get("button.duplicate"));
         printButton.setText(languageController.get("button.print"));
@@ -948,62 +948,7 @@ public class MainScreenCtrl {
 
     }
 
-    /**
-     * method to load all the flags.
-     *
-     * @param defaultIndex the language that is selected
-     */
-    private void loadAllFlags(int defaultIndex) {
-        languageComboBox.getItems().clear();
-        languageComboBox.getItems().addAll("English", "Dutch", "French", "Arabic");
-
-        // this is required for setCellFactory and setButtonCell.
-        class FlagCell extends ListCell<String> {
-            private final ImageView imageView = new ImageView();
-
-            {
-                imageView.setFitWidth(25);
-                imageView.setFitHeight(18);
-            }
-
-
-            /**
-             * This method switches the flag when selecting another language.
-             *
-             * @param item item that needs to be updated (flag).
-             * @param empty boolean value to handle ghost cells.
-             */
-            @Override
-            protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-
-                if (empty || item == null) {
-                    setText(null);
-                    setGraphic(null);
-                } else {
-                    setText(item);
-
-                    if ("Dutch".equals(item)) {
-                        imageView.setImage(dutchFlag);
-                    } else if ("French".equals(item)) {
-                        imageView.setImage(frenchFlag);
-                    } else if ("Arabic".equals(item)) {
-
-                        imageView.setImage(arabicFlag);
-                    } else {
-                        imageView.setImage(englishFlag);
-                    }
-
-                    setGraphic(imageView);
-                }
-            }
-        }
-
-        languageComboBox.setCellFactory(lv -> new FlagCell());
-        languageComboBox.setButtonCell(new FlagCell());
-
-        // this is the default model
-        languageComboBox.getSelectionModel().select(defaultIndex);
-    }
 }
+
+
 
