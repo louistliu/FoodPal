@@ -3,7 +3,6 @@ package client.utils.communication;
 import client.interfaces.IResponseHandler;
 import client.interfaces.IStompHeaders;
 import client.utils.ConfigService;
-import client.utils.communication.StompSessionHandler;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.concurrent.TimeUnit;
@@ -20,7 +19,7 @@ public class ServerSockets {
     private static String URL = "ws://127.0.0.1:8080/";
     private final WebSocketStompClient client;
     private final StompSessionHandler sessionHandler;
-    private final boolean isAvailable;
+    private boolean isAvailable;
 
     /**
      * Create a new STOMP client, and configure session.
@@ -34,6 +33,7 @@ public class ServerSockets {
               : "ws://127.0.0.1:8080/";
         this.client = client;
         this.sessionHandler = sessionHandler;
+
         try {
             System.out.println("Connecting to " + URL);
             this.client.connectAsync(URL + INITIAL_ENDPOINT, this.sessionHandler)
@@ -73,6 +73,7 @@ public class ServerSockets {
      */
     public void disconnect() {
         sessionHandler.disconnect();
+        isAvailable = false;
     }
 
     /**
