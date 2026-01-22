@@ -5,7 +5,9 @@ import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import org.apache.commons.io.FileUtils;
 
 /**
@@ -13,6 +15,47 @@ import org.apache.commons.io.FileUtils;
  */
 @Singleton
 public final class ConfigService {
+    /**
+     * Returns the search history from the config.
+     *
+     * @return list of search queries
+     */
+    public List<String> getSearchHistory() {
+        return config != null ? config.getSearchHistory() : new ArrayList<>();
+    }
+
+    /**
+     * Adds a search query to the search history and persists config.
+     * Keeps only the last 10 entries, no duplicates in a row.
+     *
+     * @param query the search query to add
+     */
+    public void addSearchHistory(String query) {
+        if (config == null || query == null || query.isBlank()) {
+            return;
+        }
+        List<String> history = config.getSearchHistory();
+        if (!history.isEmpty() && history.getLast().equalsIgnoreCase(query)) {
+            return;
+        }
+        history.add(query);
+        if (history.size() > 10) {
+            history.removeFirst();
+        }
+        config.setSearchHistory(history);
+        persistConfig();
+    }
+
+    /**
+     * Clears the search history and persists config.
+     */
+    public void clearSearchHistory() {
+        if (config == null) {
+            return;
+        }
+        config.setSearchHistory(new ArrayList<>());
+        persistConfig();
+    }
 
     private Config config;
     private File configFile;

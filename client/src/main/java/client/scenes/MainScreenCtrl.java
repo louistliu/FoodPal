@@ -96,6 +96,12 @@ public class MainScreenCtrl {
     private Button printButton;
     @FXML
     private Button favoriteButton;
+    @FXML
+    private AnchorPane searchHistoryOverlay;
+    @FXML
+    private Button showSearchHistoryButton;
+    @FXML
+    private ListView<String> searchHistoryListView;
 
     /**
      * Constructs the MainScreenCtrl, injecting the scene controller.
@@ -209,15 +215,45 @@ public class MainScreenCtrl {
               new ResponseHandler<Throwable>(ErrorScreenCtrl::onError) {
               });
 
-        searchRecipesField.textProperty().addListener((obs, oldVal, newVal) -> {
-            this.currentSearchQuery = newVal.trim().toLowerCase();
-            refreshListView();
-        });
+        setupSearchField();
+        setupSearchHistoryUI();
+        setupSearchFieldUI();
+        setupSearchHistoryEscHandler();
+    }
 
-        searchRecipesField.setOnKeyPressed(event -> {
-            if (event.getCode() == javafx.scene.input.KeyCode.ESCAPE) {
-                searchRecipesField.clear();
-                recipeListView.requestFocus();
+    /**
+     * Sets up the search history overlay and button logic.
+     */
+    private void setupSearchHistoryUI() {
+        showSearchHistoryButton.setOnAction(e -> {
+            if (searchHistoryOverlay != null) {
+                searchHistoryOverlay.setVisible(!searchHistoryOverlay.isVisible());
+            }
+        });
+        updateSearchHistoryListView();
+        searchHistoryListView.setOnMouseClicked(event -> {
+            String selected = searchHistoryListView.getSelectionModel().getSelectedItem();
+            if (selected != null) {
+                searchRecipesField.setText(selected);
+                searchHistoryOverlay.setVisible(false);
+            }
+        });
+    }
+
+    /**
+     * Sets up the search field listeners for search and history.
+     */
+    private void setupSearchFieldUI() {
+        // Save search history only when the user leaves the field (focus lost)
+        searchRecipesField.focusedProperty().addListener((obs, wasFocused, isNowFocused) -> {
+            if (!isNowFocused) {
+                Platform.runLater(() -> {
+                    String query = searchRecipesField.getText().trim().toLowerCase();
+                    if (!query.isEmpty()) {
+                        configService.addSearchHistory(query);
+                        updateSearchHistoryListView();
+                    }
+                });
             }
         });
     }
@@ -290,6 +326,22 @@ public class MainScreenCtrl {
                 recipeListView.requestFocus();
             }
         });
+    }
+
+    /**
+     * Updates the search history ListView with the latest history.
+     */
+    private void updateSearchHistoryListView() {
+        if (searchHistoryListView != null) {
+            searchHistoryListView.setItems(FXCollections.observableArrayList(getSearchHistory()));
+        }
+    }
+
+    /**
+     * Returns the search history for display.
+     */
+    public List<String> getSearchHistory() {
+        return configService.getSearchHistory();
     }
 
     private void onAddRecipe(Recipe recipe) {
@@ -912,4 +964,23 @@ public class MainScreenCtrl {
         configService.persistConfig();
         System.out.println("Language switched to: " + languageChoiceBox.getValue());
     }
+
+    /**
+     * Adds a key event handler to close the search history overlay when ESC is pressed.
+     */
+    private void setupSearchHistoryEscHandler() {
+        searchHistoryOverlay.sceneProperty().addListener((obs, oldScene, newScene) -> {
+            if (newScene == null) {
+                return;
+            }
+            newScene.addEventFilter(javafx.scene.input.KeyEvent.KEY_PRESSED, event -> {
+                if (event.getCode() == javafx.scene.input.KeyCode.ESCAPE
+                      && searchHistoryOverlay.isVisible()) {
+                    searchHistoryOverlay.setVisible(false);
+                    event.consume();
+                }
+            });
+        });
+    }
+
 }

@@ -19,9 +19,28 @@ public class Config {
     private String serverUrl = "ws://localhost:8080/";
     private String language = "English";
     private List<Long> favoriteRecipeIds = new ArrayList<>();
+    private List<String> searchHistory = new ArrayList<>();
 
     // empty constructor for jackson & default/empty configs
     public Config() {
+    }
+
+    /**
+     * Returns the search history list.
+     *
+     * @return mutable list of search history
+     */
+    public List<String> getSearchHistory() {
+        return searchHistory;
+    }
+
+    /**
+     * Replace the search history list.
+     *
+     * @param searchHistory new list of search history
+     */
+    public void setSearchHistory(List<String> searchHistory) {
+        this.searchHistory = searchHistory;
     }
 
     /**
@@ -88,13 +107,14 @@ public class Config {
         }
         Config config = (Config) o;
         return Objects.equals(serverUrl, config.serverUrl)
-                && Objects.equals(language, config.language)
-                && Objects.equals(favoriteRecipeIds, config.favoriteRecipeIds);
+                        && Objects.equals(language, config.language)
+                        && Objects.equals(favoriteRecipeIds, config.favoriteRecipeIds)
+                        && Objects.equals(searchHistory, config.searchHistory);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(serverUrl, language, favoriteRecipeIds);
+        return Objects.hash(serverUrl, language, favoriteRecipeIds, searchHistory);
     }
 
     @Override

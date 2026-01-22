@@ -8,6 +8,8 @@
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
 <?import javafx.scene.text.Font?>
 
 <SplitPane dividerPositions="0.32608695652173914" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.scenes.MainScreenCtrl">
@@ -19,12 +21,26 @@
                 <Button fx:id="deleteButton" layoutX="57.0" layoutY="550.0" mnemonicParsing="false" onAction="#deleteRecipe" text="-" AnchorPane.bottomAnchor="22.0" />
                 <Button fx:id="duplicateButton" layoutX="98.0" layoutY="550.0" mnemonicParsing="false" onAction="#duplicateRecipe" text="Duplicate" AnchorPane.bottomAnchor="22.0" />
 
-                <TextField fx:id="searchRecipesField" layoutX="15.0" layoutY="45.0" promptText="Search Recipes..." AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" />
+                <TextField fx:id="searchRecipesField" layoutX="15.0" layoutY="45.0" promptText="Search Recipes..." AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="45.0" />
+                <Button fx:id="showSearchHistoryButton" layoutX="215.0" layoutY="45.0" mnemonicParsing="false" prefWidth="25.0" AnchorPane.rightAnchor="15.0">
+                    <graphic>
+                            <ImageView fitHeight="16" fitWidth="16" preserveRatio="true" smooth="false">
+                                <image>
+                                    <Image url="@/client/searchhistoryicon.png" />
+                                </image>
+                            </ImageView>
+                    </graphic>
+                </Button>
                 <Button fx:id="favoritesButton" layoutX="15.0" layoutY="14.0" mnemonicParsing="false" onAction="#showFavorites" text="Favorites" />
                 <Button fx:id="allButton" layoutX="106.0" layoutY="14.0" mnemonicParsing="false" onAction="#showAllRecipes" text="All" />
 
                 <ListView fx:id="recipeListView" layoutX="15.0" layoutY="78.0" AnchorPane.bottomAnchor="70.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="78.0" />
                 <ChoiceBox fx:id="languageChoiceBox" layoutX="156.0" layoutY="14.0" onAction="#onLanguageChange" prefHeight="26.0" prefWidth="119.0" AnchorPane.rightAnchor="15.0" />
+                <AnchorPane fx:id="searchHistoryOverlay" visible="false" style="-fx-background-color: rgba(255,255,255,0.95); -fx-border-color: #888; -fx-border-width: 1;" layoutX="10.0" layoutY="120.0" prefWidth="230.0" prefHeight="150.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="80.0">
+                    <children>
+                        <ListView fx:id="searchHistoryListView" layoutX="0.0" layoutY="0.0" prefHeight="100.0" prefWidth="230.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0" />
+                    </children>
+                </AnchorPane>
             </children>
         </AnchorPane>
 
