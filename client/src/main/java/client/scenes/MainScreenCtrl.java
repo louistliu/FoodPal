@@ -1,6 +1,7 @@
 package client.scenes;
 
 import client.Main;
+import client.utils.Config;
 import client.utils.ConfigService;
 import client.utils.Endpoint;
 import client.utils.PrintRecipe;
@@ -24,7 +25,7 @@ import javafx.fxml.FXML;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
@@ -32,6 +33,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
+import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -65,7 +67,7 @@ public class MainScreenCtrl {
     @FXML
     private TextField searchRecipesField;
     @FXML
-    private ChoiceBox<String> languageChoiceBox;
+    private ComboBox<String> languageChoiceBox;
     @FXML
     private TextField recipeNameField;
     @FXML
@@ -95,6 +97,14 @@ public class MainScreenCtrl {
     @FXML
     private Button printButton;
     @FXML
+    private Image dutchFlag;
+    @FXML
+    private Image englishFlag;
+    @FXML
+    private Image frenchFlag;
+    private final LanguageController languageController;
+
+    @FXML
     private Button favoriteButton;
 
     /**
@@ -106,6 +116,7 @@ public class MainScreenCtrl {
     public MainScreenCtrl(MainCtrl m, ServerSockets server, ConfigService configService) {
         this.serverRecipes = server;
         this.configService = configService;
+        this.languageController = m.getLanguageController();
     }
 
     /**
@@ -118,6 +129,15 @@ public class MainScreenCtrl {
             selectedLanguage = configService.getConfig().getLanguage();
         }
         languageChoiceBox.getSelectionModel().select(selectedLanguage);
+        languageChoiceBox.setItems(FXCollections.observableArrayList(
+                "English", "Dutch", "German"));
+        languageChoiceBox.getSelectionModel().selectFirst();
+
+        dutchFlag = new Image("flags/Dutch_Flag.png");
+        englishFlag = new Image("flags/English_Flag.png");
+        frenchFlag = new Image("flags/French_Flag.png");
+        refreshUIText();
+
 
         if (recipeDescriptionField != null) {
             recipeDescriptionField.setWrapText(true);
@@ -862,11 +882,56 @@ public class MainScreenCtrl {
     }
 
     /**
-     * Handles the user changing the selected language in the choice box.
+     * provides the actions when user changes language.
      */
     public void onLanguageChange() {
         selectedLanguage = languageChoiceBox.getValue();
         configService.persistConfig();
         System.out.println("Language switched to: " + languageChoiceBox.getValue());
+
+
+        switch (selected) {
+            case "Dutch" -> switchLanguage("nl");
+            case "German" -> switchLanguage("de");
+            default -> switchLanguage("en");
+        }
+
+    }
+
+    /**
+     * switches the language of the UI.
+     *
+     * @param languageCode language Code
+     */
+    public void switchLanguage(String languageCode) {
+        languageController.loadLanguage(languageCode);
+
+        refreshUIText();
+    }
+
+    /**
+     * refreshes the UI with the new language.
+     */
+    public void refreshUIText() {
+
+        // 1. Main Actions
+        saveButton.setText(languageController.get("button.save"));
+        addButton.setText(languageController.get("button.add"));
+        deleteButton.setText(languageController.get("button.delete"));
+        duplicateButton.setText(languageController.get("button.duplicate"));
+        printButton.setText(languageController.get("button.print"));
+
+        // 2. Filters & Menu
+        favoritesButton.setText(languageController.get("button.favorites"));
+        allButton.setText(languageController.get("button.allRecipes"));
+
+        addIngredientButton.setText(languageController.get("button.addIngredient"));
+        deleteIngredientButton.setText(languageController.get("button.deleteIngredient"));
+        addInstructionButton.setText(languageController.get("button.addInstruction"));
+        deleteInstructionButton.setText(languageController.get("button.deleteInstruction"));
+
+        recipeListView.refresh();
+
     }
 }
+

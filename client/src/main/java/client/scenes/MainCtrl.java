@@ -31,6 +31,7 @@ public class MainCtrl {
     // Main Screen Scene fields
     private MainScreenCtrl mainScrCtrl; // The new controller
     private Scene mainScreen; // The new scene
+    private final LanguageController languageController = new LanguageController();
 
     /**
      * Creates central control of stages.
@@ -47,6 +48,11 @@ public class MainCtrl {
         primaryStage.show();
     }
 
+
+    public LanguageController getLanguageController() {
+        return languageController;
+    }
+
     /**
      * shows the main screen and sets window title.
      */
@@ -54,4 +60,7 @@ public class MainCtrl {
         primaryStage.setTitle("FoodPal: Recipe Organizer");
         primaryStage.setScene(mainScreen);
     }
+
+
+
 }
