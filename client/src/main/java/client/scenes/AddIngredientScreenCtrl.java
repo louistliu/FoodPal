@@ -2,7 +2,7 @@ package client.scenes;
 
 import client.utils.Endpoint;
 import client.utils.ResponseHandler;
-import client.utils.ServerSockets;
+import client.utils.communication.ServerSockets;
 import commons.Ingredient;
 import commons.RecipeIngredient;
 import jakarta.inject.Inject;

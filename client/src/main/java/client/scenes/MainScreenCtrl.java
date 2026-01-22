@@ -6,7 +6,7 @@ import client.utils.Endpoint;
 import client.utils.FlagUtils;
 import client.utils.PrintRecipe;
 import client.utils.ResponseHandler;
-import client.utils.ServerSockets;
+import client.utils.communication.ServerSockets;
 import com.google.inject.Inject;
 import commons.Ingredient;
 import commons.Recipe;

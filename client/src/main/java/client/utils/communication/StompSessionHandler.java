@@ -1,7 +1,8 @@
-package client.utils;
+package client.utils.communication;
 
 import client.interfaces.IResponseHandler;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import java.nio.channels.NotYetConnectedException;
 import java.util.HashMap;
 import java.util.Map;
@@ -12,10 +13,11 @@ import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter;
 /**
  * Manages a STOMP session.
  */
-public class StompSessionHandler extends StompSessionHandlerAdapter {
+public class StompSessionHandler extends StompSessionHandlerAdapter
+      implements Provider<StompSessionHandler> {
 
-    private StompSession session;
     private final Map<StompHeaders, IResponseHandler<?>> mappings;
+    private StompSession session;
 
     @Inject
     public StompSessionHandler() {
@@ -66,5 +68,13 @@ public class StompSessionHandler extends StompSessionHandlerAdapter {
             throw new NotYetConnectedException();
         }
         session.send(headers, object);
+    }
+
+    /**
+     * Provides an instance of {@code T}.
+     */
+    @Override
+    public StompSessionHandler get() {
+        return new StompSessionHandler();
     }
 }

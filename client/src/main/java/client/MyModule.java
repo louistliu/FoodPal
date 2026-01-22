@@ -22,11 +22,20 @@ import client.scenes.LanguageController;
 import client.scenes.MainCtrl;
 import client.scenes.MainScreenCtrl;
 import client.utils.Config;
-import client.utils.ServerRecipeUtils;
-import client.utils.ServerSockets;
+import client.utils.communication.ServerSockets;
+import client.utils.communication.StompClientProvider;
+import client.utils.communication.StompSessionHandler;
 import com.google.inject.Binder;
 import com.google.inject.Module;
+import com.google.inject.Provides;
 import com.google.inject.Scopes;
+import org.springframework.messaging.converter.JacksonJsonMessageConverter;
+import org.springframework.messaging.converter.MessageConverter;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.concurrent.DefaultManagedTaskScheduler;
+import org.springframework.web.socket.client.WebSocketClient;
+import org.springframework.web.socket.client.standard.StandardWebSocketClient;
+import org.springframework.web.socket.messaging.WebSocketStompClient;
 
 /**
  * Binds javafx scenes in a relation for dependency injection.
@@ -54,13 +63,46 @@ public class MyModule implements Module {
         binder.bind(Config.class).toInstance(config);
         binder.bind(MainCtrl.class).in(Scopes.SINGLETON);
 
+        // Setup Providers
+        binder.bind(WebSocketStompClient.class).toProvider(StompClientProvider.class);
+        binder.bind(StompSessionHandler.class);
+
         // Bind the FoodPal Main Screen controller
         binder.bind(MainScreenCtrl.class).in(Scopes.SINGLETON);
         binder.bind(AddIngredientScreenCtrl.class).in(Scopes.SINGLETON);
         binder.bind(AddInstructionScreenCtrl.class).in(Scopes.SINGLETON);
         binder.bind(ServerSockets.class).in(Scopes.SINGLETON);
-        binder.bind(ServerRecipeUtils.class).in(Scopes.SINGLETON);
         binder.bind(client.utils.ConfigService.class).in(Scopes.SINGLETON);
         binder.bind(LanguageController.class).in(Scopes.SINGLETON);
+    }
+
+    /**
+     * Provides a {@link WebSocketClient}.
+     *
+     * @return {@link StandardWebSocketClient}
+     */
+    @Provides
+    public WebSocketClient provideStandardWebSocketClient() {
+        return new StandardWebSocketClient();
+    }
+
+    /**
+     * Provides {@link TaskScheduler}.
+     *
+     * @return {@link DefaultManagedTaskScheduler}
+     */
+    @Provides
+    public TaskScheduler provideTaskScheduler() {
+        return new DefaultManagedTaskScheduler();
+    }
+
+    /**
+     * Provides {@link MessageConverter}.
+     *
+     * @return {@link JacksonJsonMessageConverter}
+     */
+    @Provides
+    public MessageConverter provideMessageConverter() {
+        return new JacksonJsonMessageConverter();
     }
 }
