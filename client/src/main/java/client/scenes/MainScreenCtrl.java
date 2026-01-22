@@ -1,7 +1,6 @@
 package client.scenes;
 
 import client.Main;
-import client.utils.Config;
 import client.utils.ConfigService;
 import client.utils.Endpoint;
 import client.utils.FlagUtils;
@@ -36,7 +35,6 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
-import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -103,14 +101,7 @@ public class MainScreenCtrl {
     private Button allButton;
     @FXML
     private Button printButton;
-    @FXML
-    private Image dutchFlag;
-    @FXML
-    private Image englishFlag;
-    @FXML
-    private Image frenchFlag;
-    @FXML
-    private Image arabicFlag;
+
     private final LanguageController languageController;
 
     @FXML
@@ -134,25 +125,28 @@ public class MainScreenCtrl {
      * language options, and adds selection listeners.
      */
     public void initialize() {
-        languageChoiceBox.setItems(FXCollections.observableArrayList("English", "Dutch", "German"));
-        if (languageChoiceBox.getItems().contains(configService.getConfig().getLanguage())) {
-            selectedLanguage = configService.getConfig().getLanguage();
-        }
-        languageChoiceBox.getSelectionModel().select(selectedLanguage);
-        languageChoiceBox.setItems(FXCollections.observableArrayList(
-                "English", "Dutch", "German"));
-        languageChoiceBox.getSelectionModel().selectFirst();
         languageComboBox.setItems(FXCollections.observableArrayList(
-                "English", "Dutch", "French", "Arabic", "Turkish"));
-        languageComboBox.getSelectionModel().selectFirst();
+                "English", "Dutch", "French", "Arabic", "Turkish"
+        ));
 
-        refreshUIText();
-        FlagUtils.loadFlags(languageComboBox, 0);
+        String savedLang = configService.getConfig().getLanguage();
 
+        if (savedLang != null && languageComboBox.getItems().contains(savedLang)) {
+            selectedLanguage = savedLang;
+        } else {
+            selectedLanguage = "English";
+        }
+
+        languageComboBox.getSelectionModel().select(selectedLanguage);
+
+        Platform.runLater(() -> {
+            applyStartupLanguage(selectedLanguage);
+        });
 
         if (recipeDescriptionField != null) {
             recipeDescriptionField.setWrapText(true);
         }
+
 
         // --- Cell Factory and Listeners ---
         recipeListView.setCellFactory(lv -> new ListCell<>() {
@@ -185,7 +179,7 @@ public class MainScreenCtrl {
         // This listener will fire immediately if data is bound, triggering
         // showRecipeDetails
         recipeListView.getSelectionModel().selectedItemProperty()
-              .addListener(this::onSelectedRecipeChanged);
+                .addListener(this::onSelectedRecipeChanged);
 
         setupInstructionDragAndDrop();
 
@@ -212,24 +206,24 @@ public class MainScreenCtrl {
         ingredientListView.setItems(observableIngredients);
 
         serverRecipes.subscribe(Endpoint.RECIPE_FETCH,
-              new ResponseHandler<List<Recipe>>(this::onUpdateRecipeList) {
-              });
+                new ResponseHandler<List<Recipe>>(this::onUpdateRecipeList) {
+                });
 
         serverRecipes.subscribe(Endpoint.RECIPE_CREATE,
-              new ResponseHandler<Recipe>(this::onAddRecipe) {
-              });
+                new ResponseHandler<Recipe>(this::onAddRecipe) {
+                });
         serverRecipes.subscribe(Endpoint.RECIPE_USER_CREATE,
-              new ResponseHandler<Recipe>(this::onCreateUserRecipe) {
-              });
+                new ResponseHandler<Recipe>(this::onCreateUserRecipe) {
+                });
         serverRecipes.subscribe(Endpoint.RECIPE_UPDATE,
-              new ResponseHandler<Recipe>(this::onUpdateRecipe) {
-              });
+                new ResponseHandler<Recipe>(this::onUpdateRecipe) {
+                });
         serverRecipes.subscribe(Endpoint.RECIPE_DELETE,
-              new ResponseHandler<Recipe>(this::onDeleteRecipe) {
-              });
+                new ResponseHandler<Recipe>(this::onDeleteRecipe) {
+                });
         serverRecipes.subscribe(Endpoint.ERROR,
-              new ResponseHandler<Throwable>(ErrorScreenCtrl::onError) {
-              });
+                new ResponseHandler<Throwable>(ErrorScreenCtrl::onError) {
+                });
 
         searchRecipesField.textProperty().addListener((obs, oldVal, newVal) -> {
             this.currentSearchQuery = newVal.trim().toLowerCase();
@@ -277,10 +271,10 @@ public class MainScreenCtrl {
      */
     public void setupSearchField() {
         searchRecipesField.textProperty()
-              .addListener((obs, oldVal, newVal) -> {
-                  this.currentSearchQuery = newVal.trim().toLowerCase();
-                  refreshListView();
-              });
+                .addListener((obs, oldVal, newVal) -> {
+                    this.currentSearchQuery = newVal.trim().toLowerCase();
+                    refreshListView();
+                });
 
         searchRecipesField.setOnKeyPressed(event -> {
             if (event.getCode() == javafx.scene.input.KeyCode.ESCAPE) {
@@ -363,11 +357,11 @@ public class MainScreenCtrl {
      */
     private void safeSwapRecipe(int index, Recipe recipe) {
         recipeListView.getSelectionModel().selectedItemProperty()
-              .removeListener(this::onSelectedRecipeChanged);
+                .removeListener(this::onSelectedRecipeChanged);
         observableRecipes.set(index, recipe);
         recipeListView.refresh();
         recipeListView.getSelectionModel().selectedItemProperty()
-              .addListener(this::onSelectedRecipeChanged);
+                .addListener(this::onSelectedRecipeChanged);
     }
 
     private void onSelectedRecipeChanged(ObservableValue<? extends Recipe> obs, Recipe oldRecipe,
@@ -419,8 +413,8 @@ public class MainScreenCtrl {
      */
     private void setupInstructionDragAndDrop() {
         instructionListView.setCellFactory(
-              param -> new InstructionListCell(this::saveRecipe,
-                      this::editInstructionHandler, languageController));
+                param -> new InstructionListCell(this::saveRecipe,
+                        this::editInstructionHandler, languageController));
     }
 
     /**
@@ -431,15 +425,15 @@ public class MainScreenCtrl {
      */
     private Optional<String> editInstructionHandler(String instruction) {
         AddInstructionScreenCtrl control =
-              launchModal(AddInstructionScreenCtrl.class, "AddInstructionScreen.fxml",
-                    "Edit Instruction", instruction);
+                launchModal(AddInstructionScreenCtrl.class, "AddInstructionScreen.fxml",
+                        "Edit Instruction", instruction);
 
         if (control == null) {
             ErrorScreenCtrl.showError(languageController.get("error.failedEditInstruction"));
             return Optional.empty();
         }
         return control.getResult() == null ? Optional.empty() :
-              Optional.of(control.getResult());
+                Optional.of(control.getResult());
     }
 
     /**
@@ -591,8 +585,8 @@ public class MainScreenCtrl {
         System.out.println("RECIPE: " + recipeName);
 
         Recipe newRecipe =
-              new Recipe(selectedRecipe.getName() + " Clone " + findNextId(recipeName + " Clone"),
-                    selectedRecipe.getDescription(), clonedIngredients, clonedInstructions);
+                new Recipe(selectedRecipe.getName() + " Clone " + findNextId(recipeName + " Clone"),
+                        selectedRecipe.getDescription(), clonedIngredients, clonedInstructions);
 
         serverRecipes.send(Endpoint.RECIPE_CREATE, newRecipe);
 
@@ -634,10 +628,7 @@ public class MainScreenCtrl {
             return;
         }
         boolean isFavorite = configService.getConfig().getFavoriteRecipeIds()
-              .contains(recipe.getId());
-        favoriteButton.setText(isFavorite ? "Unfavorite" : "Favorite");
-        boolean isFavorite = config.getFavoriteRecipeIds().contains(recipe.getId());
-
+                .contains(recipe.getId());
         String buttonText = isFavorite
                 ? languageController.get("button.unfavorite")
                 : languageController.get("button.favorite");
@@ -707,7 +698,6 @@ public class MainScreenCtrl {
         try {
             Stage modalStage = new Stage();
 
-            // Set owner to block main window interactions
             if (recipeListView.getScene() != null) {
                 modalStage.initOwner(recipeListView.getScene().getWindow());
             }
@@ -715,10 +705,9 @@ public class MainScreenCtrl {
             modalStage.initModality(Modality.WINDOW_MODAL);
             modalStage.setTitle(title);
             Pair<T, Parent> pair =
-                  Main.getFxml().load(controllerClass, "client", "scenes", fxmlFileName);
+                    Main.getFxml().load(controllerClass, "client", "scenes", fxmlFileName);
             modalStage.setScene(new Scene(pair.getValue()));
             Parent root = pair.getValue();
-            // Pass the stage to the controller so it can close itself
             pair.getKey().setStage(modalStage);
             pair.getKey().init(defaultParams);
 
@@ -780,7 +769,7 @@ public class MainScreenCtrl {
             RecipeIngredient updatedItem = controller.getResult();
 
             if (!item.getIngredient().getName().equals(updatedItem.getIngredient().getName())
-                  && containsIngredient(selectedRecipe, updatedItem.getIngredient())) {
+                    && containsIngredient(selectedRecipe, updatedItem.getIngredient())) {
                 String pattern = languageController.get("error.ingredientAlreadyExists");
                 String name = updatedItem.getIngredient().getName();
 
@@ -806,13 +795,13 @@ public class MainScreenCtrl {
     /**
      * Checks if a specific recipe already contains an ingredient with the same name.
      *
-     * @param recipe The recipe to check.
+     * @param recipe     The recipe to check.
      * @param ingredient The ingredient to look for.
      * @return True if an ingredient with the same name exists, false otherwise.
      */
     private boolean containsIngredient(Recipe recipe, Ingredient ingredient) {
         return recipe.getIngredients().stream()
-              .anyMatch(i -> i.getIngredient().getName().equals(ingredient.getName()));
+                .anyMatch(i -> i.getIngredient().getName().equals(ingredient.getName()));
     }
 
     /**
@@ -905,21 +894,46 @@ public class MainScreenCtrl {
      * provides the actions when user changes language.
      */
     public void onLanguageChange() {
-        selectedLanguage = languageChoiceBox.getValue();
+        String newLang = languageComboBox.getValue();
+
+        if (newLang == null || newLang.equals(selectedLanguage)) {
+            return;
+        }
+
+        selectedLanguage = newLang;
+
+        configService.getConfig().setLanguage(selectedLanguage);
         configService.persistConfig();
-        System.out.println("Language switched to: " + languageChoiceBox.getValue());
 
-        String language = languageComboBox.getValue();
+        System.out.println("Language switched to: " + selectedLanguage);
 
-        switch (selected) {
+        Platform.runLater(() -> {
+            switch (selectedLanguage) {
+                case "Dutch" -> switchLanguage("nl");
+                case "French" -> switchLanguage("fr");
+                case "Arabic" -> switchLanguage("ar");
+                case "Turkish" -> switchLanguage("tr");
+                default -> switchLanguage("en");
+            }
+        });
+    }
+
+    /**
+     * helper method for changing UI based on selectedLanguage at startup from config.
+     */
+    private void applyStartupLanguage(String lang) {
+        switch (lang) {
             case "Dutch" -> switchLanguage("nl");
-            case "German" -> switchLanguage("de");
             case "French" -> switchLanguage("fr");
             case "Arabic" -> switchLanguage("ar");
             case "Turkish" -> switchLanguage("tr");
             default -> switchLanguage("en");
         }
 
+        refreshUIText();
+        FlagUtils.loadFlags(languageComboBox, 0);
+
+        languageComboBox.getSelectionModel().select(lang);
     }
 
     /**
