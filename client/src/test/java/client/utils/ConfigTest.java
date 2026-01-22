@@ -31,7 +31,7 @@ public class ConfigTest {
     @Test
     void defaultServerUrl() {
         Config cfg = new Config();
-        assertEquals("ws://localhost:8080", cfg.getServerUrl());
+        assertEquals("ws://localhost:8080/", cfg.getServerUrl());
     }
 
     @Test

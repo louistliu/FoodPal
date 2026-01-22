@@ -70,7 +70,8 @@ public class MyModule implements Module {
         binder.bind(MainScreenCtrl.class).in(Scopes.SINGLETON);
         binder.bind(AddIngredientScreenCtrl.class).in(Scopes.SINGLETON);
         binder.bind(AddInstructionScreenCtrl.class).in(Scopes.SINGLETON);
-        binder.bind(ServerSockets.class);
+        binder.bind(ServerSockets.class).in(Scopes.SINGLETON);
+        binder.bind(client.utils.ConfigService.class).in(Scopes.SINGLETON);
     }
 
     /**
