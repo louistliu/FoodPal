@@ -26,7 +26,7 @@ public class LanguageController {
     }
 
     /**
-     * Generic accessor for translation keys.
+     * get method for UI translation keys.
      *
      * @param key messages key (e.g. "saveButton.text")
      * @return translated text

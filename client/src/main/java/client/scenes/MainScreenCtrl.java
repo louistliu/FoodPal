@@ -34,6 +34,7 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -67,7 +68,7 @@ public class MainScreenCtrl {
     @FXML
     private TextField searchRecipesField;
     @FXML
-    private ComboBox<String> languageChoiceBox;
+    private ComboBox<String> languageComboBox;
     @FXML
     private TextField recipeNameField;
     @FXML
@@ -102,6 +103,8 @@ public class MainScreenCtrl {
     private Image englishFlag;
     @FXML
     private Image frenchFlag;
+    @FXML
+    private Image arabicFlag;
     private final LanguageController languageController;
 
     @FXML
@@ -132,11 +135,16 @@ public class MainScreenCtrl {
         languageChoiceBox.setItems(FXCollections.observableArrayList(
                 "English", "Dutch", "German"));
         languageChoiceBox.getSelectionModel().selectFirst();
+        languageComboBox.setItems(FXCollections.observableArrayList(
+                "English", "Dutch", "French", "Arabic"));
+        languageComboBox.getSelectionModel().selectFirst();
 
         dutchFlag = new Image("flags/Dutch_Flag.png");
         englishFlag = new Image("flags/English_Flag.png");
         frenchFlag = new Image("flags/French_Flag.png");
+        arabicFlag = new Image("flags/Arabic_Flag.png");
         refreshUIText();
+        loadAllFlags(0);
 
 
         if (recipeDescriptionField != null) {
@@ -889,10 +897,13 @@ public class MainScreenCtrl {
         configService.persistConfig();
         System.out.println("Language switched to: " + languageChoiceBox.getValue());
 
+        String language = languageComboBox.getValue();
 
         switch (selected) {
             case "Dutch" -> switchLanguage("nl");
             case "German" -> switchLanguage("de");
+            case "French" -> switchLanguage("fr");
+            case "Arabic" -> switchLanguage("ar");
             default -> switchLanguage("en");
         }
 
@@ -914,24 +925,73 @@ public class MainScreenCtrl {
      */
     public void refreshUIText() {
 
-        // 1. Main Actions
         saveButton.setText(languageController.get("button.save"));
-        addButton.setText(languageController.get("button.add"));
-        deleteButton.setText(languageController.get("button.delete"));
         duplicateButton.setText(languageController.get("button.duplicate"));
         printButton.setText(languageController.get("button.print"));
 
-        // 2. Filters & Menu
         favoritesButton.setText(languageController.get("button.favorites"));
         allButton.setText(languageController.get("button.allRecipes"));
 
-        addIngredientButton.setText(languageController.get("button.addIngredient"));
-        deleteIngredientButton.setText(languageController.get("button.deleteIngredient"));
-        addInstructionButton.setText(languageController.get("button.addInstruction"));
-        deleteInstructionButton.setText(languageController.get("button.deleteInstruction"));
-
         recipeListView.refresh();
 
+    }
+
+    /**
+     * method to load all the flags.
+     *
+     * @param defaultIndex the language that is selected
+     */
+    private void loadAllFlags(int defaultIndex) {
+        languageComboBox.getItems().clear();
+        languageComboBox.getItems().addAll("English", "Dutch", "French", "Arabic");
+
+        // this is required for setCellFactory and setButtonCell.
+        class FlagCell extends ListCell<String> {
+            private final ImageView imageView = new ImageView();
+
+            {
+                imageView.setFitWidth(25);
+                imageView.setFitHeight(18);
+            }
+
+
+            /**
+             * This method switches the flag when selecting another language.
+             *
+             * @param item item that needs to be updated (flag).
+             * @param empty boolean value to handle ghost cells.
+             */
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+
+                if (empty || item == null) {
+                    setText(null);
+                    setGraphic(null);
+                } else {
+                    setText(item);
+
+                    if ("Dutch".equals(item)) {
+                        imageView.setImage(dutchFlag);
+                    } else if ("French".equals(item)) {
+                        imageView.setImage(frenchFlag);
+                    } else if ("Arabic".equals(item)) {
+
+                        imageView.setImage(arabicFlag);
+                    } else {
+                        imageView.setImage(englishFlag);
+                    }
+
+                    setGraphic(imageView);
+                }
+            }
+        }
+
+        languageComboBox.setCellFactory(lv -> new FlagCell());
+        languageComboBox.setButtonCell(new FlagCell());
+
+        // this is the default model
+        languageComboBox.getSelectionModel().select(defaultIndex);
     }
 }
 
