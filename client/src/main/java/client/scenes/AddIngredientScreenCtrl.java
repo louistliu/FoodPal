@@ -209,6 +209,7 @@ public class AddIngredientScreenCtrl extends ScreenControl {
     public void handleOk() {
         String amountStr = amountTextField.getText().trim();
         String unit = unitMenuButton.getText();
+        String otherLabel = languageController.get("ingredient.other");
 
         Ingredient selected = ingredientChoiceBox.getValue();
 
@@ -239,7 +240,7 @@ public class AddIngredientScreenCtrl extends ScreenControl {
             return;
         }
 
-        if ("Other".equals(selected.getName())) {
+        if (otherLabel.equals(selected.getName())) {
             String newName = inputTextArea.getText().trim();
             if (newName.isEmpty()) {
                 ErrorScreenCtrl.showError(languageController.get("error.missingIngredientName"));

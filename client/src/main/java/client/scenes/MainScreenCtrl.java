@@ -916,6 +916,9 @@ public class MainScreenCtrl {
                 default -> switchLanguage("en");
             }
         });
+        recipeListView.refresh();
+        ingredientListView.refresh();
+        instructionListView.refresh();
     }
 
     /**

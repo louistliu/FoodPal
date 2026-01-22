@@ -43,8 +43,8 @@
             <children>
                 <HBox alignment="CENTER_LEFT" spacing="10.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="14.0">
                     <children>
-                        <Button fx:id="saveButton" mnemonicParsing="false" onAction="#saveRecipe" text="Save" />
                         <Button fx:id="favoriteButton" mnemonicParsing="false" onAction="#toggleFavorite" text="Favorite" />
+                        <Button fx:id="saveButton" mnemonicParsing="false" onAction="#saveRecipe" text="Save" visible="false" />
                         <Region HBox.hgrow="ALWAYS" /> <Button fx:id="printButton" mnemonicParsing="false" onAction="#printRecipe" text="Print" />
                     </children>
                 </HBox>
