@@ -209,7 +209,7 @@ public class AddIngredientScreenCtrl extends ScreenControl {
     public void handleOk() {
         String amountStr = amountTextField.getText().trim();
         String unit = unitMenuButton.getText();
-        String otherLabel = languageController.get("ingredient.other");
+        final String otherLabel = languageController.get("ingredient.other");
 
         Ingredient selected = ingredientChoiceBox.getValue();
 
