@@ -37,7 +37,6 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -144,7 +143,7 @@ public class MainScreenCtrl {
                 "English", "Dutch", "German"));
         languageChoiceBox.getSelectionModel().selectFirst();
         languageComboBox.setItems(FXCollections.observableArrayList(
-                "English", "Dutch", "French", "Arabic"));
+                "English", "Dutch", "French", "Arabic", "Turkish"));
         languageComboBox.getSelectionModel().selectFirst();
 
         refreshUIText();
@@ -420,7 +419,8 @@ public class MainScreenCtrl {
      */
     private void setupInstructionDragAndDrop() {
         instructionListView.setCellFactory(
-              param -> new InstructionListCell(this::saveRecipe, this::editInstructionHandler));
+              param -> new InstructionListCell(this::saveRecipe,
+                      this::editInstructionHandler, languageController));
     }
 
     /**
@@ -636,6 +636,13 @@ public class MainScreenCtrl {
         boolean isFavorite = configService.getConfig().getFavoriteRecipeIds()
               .contains(recipe.getId());
         favoriteButton.setText(isFavorite ? "Unfavorite" : "Favorite");
+        boolean isFavorite = config.getFavoriteRecipeIds().contains(recipe.getId());
+
+        String buttonText = isFavorite
+                ? languageController.get("button.unfavorite")
+                : languageController.get("button.favorite");
+
+        favoriteButton.setText(buttonText);
     }
 
     /**
@@ -909,6 +916,7 @@ public class MainScreenCtrl {
             case "German" -> switchLanguage("de");
             case "French" -> switchLanguage("fr");
             case "Arabic" -> switchLanguage("ar");
+            case "Turkish" -> switchLanguage("tr");
             default -> switchLanguage("en");
         }
 
@@ -956,6 +964,11 @@ public class MainScreenCtrl {
         if (saveButton != null && saveButton.getScene() != null) {
             Stage stage = (Stage) saveButton.getScene().getWindow();
             stage.setTitle(languageController.get("app.title"));
+        }
+        if (selectedRecipe != null) {
+            updateFavoriteButtonText(selectedRecipe);
+        } else {
+            favoriteButton.setText(languageController.get("button.favorite"));
         }
         recipeListView.refresh();
 

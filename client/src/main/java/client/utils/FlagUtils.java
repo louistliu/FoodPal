@@ -14,6 +14,7 @@ public class FlagUtils {
     private static final Image dutchFlag   = load("/flags/Dutch_Flag.png");
     private static final Image frenchFlag  = load("/flags/French_Flag.png");
     private static final Image arabicFlag  = load("/flags/Arabic_Flag.png");
+    private static final Image turkishFlag  = load("/flags/Turkey_Flag.png");
 
     private static Image load(String path) {
         var url = FlagUtils.class.getResource(path);
@@ -32,7 +33,7 @@ public class FlagUtils {
     public static void loadFlags(ComboBox<String> comboBox, int defaultIndex) {
         System.out.println(FlagUtils.class.getResource("/flags/english.png"));
         comboBox.getItems().clear();
-        comboBox.getItems().addAll("English", "Dutch", "French", "Arabic");
+        comboBox.getItems().addAll("English", "Dutch", "French", "Arabic", "Turkish");
 
         class FlagCell extends ListCell<String> {
             private final ImageView imageView = new ImageView();
@@ -62,6 +63,8 @@ public class FlagUtils {
                         case "Dutch" -> imageView.setImage(dutchFlag);
                         case "French" -> imageView.setImage(frenchFlag);
                         case "Arabic" -> imageView.setImage(arabicFlag);
+                        case "Turkish" -> imageView.setImage(turkishFlag);
+
                         default -> imageView.setImage(englishFlag);
                     }
 

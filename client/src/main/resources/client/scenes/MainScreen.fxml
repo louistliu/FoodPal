@@ -9,48 +9,53 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
 <SplitPane dividerPositions="0.32" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="500.0" minWidth="850.0" prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.scenes.MainScreenCtrl">
     <items>
-        <AnchorPane minWidth="250.0">
+        <VBox minWidth="280.0" spacing="10.0" style="-fx-padding: 10;">
             <children>
-                <HBox alignment="CENTER" prefHeight="45.0" spacing="20.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="5.0">
+                <HBox alignment="CENTER" spacing="10.0">
                     <children>
-                        <ComboBox fx:id="languageComboBox" onAction="#onLanguageChange" prefHeight="30.0" prefWidth="120.0" />
+                        <ComboBox fx:id="languageComboBox" onAction="#onLanguageChange" prefHeight="30.0" prefWidth="130.0" HBox.hgrow="ALWAYS" />
                         <Button fx:id="duplicateButton" mnemonicParsing="false" onAction="#duplicateRecipe" prefHeight="30.0" text="Duplicate" />
                     </children>
                 </HBox>
 
-                <TextField fx:id="searchRecipesField" promptText="Search Recipes..." AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="50.0" />
+                <TextField fx:id="searchRecipesField" promptText="Search Recipes..." />
 
-                <ListView fx:id="recipeListView" AnchorPane.bottomAnchor="70.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="85.0" />
+                <ListView fx:id="recipeListView" VBox.vgrow="ALWAYS" />
 
-                <HBox alignment="CENTER" prefHeight="50.0" spacing="15.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0">
+                <HBox alignment="CENTER" spacing="5.0">
                     <children>
-                        <Button fx:id="addButton" minWidth="35.0" onAction="#addRecipe" text="+" />
-                        <Button fx:id="deleteButton" minWidth="35.0" onAction="#deleteRecipe" text="-" />
-                        <Button fx:id="allButton" minWidth="60.0" onAction="#showAllRecipes" text="All" />
-                        <Button fx:id="favoritesButton" minWidth="80.0" onAction="#showFavorites" text="Favorites" />
-                        <Button fx:id="favoriteButton" minWidth="80.0" onAction="#showFavorites" text="Favorites" />
+                        <Button fx:id="addButton" minWidth="30.0" onAction="#addRecipe" text="+" />
+                        <Button fx:id="deleteButton" minWidth="30.0" onAction="#deleteRecipe" text="-" />
+                        <Button fx:id="allButton" maxWidth="Infinity" onAction="#showAllRecipes" text="All" HBox.hgrow="ALWAYS" />
+                        <Button fx:id="favoritesButton" maxWidth="Infinity" onAction="#showFavorites" text="Favorites" HBox.hgrow="ALWAYS" />
                     </children>
                 </HBox>
             </children>
-        </AnchorPane>
+        </VBox>
 
-        <AnchorPane fx:id="rightPane" minWidth="400.0">
+        <AnchorPane fx:id="rightPane" minWidth="450.0" style="-fx-padding: 10;">
             <children>
-                <Button fx:id="saveButton" mnemonicParsing="false" onAction="#saveRecipe" text="Save" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="14.0" />
-                <Button fx:id="printButton" mnemonicParsing="false" onAction="#printRecipe" text="Print" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="14.0" />
+                <HBox alignment="CENTER_LEFT" spacing="10.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="14.0">
+                    <children>
+                        <Button fx:id="saveButton" mnemonicParsing="false" onAction="#saveRecipe" text="Save" />
+                        <Button fx:id="favoriteButton" mnemonicParsing="false" onAction="#toggleFavorite" text="Favorite" />
+                        <Region HBox.hgrow="ALWAYS" /> <Button fx:id="printButton" mnemonicParsing="false" onAction="#printRecipe" text="Print" />
+                    </children>
+                </HBox>
 
                 <TextField fx:id="recipeNameField" promptText="Recipe Name" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="50.0" />
 
-                <TextArea fx:id="recipeDescriptionField" prefHeight="80.0" promptText="Description" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="88.0" />
+                <TextArea fx:id="recipeDescriptionField" prefHeight="80.0" promptText="Description" wrapText="true" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="88.0" />
 
-                <HBox spacing="15.0" AnchorPane.bottomAnchor="50.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="185.0">
+                <HBox spacing="15.0" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="185.0">
                     <children>
-                        <VBox alignment="TOP_CENTER" spacing="5.0" HBox.hgrow="ALWAYS">
+                        <VBox alignment="TOP_CENTER" spacing="8.0" HBox.hgrow="ALWAYS">
                             <children>
                                 <Label fx:id="ingredientsLabel" text="Ingredients">
                                     <font><Font name="System Bold" size="16.0" /></font>
@@ -58,14 +63,14 @@
                                 <ListView fx:id="ingredientListView" VBox.vgrow="ALWAYS" />
                                 <HBox alignment="CENTER" spacing="10.0">
                                     <children>
-                                        <Button fx:id="addIngredientButton" onAction="#addIngredient" text="+" />
-                                        <Button fx:id="deleteIngredientButton" onAction="#deleteIngredient" text="-" />
+                                        <Button fx:id="addIngredientButton" minWidth="40.0" onAction="#addIngredient" text="+" />
+                                        <Button fx:id="deleteIngredientButton" minWidth="40.0" onAction="#deleteIngredient" text="-" />
                                     </children>
                                 </HBox>
                             </children>
                         </VBox>
 
-                        <VBox alignment="TOP_CENTER" spacing="5.0" HBox.hgrow="ALWAYS">
+                        <VBox alignment="TOP_CENTER" spacing="8.0" HBox.hgrow="ALWAYS">
                             <children>
                                 <Label fx:id="instructionsLabel" text="Instructions">
                                     <font><Font name="System Bold" size="16.0" /></font>
@@ -73,8 +78,8 @@
                                 <ListView fx:id="instructionListView" VBox.vgrow="ALWAYS" />
                                 <HBox alignment="CENTER" spacing="10.0">
                                     <children>
-                                        <Button fx:id="addInstructionButton" onAction="#addInstruction" text="+" />
-                                        <Button fx:id="deleteInstructionButton" onAction="#deleteInstruction" text="-" />
+                                        <Button fx:id="addInstructionButton" minWidth="40.0" onAction="#addInstruction" text="+" />
+                                        <Button fx:id="deleteInstructionButton" minWidth="40.0" onAction="#deleteInstruction" text="-" />
                                     </children>
                                 </HBox>
                             </children>
