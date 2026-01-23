@@ -106,6 +106,12 @@ public class MainScreenCtrl {
 
     @FXML
     private Button favoriteButton;
+    @FXML
+    private AnchorPane searchHistoryOverlay;
+    @FXML
+    private Button showSearchHistoryButton;
+    @FXML
+    private ListView<String> searchHistoryListView;
 
     /**
      * Constructs the MainScreenCtrl, injecting the scene controller.
@@ -125,37 +131,53 @@ public class MainScreenCtrl {
      * language options, and adds selection listeners.
      */
     public void initialize() {
+        setupLanguageComboBox();
+        setupRecipeDescriptionField();
+        setupCellFactories();
+        setupRecipeListSelection();
+        setupInstructionDragAndDrop();
+        setupRecipeFieldListeners();
+        setupObservableLists();
+        setupServerSubscriptions();
+        setupSearchField();
+        setupSearchHistoryUI();
+        setupSearchFieldUI();
+        setupSearchHistoryEscHandler();
+        setupSearchHistoryOverlayAutoHide();
+        System.out.println("FoodPal Main Screen UI initialized.");
+        rightPane.setVisible(false);
+    }
+
+    private void setupLanguageComboBox() {
         languageComboBox.setItems(FXCollections.observableArrayList(
                 "English", "Dutch", "French", "Arabic", "Turkish"
         ));
-
         String savedLang = configService.getConfig().getLanguage();
-
-        if (savedLang != null && languageComboBox.getItems().contains(savedLang)) {
-            selectedLanguage = savedLang;
-        } else {
-            selectedLanguage = "English";
-        }
-
+        selectedLanguage = (savedLang != null
+              && languageComboBox.getItems().contains(savedLang)) ? savedLang : "English";
         languageComboBox.getSelectionModel().select(selectedLanguage);
+        Platform.runLater(() -> applyStartupLanguage(selectedLanguage));
+    }
 
-        Platform.runLater(() -> {
-            applyStartupLanguage(selectedLanguage);
-        });
-
+    private void setupRecipeDescriptionField() {
         if (recipeDescriptionField != null) {
             recipeDescriptionField.setWrapText(true);
         }
+    }
 
-
-        // --- Cell Factory and Listeners ---
+    private void setupCellFactories() {
         recipeListView.setCellFactory(lv -> new ListCell<>() {
             public void updateItem(Recipe recipe, boolean empty) {
                 super.updateItem(recipe, empty);
-                setText(empty ? null : recipe != null ? recipe.getName() : null);
+                if (empty || recipe == null) {
+                    setText(null);
+                } else {
+                    List<Long> favoriteIds = configService.getConfig().getFavoriteRecipeIds();
+                    setText(favoriteIds.contains(recipe.getId()) ? "★ "
+                          + recipe.getName() : recipe.getName());
+                }
             }
         });
-
         ingredientListView.setCellFactory(lv -> new ListCell<>() {
             @Override
             protected void updateItem(RecipeIngredient item, boolean empty) {
@@ -165,8 +187,7 @@ public class MainScreenCtrl {
                     setContextMenu(null);
                 } else {
                     setText(item.getIngredient().getName() + " " + item.getAmount() + " "
-                            + item.getUnit());
-
+                          + item.getUnit());
                     ContextMenu cm = new ContextMenu();
                     MenuItem editItem = new MenuItem(languageController.get("menu.edit"));
                     editItem.setOnAction(event -> editIngredient(item));
@@ -175,14 +196,14 @@ public class MainScreenCtrl {
                 }
             }
         });
+    }
 
-        // This listener will fire immediately if data is bound, triggering
-        // showRecipeDetails
+    private void setupRecipeListSelection() {
         recipeListView.getSelectionModel().selectedItemProperty()
-                .addListener(this::onSelectedRecipeChanged);
+              .addListener(this::onSelectedRecipeChanged);
+    }
 
-        setupInstructionDragAndDrop();
-
+    private void setupRecipeFieldListeners() {
         recipeNameField.setOnMouseExited(e -> saveRecipeTitle());
         recipeNameField.focusedProperty().addListener((observable, oldValue, newValue) -> {
             if (oldValue) {
@@ -195,45 +216,98 @@ public class MainScreenCtrl {
                 saveRecipeDescription();
             }
         });
+    }
 
-
-        System.out.println("FoodPal Main Screen UI initialized.");
-        rightPane.setVisible(false);
-
+    private void setupObservableLists() {
         observableRecipes = FXCollections.observableList(new ArrayList<>());
         recipeListView.setItems(observableRecipes);
         observableIngredients = FXCollections.observableArrayList();
         ingredientListView.setItems(observableIngredients);
+    }
 
+    private void setupServerSubscriptions() {
         serverRecipes.subscribe(Endpoint.RECIPE_FETCH,
-                new ResponseHandler<List<Recipe>>(this::onUpdateRecipeList) {
-                });
-
+              new ResponseHandler<List<Recipe>>(this::onUpdateRecipeList) {});
         serverRecipes.subscribe(Endpoint.RECIPE_CREATE,
-                new ResponseHandler<Recipe>(this::onAddRecipe) {
-                });
+              new ResponseHandler<Recipe>(this::onAddRecipe) {});
         serverRecipes.subscribe(Endpoint.RECIPE_USER_CREATE,
-                new ResponseHandler<Recipe>(this::onCreateUserRecipe) {
-                });
+              new ResponseHandler<Recipe>(this::onCreateUserRecipe) {});
         serverRecipes.subscribe(Endpoint.RECIPE_UPDATE,
-                new ResponseHandler<Recipe>(this::onUpdateRecipe) {
-                });
+              new ResponseHandler<Recipe>(this::onUpdateRecipe) {});
         serverRecipes.subscribe(Endpoint.RECIPE_DELETE,
-                new ResponseHandler<Recipe>(this::onDeleteRecipe) {
-                });
+              new ResponseHandler<Recipe>(this::onDeleteRecipe) {});
         serverRecipes.subscribe(Endpoint.ERROR,
-                new ResponseHandler<Throwable>(ErrorScreenCtrl::onError) {
-                });
+              new ResponseHandler<Throwable>(ErrorScreenCtrl::onError) {});
+    }
 
-        searchRecipesField.textProperty().addListener((obs, oldVal, newVal) -> {
-            this.currentSearchQuery = newVal.trim().toLowerCase();
-            refreshListView();
+    private void setupSearchHistoryOverlayAutoHide() {
+        Platform.runLater(() -> {
+            if (searchHistoryOverlay != null && searchHistoryOverlay.getScene() != null) {
+                searchHistoryOverlay.getScene().addEventFilter(
+                        javafx.scene.input.MouseEvent.MOUSE_PRESSED, event -> {
+                            if (searchHistoryOverlay.isVisible()) {
+                                Object target = event.getTarget();
+                                if (target instanceof javafx.scene.Node node) {
+                                    if (!isDescendantOf(node, searchHistoryOverlay)
+                                            && node != showSearchHistoryButton
+                                            && node != searchHistoryOverlay
+                                            && !showSearchHistoryButton.equals(node.getParent())) {
+                                        searchHistoryOverlay.setVisible(false);
+                                    }
+                                }
+                            }
+                        });
+            }
         });
+    }
 
-        searchRecipesField.setOnKeyPressed(event -> {
-            if (event.getCode() == javafx.scene.input.KeyCode.ESCAPE) {
-                searchRecipesField.clear();
-                recipeListView.requestFocus();
+    /**
+     * Utility to check if a node is a descendant of a parent node.
+     */
+    private boolean isDescendantOf(javafx.scene.Node node, javafx.scene.Parent potentialAncestor) {
+        javafx.scene.Node current = node;
+        while (current != null) {
+            if (current == potentialAncestor) {
+                return true;
+            }
+            current = current.getParent();
+        }
+        return false;
+    }
+
+    /**
+     * Sets up the search history overlay and button logic.
+     */
+    private void setupSearchHistoryUI() {
+        showSearchHistoryButton.setOnAction(e -> {
+            if (searchHistoryOverlay != null) {
+                searchHistoryOverlay.setVisible(!searchHistoryOverlay.isVisible());
+            }
+        });
+        updateSearchHistoryListView();
+        searchHistoryListView.setOnMouseClicked(event -> {
+            String selected = searchHistoryListView.getSelectionModel().getSelectedItem();
+            if (selected != null) {
+                searchRecipesField.setText(selected);
+                searchHistoryOverlay.setVisible(false);
+            }
+        });
+    }
+
+    /**
+     * Sets up the search field listeners for search and history.
+     */
+    private void setupSearchFieldUI() {
+        // Save search history only when the user leaves the field (focus lost)
+        searchRecipesField.focusedProperty().addListener((obs, wasFocused, isNowFocused) -> {
+            if (!isNowFocused) {
+                Platform.runLater(() -> {
+                    String query = searchRecipesField.getText().trim().toLowerCase();
+                    if (!query.isEmpty()) {
+                        configService.addSearchHistory(query);
+                        updateSearchHistoryListView();
+                    }
+                });
             }
         });
     }
@@ -260,6 +334,30 @@ public class MainScreenCtrl {
 
         System.out.print("RECIPES ARRIVED");
         Platform.runLater(() -> {
+            // Detect if any favorite was deleted
+            List<Long> favoriteIds = configService.getConfig().getFavoriteRecipeIds();
+            Set<Long> recipeIds = new HashSet<>();
+            for (Recipe r : recipes) {
+                recipeIds.add(r.getId());
+            }
+            List<Long> missingFavorites = new ArrayList<>();
+            List<Long> newFavorites = new ArrayList<>(favoriteIds);
+            for (Long favId : favoriteIds) {
+                if (!recipeIds.contains(favId)) {
+                    missingFavorites.add(favId);
+                    newFavorites.remove(favId);
+                }
+            }
+            if (!missingFavorites.isEmpty()) {
+                configService.getConfig().setFavoriteRecipeIds(newFavorites);
+                configService.persistConfig();
+                // Show warning for each missing favorite
+                for (Long lostId : missingFavorites) {
+                    ErrorScreenCtrl.showError(
+                          "A favorite recipe was deleted by someone else. (ID: " + lostId + ")");
+                }
+            }
+
             allRecipes.clear();
             allRecipes.addAll(recipes);
             refreshListView();
@@ -284,6 +382,22 @@ public class MainScreenCtrl {
         });
     }
 
+    /**
+     * Updates the search history ListView with the latest history.
+     */
+    private void updateSearchHistoryListView() {
+        if (searchHistoryListView != null) {
+            searchHistoryListView.setItems(FXCollections.observableArrayList(getSearchHistory()));
+        }
+    }
+
+    /**
+     * Returns the search history for display.
+     */
+    public List<String> getSearchHistory() {
+        return configService.getSearchHistory();
+    }
+
     private void onAddRecipe(Recipe recipe) {
         Platform.runLater(() -> {
             if (!allRecipes.contains(recipe)) {
@@ -305,8 +419,18 @@ public class MainScreenCtrl {
     private void onDeleteRecipe(Recipe recipe) {
         Platform.runLater(() -> {
             allRecipes.removeIf(r -> r.getId() == recipe.getId());
-
             observableRecipes.remove(recipe);
+            // Remove from favorites if present
+            List<Long> favoriteIds = configService.getConfig().getFavoriteRecipeIds();
+            if (favoriteIds.contains(recipe.getId())) {
+                List<Long> newFavorites = new ArrayList<>(favoriteIds);
+                newFavorites.remove(recipe.getId());
+                configService.getConfig().setFavoriteRecipeIds(newFavorites);
+                configService.persistConfig();
+                // Show notification for deleted favorite
+                ErrorScreenCtrl.showError("A favorite recipe was deleted: '"
+                      + recipe.getName() + "'.");
+            }
             recipeListView.refresh();
         });
     }
@@ -611,15 +735,15 @@ public class MainScreenCtrl {
 
         List<Long> favoriteIds = configService.getConfig().getFavoriteRecipeIds();
         long currentId = selectedRecipe.getId();
-
+        List<Long> newFavorites = new ArrayList<>(favoriteIds);
         if (favoriteIds.contains(currentId)) {
-            favoriteIds.remove(currentId);
+            newFavorites.remove(currentId);
             System.out.println("Recipe '" + selectedRecipe.getName() + "' removed from favorites.");
         } else {
-            favoriteIds.add(currentId);
+            newFavorites.add(currentId);
             System.out.println("Recipe '" + selectedRecipe.getName() + "' added to favorites.");
         }
-
+        configService.getConfig().setFavoriteRecipeIds(newFavorites);
         configService.persistConfig();
         updateFavoriteButtonText(selectedRecipe);
         refreshListView();
@@ -925,6 +1049,24 @@ public class MainScreenCtrl {
         recipeListView.refresh();
         ingredientListView.refresh();
         instructionListView.refresh();
+    }
+
+    /**
+     * Adds a key event handler to close the search history overlay when ESC is pressed.
+     */
+    private void setupSearchHistoryEscHandler() {
+        searchHistoryOverlay.sceneProperty().addListener((obs, oldScene, newScene) -> {
+            if (newScene == null) {
+                return;
+            }
+            newScene.addEventFilter(javafx.scene.input.KeyEvent.KEY_PRESSED, event -> {
+                if (event.getCode() == javafx.scene.input.KeyCode.ESCAPE
+                      && searchHistoryOverlay.isVisible()) {
+                    searchHistoryOverlay.setVisible(false);
+                    event.consume();
+                }
+            });
+        });
     }
 
     /**
