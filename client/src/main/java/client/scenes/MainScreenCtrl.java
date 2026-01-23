@@ -239,26 +239,27 @@ public class MainScreenCtrl {
               new ResponseHandler<Recipe>(this::onDeleteRecipe) {
               });
         serverRecipes.subscribe(Endpoint.ERROR,
-              new ResponseHandler<Throwable>(ErrorScreenCtrl::onError) {});
+              new ResponseHandler<Throwable>(ErrorScreenCtrl::onError) {
+              });
     }
 
     private void setupSearchHistoryOverlayAutoHide() {
         Platform.runLater(() -> {
             if (searchHistoryOverlay != null && searchHistoryOverlay.getScene() != null) {
                 searchHistoryOverlay.getScene().addEventFilter(
-                        javafx.scene.input.MouseEvent.MOUSE_PRESSED, event -> {
-                            if (searchHistoryOverlay.isVisible()) {
-                                Object target = event.getTarget();
-                                if (target instanceof javafx.scene.Node node) {
-                                    if (!isDescendantOf(node, searchHistoryOverlay)
-                                            && node != showSearchHistoryButton
-                                            && node != searchHistoryOverlay
-                                            && !showSearchHistoryButton.equals(node.getParent())) {
-                                        searchHistoryOverlay.setVisible(false);
-                                    }
-                                }
-                            }
-                        });
+                      javafx.scene.input.MouseEvent.MOUSE_PRESSED, event -> {
+                          if (searchHistoryOverlay.isVisible()) {
+                              Object target = event.getTarget();
+                              if (target instanceof javafx.scene.Node node) {
+                                  if (!isDescendantOf(node, searchHistoryOverlay)
+                                        && node != showSearchHistoryButton
+                                        && node != searchHistoryOverlay
+                                        && !showSearchHistoryButton.equals(node.getParent())) {
+                                      searchHistoryOverlay.setVisible(false);
+                                  }
+                              }
+                          }
+                      });
             }
         });
     }
@@ -526,6 +527,10 @@ public class MainScreenCtrl {
                 return;
             }
         }
+        if (recipeNameField.getText().length() > 200) {
+            recipeNameField.setText(selectedRecipe.getName());
+            ErrorScreenCtrl.showError("Recipe name is too long.");
+        }
         saveRecipe();
     }
 
@@ -720,6 +725,10 @@ public class MainScreenCtrl {
         Recipe newRecipe =
               new Recipe(selectedRecipe.getName() + " Clone " + findNextId(recipeName + " Clone"),
                     selectedRecipe.getDescription(), clonedIngredients, clonedInstructions);
+        if (newRecipe.getName().length() > 200) {
+            ErrorScreenCtrl.showError("Recipe Name is too long.");
+            return;
+        }
 
         serverRecipes.send(Endpoint.RECIPE_CREATE, newRecipe);
 
