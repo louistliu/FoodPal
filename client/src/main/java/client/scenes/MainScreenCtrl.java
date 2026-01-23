@@ -47,16 +47,15 @@ public class MainScreenCtrl {
 
     private final ServerSockets serverRecipes;
     private final ConfigService configService;
+    private final LanguageController languageController;
     RecipeList listOfRecipes = new RecipeList();
     private String selectedLanguage = "English";
     private ObservableList<Recipe> observableRecipes;
     private ObservableList<RecipeIngredient> observableIngredients;
     private Recipe selectedRecipe;
-
     private List<Recipe> allRecipes = new ArrayList<>();
     private String currentSearchQuery = "";
     private boolean showingFavoritesOnly = false;
-
     @FXML
     private AnchorPane rightPane;
     @FXML
@@ -101,9 +100,6 @@ public class MainScreenCtrl {
     private Button allButton;
     @FXML
     private Button printButton;
-
-    private final LanguageController languageController;
-
     @FXML
     private Button favoriteButton;
     @FXML
@@ -150,7 +146,7 @@ public class MainScreenCtrl {
 
     private void setupLanguageComboBox() {
         languageComboBox.setItems(FXCollections.observableArrayList(
-                "English", "Dutch", "French", "Arabic", "Turkish"
+              "English", "Dutch", "French", "Arabic", "Turkish"
         ));
         String savedLang = configService.getConfig().getLanguage();
         selectedLanguage = (savedLang != null
@@ -227,15 +223,21 @@ public class MainScreenCtrl {
 
     private void setupServerSubscriptions() {
         serverRecipes.subscribe(Endpoint.RECIPE_FETCH,
-              new ResponseHandler<List<Recipe>>(this::onUpdateRecipeList) {});
+              new ResponseHandler<List<Recipe>>(this::onUpdateRecipeList) {
+              });
+
         serverRecipes.subscribe(Endpoint.RECIPE_CREATE,
-              new ResponseHandler<Recipe>(this::onAddRecipe) {});
+              new ResponseHandler<Recipe>(this::onAddRecipe) {
+              });
         serverRecipes.subscribe(Endpoint.RECIPE_USER_CREATE,
-              new ResponseHandler<Recipe>(this::onCreateUserRecipe) {});
+              new ResponseHandler<Recipe>(this::onCreateUserRecipe) {
+              });
         serverRecipes.subscribe(Endpoint.RECIPE_UPDATE,
-              new ResponseHandler<Recipe>(this::onUpdateRecipe) {});
+              new ResponseHandler<Recipe>(this::onUpdateRecipe) {
+              });
         serverRecipes.subscribe(Endpoint.RECIPE_DELETE,
-              new ResponseHandler<Recipe>(this::onDeleteRecipe) {});
+              new ResponseHandler<Recipe>(this::onDeleteRecipe) {
+              });
         serverRecipes.subscribe(Endpoint.ERROR,
               new ResponseHandler<Throwable>(ErrorScreenCtrl::onError) {});
     }
@@ -369,10 +371,10 @@ public class MainScreenCtrl {
      */
     public void setupSearchField() {
         searchRecipesField.textProperty()
-                .addListener((obs, oldVal, newVal) -> {
-                    this.currentSearchQuery = newVal.trim().toLowerCase();
-                    refreshListView();
-                });
+              .addListener((obs, oldVal, newVal) -> {
+                  this.currentSearchQuery = newVal.trim().toLowerCase();
+                  refreshListView();
+              });
 
         searchRecipesField.setOnKeyPressed(event -> {
             if (event.getCode() == javafx.scene.input.KeyCode.ESCAPE) {
@@ -451,7 +453,7 @@ public class MainScreenCtrl {
             }
 
             var recipes = observableRecipes.stream()
-                    .filter(x -> x.getId() == recipe.getId()).toList();
+                  .filter(x -> x.getId() == recipe.getId()).toList();
 
             if (recipes.isEmpty()) {
                 refreshListView();
@@ -481,11 +483,11 @@ public class MainScreenCtrl {
      */
     private void safeSwapRecipe(int index, Recipe recipe) {
         recipeListView.getSelectionModel().selectedItemProperty()
-                .removeListener(this::onSelectedRecipeChanged);
+              .removeListener(this::onSelectedRecipeChanged);
         observableRecipes.set(index, recipe);
         recipeListView.refresh();
         recipeListView.getSelectionModel().selectedItemProperty()
-                .addListener(this::onSelectedRecipeChanged);
+              .addListener(this::onSelectedRecipeChanged);
     }
 
     private void onSelectedRecipeChanged(ObservableValue<? extends Recipe> obs, Recipe oldRecipe,
@@ -543,8 +545,8 @@ public class MainScreenCtrl {
      */
     private void setupInstructionDragAndDrop() {
         instructionListView.setCellFactory(
-                param -> new InstructionListCell(this::saveRecipe,
-                        this::editInstructionHandler, languageController));
+              param -> new InstructionListCell(this::saveRecipe,
+                    this::editInstructionHandler, languageController));
     }
 
     /**
@@ -555,15 +557,15 @@ public class MainScreenCtrl {
      */
     private Optional<String> editInstructionHandler(String instruction) {
         AddInstructionScreenCtrl control =
-                launchModal(AddInstructionScreenCtrl.class, "AddInstructionScreen.fxml",
-                        "Edit Instruction", instruction);
+              launchModal(AddInstructionScreenCtrl.class, "AddInstructionScreen.fxml",
+                    "Edit Instruction", instruction);
 
         if (control == null) {
             ErrorScreenCtrl.showError(languageController.get("error.failedEditInstruction"));
             return Optional.empty();
         }
         return control.getResult() == null ? Optional.empty() :
-                Optional.of(control.getResult());
+              Optional.of(control.getResult());
     }
 
     /**
@@ -617,10 +619,16 @@ public class MainScreenCtrl {
      * Saves the changes made in the text fields to the selected Recipe object.
      * Linked to the Save button in FXML.
      */
+    @SuppressWarnings("checkstyle:VariableDeclarationUsageDistance")
     public void saveRecipe() {
         if (selectedRecipe == null) {
             return;
         }
+
+        var oldName = selectedRecipe.getName();
+        var oldDescription = selectedRecipe.getDescription();
+        var oldInstructions = selectedRecipe.getInstructions();
+        var oldIngredients = selectedRecipe.getIngredients();
 
         String newName = recipeNameField.getText();
         String newDescription = recipeDescriptionField.getText();
@@ -640,6 +648,11 @@ public class MainScreenCtrl {
         } else {
             serverRecipes.send(Endpoint.RECIPE_CREATE, selectedRecipe);
         }
+
+        selectedRecipe.setName(oldName);
+        selectedRecipe.setDescription(oldDescription);
+        selectedRecipe.setInstructions(oldInstructions);
+        selectedRecipe.setIngredients(oldIngredients);
 
         System.out.println("Saved changes for: " + newName);
     }
@@ -715,8 +728,8 @@ public class MainScreenCtrl {
         System.out.println("RECIPE: " + recipeName);
 
         Recipe newRecipe =
-                new Recipe(selectedRecipe.getName() + " Clone " + findNextId(recipeName + " Clone"),
-                        selectedRecipe.getDescription(), clonedIngredients, clonedInstructions);
+              new Recipe(selectedRecipe.getName() + " Clone " + findNextId(recipeName + " Clone"),
+                    selectedRecipe.getDescription(), clonedIngredients, clonedInstructions);
 
         serverRecipes.send(Endpoint.RECIPE_CREATE, newRecipe);
 
@@ -758,10 +771,10 @@ public class MainScreenCtrl {
             return;
         }
         boolean isFavorite = configService.getConfig().getFavoriteRecipeIds()
-                .contains(recipe.getId());
+              .contains(recipe.getId());
         String buttonText = isFavorite
-                ? languageController.get("button.unfavorite")
-                : languageController.get("button.favorite");
+              ? languageController.get("button.unfavorite")
+              : languageController.get("button.favorite");
 
         favoriteButton.setText(buttonText);
     }
@@ -774,44 +787,44 @@ public class MainScreenCtrl {
         List<Long> favoriteIds = configService.getConfig().getFavoriteRecipeIds();
 
         List<Recipe> filteredList = allRecipes.stream()
-                .filter(recipe -> {
-                    boolean matchesFavorite = !showingFavoritesOnly
-                            || favoriteIds.contains(recipe.getId());
-                    if (!matchesFavorite) {
-                        return false;
-                    }
+              .filter(recipe -> {
+                  boolean matchesFavorite = !showingFavoritesOnly
+                        || favoriteIds.contains(recipe.getId());
+                  if (!matchesFavorite) {
+                      return false;
+                  }
 
-                    if (currentSearchQuery.isEmpty()) {
-                        return true;
-                    }
+                  if (currentSearchQuery.isEmpty()) {
+                      return true;
+                  }
 
-                    // Aggregating all searchable content for this recipe
-                    StringBuilder searchableContent = new StringBuilder();
-                    searchableContent.append(recipe.getName()).append(" ");
-                    searchableContent.append(recipe.getDescription()).append(" ");
+                  // Aggregating all searchable content for this recipe
+                  StringBuilder searchableContent = new StringBuilder();
+                  searchableContent.append(recipe.getName()).append(" ");
+                  searchableContent.append(recipe.getDescription()).append(" ");
 
-                    String[] keywords = currentSearchQuery.split("\\s+");
+                  String[] keywords = currentSearchQuery.split("\\s+");
 
-                    // Append ingredient names
-                    for (RecipeIngredient ri : recipe.getIngredients()) {
-                        searchableContent.append(ri.getIngredient().getName()).append(" ");
-                    }
+                  // Append ingredient names
+                  for (RecipeIngredient ri : recipe.getIngredients()) {
+                      searchableContent.append(ri.getIngredient().getName()).append(" ");
+                  }
 
-                    // Append instruction steps
-                    for (String instruction : recipe.getInstructions()) {
-                        searchableContent.append(instruction).append(" ");
-                    }
+                  // Append instruction steps
+                  for (String instruction : recipe.getInstructions()) {
+                      searchableContent.append(instruction).append(" ");
+                  }
 
-                    String finalSearchString = searchableContent.toString().toLowerCase();
+                  String finalSearchString = searchableContent.toString().toLowerCase();
 
-                    for (String keyword : keywords) {
-                        if (!finalSearchString.contains(keyword.toLowerCase())) {
-                            return false;
-                        }
-                    }
-                    return true;
-                })
-                .toList();
+                  for (String keyword : keywords) {
+                      if (!finalSearchString.contains(keyword.toLowerCase())) {
+                          return false;
+                      }
+                  }
+                  return true;
+              })
+              .toList();
 
         observableRecipes.setAll(filteredList);
         recipeListView.refresh();
@@ -835,7 +848,7 @@ public class MainScreenCtrl {
             modalStage.initModality(Modality.WINDOW_MODAL);
             modalStage.setTitle(title);
             Pair<T, Parent> pair =
-                    Main.getFxml().load(controllerClass, "client", "scenes", fxmlFileName);
+                  Main.getFxml().load(controllerClass, "client", "scenes", fxmlFileName);
             modalStage.setScene(new Scene(pair.getValue()));
             Parent root = pair.getValue();
             pair.getKey().setStage(modalStage);
@@ -859,8 +872,8 @@ public class MainScreenCtrl {
         }
 
         AddIngredientScreenCtrl controller =
-                launchModal(AddIngredientScreenCtrl.class, "AddIngredientScreen.fxml",
-                        languageController.get("title.addIngredient"));
+              launchModal(AddIngredientScreenCtrl.class, "AddIngredientScreen.fxml",
+                    languageController.get("title.addIngredient"));
 
 
         if (controller != null && controller.getResult() != null) {
@@ -889,17 +902,17 @@ public class MainScreenCtrl {
         }
 
         AddIngredientScreenCtrl controller = launchModal(
-                AddIngredientScreenCtrl.class,
-                "AddIngredientScreen.fxml",
-                "Edit Ingredient",
-                item
+              AddIngredientScreenCtrl.class,
+              "AddIngredientScreen.fxml",
+              "Edit Ingredient",
+              item
         );
 
         if (controller != null && controller.getResult() != null) {
             RecipeIngredient updatedItem = controller.getResult();
 
             if (!item.getIngredient().getName().equals(updatedItem.getIngredient().getName())
-                    && containsIngredient(selectedRecipe, updatedItem.getIngredient())) {
+                  && containsIngredient(selectedRecipe, updatedItem.getIngredient())) {
                 String pattern = languageController.get("error.ingredientAlreadyExists");
                 String name = updatedItem.getIngredient().getName();
 
@@ -931,7 +944,7 @@ public class MainScreenCtrl {
      */
     private boolean containsIngredient(Recipe recipe, Ingredient ingredient) {
         return recipe.getIngredients().stream()
-                .anyMatch(i -> i.getIngredient().getName().equals(ingredient.getName()));
+              .anyMatch(i -> i.getIngredient().getName().equals(ingredient.getName()));
     }
 
     /**
@@ -945,8 +958,8 @@ public class MainScreenCtrl {
 
 
         AddInstructionScreenCtrl controller =
-                launchModal(AddInstructionScreenCtrl.class, "AddInstructionScreen.fxml",
-                        languageController.get("title.addInstruction"));
+              launchModal(AddInstructionScreenCtrl.class, "AddInstructionScreen.fxml",
+                    languageController.get("title.addInstruction"));
 
         if (controller != null) {
             String instructionText = controller.getResult();
@@ -994,7 +1007,7 @@ public class MainScreenCtrl {
         }
 
         PrintRecipe.exportRecipe(printButton.getScene().getWindow(),
-                selectedRecipe, languageController);
+              selectedRecipe, languageController);
 
         System.out.println("Exported recipe: " + selectedRecipe.getName());
     }
