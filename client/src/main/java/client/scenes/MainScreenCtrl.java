@@ -625,11 +625,6 @@ public class MainScreenCtrl {
             return;
         }
 
-        var oldName = selectedRecipe.getName();
-        var oldDescription = selectedRecipe.getDescription();
-        var oldInstructions = selectedRecipe.getInstructions();
-        var oldIngredients = selectedRecipe.getIngredients();
-
         String newName = recipeNameField.getText();
         String newDescription = recipeDescriptionField.getText();
 
@@ -648,11 +643,6 @@ public class MainScreenCtrl {
         } else {
             serverRecipes.send(Endpoint.RECIPE_CREATE, selectedRecipe);
         }
-
-        selectedRecipe.setName(oldName);
-        selectedRecipe.setDescription(oldDescription);
-        selectedRecipe.setInstructions(oldInstructions);
-        selectedRecipe.setIngredients(oldIngredients);
 
         System.out.println("Saved changes for: " + newName);
     }
