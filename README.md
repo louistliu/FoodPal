@@ -8,11 +8,28 @@ To run the template project from the command line, you either need to have [Mave
 
 to run the server and
 
-	mvn -pl client -am javafx:run
+	mvn -pl client -am javafx:run -Dcfg <config file path>
 
-to run the client. Please note that the server needs to be running, before you can start the client.
+to run the client (with a valid config path). Please note that the server needs to be running, before you can start the client.
 
 Get the template project running from the command line first to ensure you have the required tools on your system.
 
 Once it is working, you can try importing the project into your favorite IDE. Especially the client is a bit more tricky to set up there due to the dependency on a JavaFX SDK.
 To help you get started, you can find additional instructions in the corresponding README of the client project.
+
+## Keep these things in mind
+- You can edit or delete an ingredient/instruction by right-clicking it.
+- The app uses STOMP websockets.
+
+## Feature overview
+- All basic features
+  - Extra feature: Integration tests for server (db and endpoints) and client sockets
+- Automated Change Synchronization
+  - Extra feature: auto saves recipe on edit
+- Live Language Switch
+  - Extra feature: a total of five languages: Dutch, English, French, Turkish and Arabic (RTL)
+- Searching for Recipes
+  - Extra feature: Search history
+    - Click a search query in the history window to search it again. 
+    - Only saves after unfocusing the searchbar (to only save searches where the user actually opened a recipe).
+    - Only saves the last 10 results.
