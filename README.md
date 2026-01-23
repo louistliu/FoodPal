@@ -8,7 +8,14 @@ To run the template project from the command line, you either need to have [Mave
 
 to run the server and
 
-	mvn -pl client -am javafx:run -Dcfg <config file path>
+	mvn -pl client -am javafx:run
+
+to run the client without a config. Default config will be created in `client/config.json`.
+
+Optionally config can be specified with
+
+	mvn -pl client -am javafx:run -Dcfg=<config file path>
+
 
 to run the client (with a valid config path). Please note that the server needs to be running, before you can start the client.
 
@@ -30,6 +37,7 @@ To help you get started, you can find additional instructions in the correspondi
   - Extra feature: a total of five languages: Dutch, English, French, Turkish and Arabic (RTL)
 - Searching for Recipes
   - Extra feature: Search history
+    - History is saved once you search and click the search icon.
     - Click a search query in the history window to search it again. 
     - Only saves after unfocusing the searchbar (to only save searches where the user actually opened a recipe).
     - Only saves the last 10 results.
