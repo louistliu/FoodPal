@@ -16,6 +16,7 @@ Optionally config can be specified with
 
 	mvn -pl client -am javafx:run -Dcfg=<config file path>
 
+or, otherwise, by passing `-cfg <config file path>` in program arguments when running in Intellij or as an exectuable
 
 to run the client (with a valid config path). Please note that the server needs to be running, before you can start the client.
 
