@@ -4,7 +4,7 @@ A full-stack recipe management application built with Spring Boot and JavaFX. It
 
 # Prerequisites
 
-- Java 23+
+- Java 25
 - Maven (or use the provided maven wrapper 'mvnw')
 
 # How to run
