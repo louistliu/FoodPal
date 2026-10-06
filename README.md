@@ -4,7 +4,7 @@ A full-stack recipe management application built with Spring Boot and JavaFX. It
 
 # Prerequisites
 
-- Java 8+
+- Java 23+
 - Maven (or use the provided maven wrapper 'mvnw')
 
 # How to run
@@ -23,7 +23,6 @@ Optionally config can be specified with
 
 or, otherwise, by passing `-cfg <config file path>` in program arguments when running in Intellij or as an exectuable
 to run the client (with a valid config path). Please note that the server needs to be running, before you can start the client.
-Get the template project running from the command line first to ensure you have the required tools on your system.
 
 ## Keep these things in mind
 - You can edit or delete an ingredient/instruction by right-clicking it.
